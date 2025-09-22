@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Fantasy Sport Token 🏆</title>
+  <title>FST Button Fix 🛠️</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
@@ -16,6 +16,7 @@
       --border-color: #333;
       --success: #00b894;
       --danger: #e84393;
+      --warning: #fdcb6e;
     }
 
     * {
@@ -32,6 +33,7 @@
       padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
       position: relative;
       min-height: 100vh;
+      line-height: 1.6;
     }
 
     .container {
@@ -62,27 +64,27 @@
       height: 28px;
     }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-    }
-
     h1 {
       font-size: 24px;
       margin-bottom: 16px;
+      color: var(--warning);
+    }
+
+    h2 {
+      font-size: 20px;
+      margin: 24px 0 16px;
+      color: var(--primary);
+    }
+
+    h3 {
+      font-size: 18px;
+      margin: 20px 0 12px;
+      color: var(--secondary);
+    }
+
+    p {
+      margin-bottom: 16px;
+      color: #ccc;
     }
 
     .subtitle {
@@ -91,39 +93,42 @@
       margin-bottom: 24px;
     }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .stat-card {
+    .card {
       background: var(--card-bg);
       border-radius: 12px;
-      padding: 16px;
-      text-align: center;
+      padding: 20px;
+      margin: 20px 0;
       border: 1px solid var(--border-color);
-      transition: transform 0.2s ease;
     }
 
-    .stat-card:hover {
-      transform: translateY(-2px);
+    .diagnosis {
+      background: rgba(232, 67, 147, 0.2);
+      border-left: 4px solid var(--danger);
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
     }
 
-    .stat-value {
-      font-size: 28px;
-      font-weight: 700;
-      margin: 8px 0;
-      color: var(--primary);
+    .solution {
+      background: rgba(0, 184, 148, 0.2);
+      border-left: 4px solid var(--success);
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: #aaa;
+    .code-block {
+      background: #111;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      margin: 16px 0;
+      border: 1px solid #333;
     }
 
-    .action-button {
+    .btn {
       background: var(--primary);
       color: white;
       border: none;
@@ -132,35 +137,36 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      width: 100%;
-      margin-top: 24px;
+      margin: 10px 0;
       transition: all 0.2s ease;
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .action-button:hover {
+    .btn:hover {
       background: #5649c7;
       transform: translateY(-2px);
     }
 
-    .loading {
-      text-align: center;
-      padding: 40px 0;
-      color: #aaa;
+    .btn:active {
+      transform: translateY(0);
     }
 
-    .spinner {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: var(--primary);
-      animation: spin 1s ease-in-out infinite;
-      margin-bottom: 10px;
+    .btn svg {
+      width: 20px;
+      height: 20px;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .test-btn {
+      background: var(--accent);
+      color: #0f1117;
+    }
+
+    .test-btn:hover {
+      background: #eaae3d;
     }
 
     .bottom-nav {
@@ -194,6 +200,53 @@
     .nav-icon {
       font-size: 20px;
     }
+
+    .check {
+      color: var(--success);
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    .cross {
+      color: var(--danger);
+      font-weight: bold;
+      margin-right: 8px;
+    }
+
+    .tip {
+      background: rgba(253, 203, 110, 0.2);
+      border-left: 4px solid var(--accent);
+      padding: 16px;
+      margin: 16px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .debug-info {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(253, 203, 110, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(253, 203, 110, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(253, 203, 110, 0); }
+    }
   </style>
 </head>
 <body>
@@ -208,55 +261,210 @@
         </svg>
         <span style="background: linear-gradient(45deg, #6c5ce7, #fdcb6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800;">FST</span>
       </div>
-      <div class="user-info">
-        <div class="avatar" id="user-avatar">U</div>
-        <div id="user-name">User</div>
-      </div>
+      <div style="color: #aaa; font-size: 14px;">Button Fix Guide</div>
     </header>
 
-    <h1>Fantasy Sport Token</h1>
-    <div class="subtitle">Powered by Premier League Data</div>
+    <div class="diagnosis fade-in">
+      <h1>🔧 Button Not Responding? Let's Fix It!</h1>
+      <p><span class="cross">❌</span> Yes, this is likely because you don't have your <code>bot.js</code> running yet, BUT that's not the only possible cause.</p>
+      <p>Let's diagnose and fix this step by step!</p>
+    </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">TOTAL POINTS</div>
-        <div class="stat-value" id="total-points">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">RANK</div>
-        <div class="stat-value" id="user-rank">-</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">PLAYERS</div>
-        <div class="stat-value" id="player-count">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">BUDGET</div>
-        <div class="stat-value" id="budget">£100.0M</div>
+    <div class="card fade-in">
+      <h2>🔍 Diagnosis: Why Buttons Might Not Work</h2>
+      
+      <div class="diagnosis">
+        <h3>Possible Causes:</h3>
+        <ol style="margin: 10px 0 10px 20px; padding: 0;">
+          <li><strong>No bot.js running</strong> - Your backend isn't processing the tg.sendData() calls</li>
+          <li><strong>JavaScript errors</strong> - Check browser console for errors in your index.html</li>
+          <li><strong>Event listeners not attached</strong> - Buttons might not have click handlers</li>
+          <li><strong>Telegram WebApp not ready</strong> - tg.ready() not called or called too late</li>
+          <li><strong>Render deployment issues</strong> - Old version deployed or cache issues</li>
+        </ol>
       </div>
     </div>
 
-    <button id="transfer-btn" class="action-button">Make Transfer</button>
-    <button id="captain-btn" class="action-button">Set Captain</button>
-    <button id="chip-btn" class="action-button">Use Chip</button>
+    <div class="card fade-in">
+      <h2>✅ Solution 1: Test Without bot.js (Temporary Fix)</h2>
+      
+      <div class="solution">
+        <h3>Modify Your Buttons to Work Without Backend</h3>
+        <p>Until your bot.js is running, update your button event listeners to show feedback locally:</p>
+        
+        <div class="code-block">
+// BEFORE (requires bot.js):
+document.getElementById('transfer-btn').addEventListener('click', () => {
+  const data = { action: 'make_transfer', ... };
+  tg.sendData(JSON.stringify(data)); // Won't work without bot.js
+  tg.close();
+});
+
+// AFTER (works without bot.js):
+document.getElementById('transfer-btn').addEventListener('click', () => {
+  tg.showPopup({
+    title: "🚧 Coming Soon!",
+    message: "This feature will work once our backend is ready!"
+  });
+  
+  // Optional: Close after delay
+  setTimeout(() => {
+    tg.close();
+  }, 3000);
+});
+        </div>
+      </div>
+      
+      <button id="test-button" class="btn test-btn fade-in pulse">
+        <span>🧪 Test Button (Click Me!)</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="card fade-in">
+      <h2>✅ Solution 2: Debug Your Current index.html</h2>
+      
+      <div class="solution">
+        <h3>Step-by-Step Debugging:</h3>
+        <ol style="margin: 10px 0 10px 20px; padding: 0;">
+          <li><strong>Open browser dev tools</strong> - Right-click → "Inspect" or F12</li>
+          <li><strong>Check Console tab</strong> - Look for JavaScript errors</li>
+          <li><strong>Test tg object</strong> - Type <code>Telegram.WebApp</code> in console</li>
+          <li><strong>Verify button exists</strong> - Check if your button IDs match</li>
+          <li><strong>Check event listeners</strong> - Ensure they're attached after DOM loads</li>
+        </ol>
+      </div>
+      
+      <div class="debug-info">
+        <h3>Debug Info (click "Show Debug Info" button below):</h3>
+        <div id="debug-output" style="color: #aaa; font-size: 12px; margin-top: 10px;">
+          Click the button below to run diagnostics...
+        </div>
+      </div>
+      
+      <button id="debug-btn" class="btn fade-in">
+        <span>🔍 Show Debug Info</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="card fade-in">
+      <h2>✅ Solution 3: Quick Fix for Your Deployed index.html</h2>
+      
+      <div class="solution">
+        <h3>Update Your Button Code:</h3>
+        <p>Replace your current button event listeners with this temporary code:</p>
+        
+        <div class="code-block">
+// Add this to your index.html script section
+function setupButtons() {
+  // Transfer button
+  const transferBtn = document.getElementById('transfer-btn');
+  if (transferBtn) {
+    transferBtn.addEventListener('click', () => {
+      tg.showPopup({
+        title: "🔄 Processing",
+        message: "Transfer feature is being prepared! Check back soon."
+      });
+      
+      // Log for debugging
+      console.log('Transfer button clicked');
+      
+      // Close after 3 seconds
+      setTimeout(() => {
+        tg.close();
+      }, 3000);
+    });
+  }
+  
+  // Captain button
+  const captainBtn = document.getElementById('captain-btn');
+  if (captainBtn) {
+    captainBtn.addEventListener('click', () => {
+      tg.showPopup({
+        title: "👑 Captain Feature",
+        message: "Setting captain will be available soon!"
+      });
+      
+      console.log('Captain button clicked');
+      
+      setTimeout(() => {
+        tg.close();
+      }, 3000);
+    });
+  }
+}
+
+// Call this after tg.ready()
+tg.ready();
+setupButtons();
+        </div>
+      </div>
+      
+      <div class="tip">
+        <h3>💡 Pro Tip: Always add console.log() for debugging:</h3>
+        <p>Add <code>console.log('Button clicked')</code> inside your event listeners to verify they're working, even if tg.sendData() isn't connected to your bot yet.</p>
+      </div>
+    </div>
+
+    <div class="card fade-in">
+      <h2>🚀 Next Steps: Get Your bot.js Running</h2>
+      
+      <div class="solution">
+        <h3>Ubuntu Server Setup Checklist:</h3>
+        <ol style="margin: 10px 0 10px 20px; padding: 0;">
+          <li>Install Node.js: <code>sudo apt update && sudo apt install nodejs npm</code></li>
+          <li>Create project folder: <code>mkdir fst-bot && cd fst-bot</code></li>
+          <li>Initialize: <code>npm init -y</code></li>
+          <li>Install Telegraf: <code>npm install telegraf dotenv</code></li>
+          <li>Create bot.js with your code</li>
+          <li>Create .env file with BOT_TOKEN</li>
+          <li>Start bot: <code>node bot.js</code></li>
+          <li>Use PM2 for production: <code>npm install -g pm2 && pm2 start bot.js</code></li>
+        </ol>
+      </div>
+      
+      <div class="tip">
+        <h3>⏱️ Timeline:</h3>
+        <p>You can have your bot.js running on Ubuntu in under 15 minutes! Once it's running, your tg.sendData() calls will work properly.</p>
+      </div>
+    </div>
+
+    <div class="tip fade-in">
+      <h3>💡 Temporary Workaround Until bot.js is Ready:</h3>
+      <p>Update your index.html with local feedback (showPopup, alerts) instead of tg.sendData(). This way your users get immediate feedback while you finish setting up your backend.</p>
+    </div>
+
+    <button id="copy-fixed-code-btn" class="btn fade-in">
+      <span>📋 Copy Fixed Button Code</span>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </button>
   </div>
 
   <div class="bottom-nav">
     <a href="#" class="nav-item active">
-      <div class="nav-icon">🏠</div>
-      <div>Home</div>
+      <div class="nav-icon">🔧</div>
+      <div>Fix</div>
     </a>
     <a href="#" class="nav-item">
-      <div class="nav-icon">⚽</div>
-      <div>Players</div>
+      <div class="nav-icon">🔍</div>
+      <div>Debug</div>
     </a>
     <a href="#" class="nav-item">
-      <div class="nav-icon">📅</div>
-      <div>Fixtures</div>
+      <div class="nav-icon">🚀</div>
+      <div>Deploy</div>
     </a>
     <a href="#" class="nav-item">
-      <div class="nav-icon">📊</div>
-      <div>Stats</div>
+      <div class="nav-icon">❓</div>
+      <div>Help</div>
     </a>
   </div>
 
@@ -270,78 +478,161 @@
     // Set background color based on theme
     updateTheme();
     
-    // Get user info
-    const user = tg.initDataUnsafe?.user;
-    if (user) {
-      document.getElementById('user-name').textContent = user.first_name;
-      if (user.username) {
-        document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
-      }
-    }
-    
     // Update theme based on Telegram settings
     function updateTheme() {
       const themeParams = tg.themeParams;
+      const root = document.documentElement;
+      root.style.setProperty('--bg-color', themeParams.bg_color || '#0f1117');
+      root.style.setProperty('--text-color', themeParams.text_color || '#ffffff');
+      root.style.setProperty('--primary', themeParams.button_color || '#6c5ce7');
+      root.style.setProperty('--secondary', '#a29bfe');
+      root.style.setProperty('--accent', '#fdcb6e');
+      root.style.setProperty('--card-bg', themeParams.hint_color ? 
+        themeParams.hint_color + '20' : '#1e212c');
+      root.style.setProperty('--border-color', themeParams.hint_color || '#333');
+      root.style.setProperty('--success', '#00b894');
+      root.style.setProperty('--danger', '#e84393');
+      root.style.setProperty('--warning', '#fdcb6e');
       document.body.style.backgroundColor = themeParams.bg_color || '#0f1117';
-      document.body.style.color = themeParams.text_color || '#ffffff';
     }
     
-    // Handle transfer button click
-    document.getElementById('transfer-btn').addEventListener('click', () => {
-      const data = {
-        action: 'make_transfer',
-        player_out: 123,
-        player_in: 456,
-        user_id: user?.id
-      };
-      
-      tg.sendData(JSON.stringify(data));
+    // Test button functionality
+    document.getElementById('test-button').addEventListener('click', () => {
       tg.showPopup({
-        title: "Processing",
-        message: "Your transfer request has been sent!"
+        title: "✅ Button Working!",
+        message: "Great! Your buttons are responding. The issue is likely with tg.sendData() which requires your bot.js to be running.",
+        buttons: [{ text: "OK" }]
       });
       
-      setTimeout(() => {
-        tg.close();
-      }, 2000);
+      // Vibrate device if supported
+      if (tg.HapticFeedback) {
+        tg.HapticFeedback.impactOccurred('medium');
+      }
     });
     
-    // Handle captain button click
-    document.getElementById('captain-btn').addEventListener('click', () => {
-      const data = {
-        action: 'set_captain',
-        player_id: 789,
-        user_id: user?.id
-      };
+    // Debug button functionality
+    document.getElementById('debug-btn').addEventListener('click', () => {
+      let debugInfo = '';
       
-      tg.sendData(JSON.stringify(data));
+      // Check if Telegram WebApp is available
+      if (window.Telegram && window.Telegram.WebApp) {
+        debugInfo += '✅ Telegram WebApp API: Available\n';
+        debugInfo += `✅ tg object: ${typeof tg}\n`;
+        debugInfo += `✅ tg.ready(): ${typeof tg.ready}\n`;
+        
+        // Check user info
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+          debugInfo += `✅ User info: ${user.first_name} (ID: ${user.id})\n`;
+        } else {
+          debugInfo += '⚠️ User info: Not available\n';
+        }
+      } else {
+        debugInfo += '❌ Telegram WebApp API: NOT available\n';
+      }
+      
+      // Check if buttons exist
+      const transferBtn = document.getElementById('transfer-btn');
+      const captainBtn = document.getElementById('captain-btn');
+      
+      debugInfo += `\n🔍 DOM Elements:\n`;
+      debugInfo += `Transfer button: ${transferBtn ? 'FOUND' : 'NOT FOUND'}\n`;
+      debugInfo += `Captain button: ${captainBtn ? 'FOUND' : 'NOT FOUND'}\n`;
+      
+      // Check event listeners (basic check)
+      debugInfo += `\n🔄 Event Listeners:\n`;
+      if (transferBtn) {
+        // Add test event listener if none exists
+        if (!transferBtn.onclick) {
+          transferBtn.addEventListener('click', () => {
+            console.log('Test click handler working');
+            tg.showPopup({
+              title: "🔧 Debug Mode",
+              message: "This click handler was added dynamically for testing!"
+            });
+          });
+          debugInfo += 'Transfer button: Added test event listener\n';
+        } else {
+          debugInfo += 'Transfer button: Has event listener\n';
+        }
+      }
+      
+      document.getElementById('debug-output').textContent = debugInfo;
+      
       tg.showPopup({
-        title: "Processing",
-        message: "Captain set successfully!"
+        title: "🔍 Debug Results",
+        message: "Check the debug info below for details about your setup.",
+        buttons: [{ text: "OK" }]
       });
-      
-      setTimeout(() => {
-        tg.close();
-      }, 2000);
     });
     
-    // Handle chip button click
-    document.getElementById('chip-btn').addEventListener('click', () => {
-      const data = {
-        action: 'use_chip',
-        chip_name: 'Wildcard',
-        user_id: user?.id
-      };
-      
-      tg.sendData(JSON.stringify(data));
+    // Copy fixed code button functionality
+    document.getElementById('copy-fixed-code-btn').addEventListener('click', async () => {
+      const fixedCode = `// Add this function to your index.html script section
+function setupButtons() {
+  // Transfer button
+  const transferBtn = document.getElementById('transfer-btn');
+  if (transferBtn) {
+    transferBtn.addEventListener('click', () => {
       tg.showPopup({
-        title: "Processing",
-        message: "Wildcard activated successfully!"
+        title: "🔄 Processing",
+        message: "Transfer feature is being prepared! Check back soon."
       });
+      
+      // Log for debugging
+      console.log('Transfer button clicked');
+      
+      // Close after 3 seconds
+      setTimeout(() => {
+        tg.close();
+      }, 3000);
+    });
+  }
+  
+  // Captain button
+  const captainBtn = document.getElementById('captain-btn');
+  if (captainBtn) {
+    captainBtn.addEventListener('click', () => {
+      tg.showPopup({
+        title: "👑 Captain Feature",
+        message: "Setting captain will be available soon!"
+      });
+      
+      console.log('Captain button clicked');
       
       setTimeout(() => {
         tg.close();
-      }, 2000);
+      }, 3000);
+    });
+  }
+}
+
+// Make sure to call this after tg.ready()
+tg.ready();
+setupButtons();
+
+// Also add this for theme changes
+tg.onEvent('themeChanged', updateTheme);`;
+      
+      try {
+        await navigator.clipboard.writeText(fixedCode);
+        tg.showPopup({
+          title: "✅ Success!",
+          message: "Fixed button code copied to clipboard! Paste this into your index.html to make buttons work temporarily.",
+          buttons: [{ text: "OK" }]
+        });
+        
+        // Vibrate device if supported
+        if (tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred('light');
+        }
+      } catch (err) {
+        tg.showPopup({
+          title: "❌ Error",
+          message: "Failed to copy code. Please manually copy the fixed button code above.",
+          buttons: [{ text: "OK" }]
+        });
+      }
     });
     
     // Handle navigation clicks
@@ -351,11 +642,37 @@
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         item.classList.add('active');
         
-        tg.showPopup({
-          title: "Navigation",
-          message: "You clicked on " + item.querySelector('div:last-child').textContent,
-          buttons: [{ text: "OK" }]
-        });
+        const section = item.querySelector('.nav-icon').textContent;
+        switch(section) {
+          case '🔧':
+            tg.showPopup({
+              title: "Button Fix",
+              message: "Buttons not working? Update them to use tg.showPopup() temporarily until your bot.js is running!",
+              buttons: [{ text: "OK" }]
+            });
+            break;
+          case '🔍':
+            tg.showPopup({
+              title: "Debugging",
+              message: "1. Open browser dev tools\n2. Check console for errors\n3. Verify tg object exists\n4. Test button IDs",
+              buttons: [{ text: "OK" }]
+            });
+            break;
+          case '🚀':
+            tg.showPopup({
+              title: "Deployment",
+              message: "Your index.html is deployed! Now set up bot.js on Ubuntu: install Node.js, create bot.js, run with PM2",
+              buttons: [{ text: "OK" }]
+            });
+            break;
+          case '❓':
+            tg.showPopup({
+              title: "Need Help?",
+              message: "Yes, buttons may not work without bot.js, but you can fix them temporarily with local feedback using tg.showPopup()!",
+              buttons: [{ text: "OK" }]
+            });
+            break;
+        }
       });
     });
     
@@ -366,6 +683,40 @@
     
     // Notify Telegram the app is ready
     tg.ready();
+    
+    // Setup any additional button event listeners
+    setTimeout(() => {
+      // Try to setup buttons if they exist
+      const transferBtn = document.getElementById('transfer-btn');
+      const captainBtn = document.getElementById('captain-btn');
+      
+      if (transferBtn && !transferBtn.onclick) {
+        transferBtn.addEventListener('click', () => {
+          tg.showPopup({
+            title: "🚧 Under Construction",
+            message: "This feature is being prepared! Your bot.js backend needs to be running for full functionality."
+          });
+        });
+      }
+      
+      if (captainBtn && !captainBtn.onclick) {
+        captainBtn.addEventListener('click', () => {
+          tg.showPopup({
+            title: "🚧 Coming Soon",
+            message: "Captain feature will be available once your backend is complete!"
+          });
+        });
+      }
+    }, 1000);
+    
+    // Show welcome message
+    setTimeout(() => {
+      tg.showPopup({
+        title: "🔧 Button Fix Guide",
+        message: "Don't worry! Your buttons can work even without bot.js. Use tg.showPopup() for temporary feedback until your backend is ready!",
+        buttons: [{ text: "Let's Fix It!" }]
+      });
+    }, 500);
   </script>
 </body>
 </html>
