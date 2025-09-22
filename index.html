@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Fantasy Sport Token 🏆</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: #0f1117;
+      --text-color: #ffffff;
+      --primary: #6c5ce7;
+      --secondary: #a29bfe;
+      --accent: #fdcb6e;
+      --card-bg: #1e212c;
+      --border-color: #333;
+      --success: #00b894;
+      --danger: #e84393;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 100%;
+      padding: 16px;
+      padding-bottom: 80px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .logo svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+      transition: transform 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 8px 0;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .action-button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 24px;
+      transition: all 0.2s ease;
+    }
+
+    .action-button:hover {
+      background: #5649c7;
+      transform: translateY(-2px);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 0;
+      color: #aaa;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-bottom: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: #888;
+      text-decoration: none;
+      padding: 8px 0;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L4 6V18L12 22L20 18V6L12 2Z" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="2"/>
+          <path d="M4 10L12 14L20 10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <path d="M4 14L12 18L20 14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="2" fill="white"/>
+        </svg>
+        <span style="background: linear-gradient(45deg, #6c5ce7, #fdcb6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800;">FST</span>
+      </div>
+      <div class="user-info">
+        <div class="avatar" id="user-avatar">U</div>
+        <div id="user-name">User</div>
+      </div>
+    </header>
+
+    <h1>Fantasy Sport Token</h1>
+    <div class="subtitle">Powered by Premier League Data</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">TOTAL POINTS</div>
+        <div class="stat-value" id="total-points">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">RANK</div>
+        <div class="stat-value" id="user-rank">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">PLAYERS</div>
+        <div class="stat-value" id="player-count">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">BUDGET</div>
+        <div class="stat-value" id="budget">£100.0M</div>
+      </div>
+    </div>
+
+    <button id="transfer-btn" class="action-button">Make Transfer</button>
+    <button id="captain-btn" class="action-button">Set Captain</button>
+    <button id="chip-btn" class="action-button">Use Chip</button>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <div class="nav-icon">🏠</div>
+      <div>Home</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">⚽</div>
+      <div>Players</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">📅</div>
+      <div>Fixtures</div>
+    </a>
+    <a href="#" class="nav-item">
+      <div class="nav-icon">📊</div>
+      <div>Stats</div>
+    </a>
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    
+    // Expand the app to full height
+    tg.expand();
+    
+    // Set background color based on theme
+    updateTheme();
+    
+    // Get user info
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+      document.getElementById('user-name').textContent = user.first_name;
+      if (user.username) {
+        document.getElementById('user-avatar').textContent = user.username.charAt(0).toUpperCase();
+      }
+    }
+    
+    // Update theme based on Telegram settings
+    function updateTheme() {
+      const themeParams = tg.themeParams;
+      document.body.style.backgroundColor = themeParams.bg_color || '#0f1117';
+      document.body.style.color = themeParams.text_color || '#ffffff';
+    }
+    
+    // Handle transfer button click
+    document.getElementById('transfer-btn').addEventListener('click', () => {
+      const data = {
+        action: 'make_transfer',
+        player_out: 123,
+        player_in: 456,
+        user_id: user?.id
+      };
+      
+      tg.sendData(JSON.stringify(data));
+      tg.showPopup({
+        title: "Processing",
+        message: "Your transfer request has been sent!"
+      });
+      
+      setTimeout(() => {
+        tg.close();
+      }, 2000);
+    });
+    
+    // Handle captain button click
+    document.getElementById('captain-btn').addEventListener('click', () => {
+      const data = {
+        action: 'set_captain',
+        player_id: 789,
+        user_id: user?.id
+      };
+      
+      tg.sendData(JSON.stringify(data));
+      tg.showPopup({
+        title: "Processing",
+        message: "Captain set successfully!"
+      });
+      
+      setTimeout(() => {
+        tg.close();
+      }, 2000);
+    });
+    
+    // Handle chip button click
+    document.getElementById('chip-btn').addEventListener('click', () => {
+      const data = {
+        action: 'use_chip',
+        chip_name: 'Wildcard',
+        user_id: user?.id
+      };
+      
+      tg.sendData(JSON.stringify(data));
+      tg.showPopup({
+        title: "Processing",
+        message: "Wildcard activated successfully!"
+      });
+      
+      setTimeout(() => {
+        tg.close();
+      }, 2000);
+    });
+    
+    // Handle navigation clicks
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        
+        tg.showPopup({
+          title: "Navigation",
+          message: "You clicked on " + item.querySelector('div:last-child').textContent,
+          buttons: [{ text: "OK" }]
+        });
+      });
+    });
+    
+    // Listen for theme changes
+    tg.onEvent('themeChanged', () => {
+      updateTheme();
+    });
+    
+    // Notify Telegram the app is ready
+    tg.ready();
+  </script>
+</body>
+</html>
