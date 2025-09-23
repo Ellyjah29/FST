@@ -1,15 +1,14 @@
 {
-  "name": "fst-fantasy",
+  "name": "fst-fantasy-render",
   "version": "1.0.0",
-  "description": "Web3 Fantasy Sports Token Telegram Mini App",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
-    "axios": "^1.6.0"
+    "axios": "^1.6.0",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.3.1"
   }
 }
