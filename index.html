@@ -3,840 +3,408 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FST — Fantasy Sport Token</title>
-
-  <!-- Telegram WebApp SDK -->
+  <title>FST Fantasy ⚽</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-  <!-- Web3Modal & Ethers -->
-  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.9/dist/web3modal.min.js"></script>
-  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
-
-  <!-- Styling -->
   <style>
-    :root {
-      --tg-theme-bg-color: #141d26;
-      --tg-theme-text-color: #ffffff;
-      --tg-theme-hint-color: #7f8fa4;
-      --primary: #ff8c00;
-      --secondary: #2a3b4c;
-      --card-bg: #1e2c38;
-      --border-radius: 12px;
-      --danger: #ff4d4d;
-      --success: #36c97d;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
-
     body {
-      background-color: var(--tg-theme-bg-color);
-      color: var(--tg-theme-text-color);
-      padding: 0;
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1923;
+      color: white;
+      margin: 0;
+      padding: 16px 16px 80px 16px; /* space for tab bar */
+      font-size: 16px;
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      color: #00c3ff;
+      margin-bottom: 10px;
+    }
+    .section {
+      background: #1a2a3a;
+      padding: 16px;
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    #connectWallet {
+      background: #00c3ff;
+      color: #000;
+    }
+    #joinContest {
+      background: #4ecdc4;
+      color: #000;
+    }
+    #loadPlayers {
+      background: #556ee6;
+      color: white;
+    }
+    .player-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .player-card {
+      background: #2a3a4a;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .selected {
+      background: #00c3ff;
+      color: #000;
+    }
+    #status {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 14px;
+      color: #aaa;
+    }
+    #leaderboard {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .leaderboard-item {
+      padding: 8px;
+      border-bottom: 1px solid #333;
+    }
+
+    /* === FIXED TAB BAR STYLES === */
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      background: #15202b;
+      padding: 10px 0;
+      border-top: 1px solid #333;
+      z-index: 10000; /* on top of everything */
+      pointer-events: auto;
+    }
+
+    .tab-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .container {
-      width: 100%;
-      max-width: 500px;
-      padding: 16px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 24px;
-    }
-
-    .avatar {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary);
-    }
-
-    .user-info h1 {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .user-info p {
-      color: var(--tg-theme-hint-color);
-      font-size: 14px;
-    }
-
-    .wallet-section {
-      background: var(--secondary);
-      padding: 16px;
-      border-radius: var(--border-radius);
-      margin-bottom: 24px;
-      text-align: center;
-    }
-
-    button {
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 30px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    button.secondary {
-      background: var(--secondary);
-    }
-
-    button.success {
-      background: var(--success);
-    }
-
-    button.danger {
-      background: var(--danger);
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 24px 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .section-title::before {
-      content: "";
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      background: var(--primary);
-      border-radius: 50%;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 16px;
-      margin-bottom: 16px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px 0;
-      color: var(--tg-theme-hint-color);
-    }
-
-    .error {
-      background: #ff4d4d20;
-      color: #ff6b6b;
-      padding: 16px;
-      border-radius: var(--border-radius);
-      margin: 16px 0;
-    }
-
-    footer {
-      margin-top: auto;
-      padding: 16px 0;
-      text-align: center;
-      font-size: 12px;
-      color: var(--tg-theme-hint-color);
-    }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-content {
-      background: var(--tg-theme-bg-color);
-      width: 90%;
-      max-width: 450px;
-      border-radius: var(--border-radius);
-      padding: 24px;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .close-modal {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      font-size: 24px;
       background: none;
       border: none;
-      color: var(--tg-theme-hint-color);
+      color: #aaa;
+      font-size: 10px;
+      padding: 6px 4px;
       cursor: pointer;
-    }
-
-    .player-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .player-avatar {
-      width: 64px;
-      height: 64px;
-      border-radius: 8px;
-      background: var(--secondary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 24px;
-    }
-
-    .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin: 16px 0;
-    }
-
-    .stat-item {
-      background: var(--secondary);
-      padding: 12px;
-      border-radius: 8px;
+      width: 100%;
+      max-width: 60px;
       text-align: center;
+      pointer-events: auto;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .stat-label {
-      font-size: 12px;
-      color: var(--tg-theme-hint-color);
+    .tab-btn.active {
+      color: #00c3ff;
+      text-shadow: 0 0 4px rgba(0, 195, 255, 0.7);
     }
 
-    .stat-value {
+    .tab-btn i {
       font-size: 18px;
-      font-weight: 700;
+      margin-bottom: 2px;
     }
 
-    .tabs {
-      display: flex;
-      margin: 24px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .tab {
-      padding: 12px 16px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .tab.active {
-      color: var(--primary);
-      border-bottom: 2px solid var(--primary);
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    .history-item {
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .nft-badge {
-      text-align: center;
-      padding: 24px;
-      border: 2px dashed var(--success);
-      border-radius: var(--border-radius);
-      margin: 16px 0;
-    }
-
-    .nft-badge img {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 12px;
-    }
-
-    @media (prefers-color-scheme: light) {
-      :root {
-        --tg-theme-bg-color: #f5f5f5;
-        --tg-theme-text-color: #000000;
-        --tg-theme-hint-color: #757575;
-        --secondary: #e0e0e0;
-        --card-bg: #ffffff;
-      }
+    .tab-btn:active {
+      transform: scale(0.95);
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- User Profile from Telegram -->
-    <header>
-      <img id="userAvatar" class="avatar" src="https://via.placeholder.com/56" alt="Profile" />
-      <div class="user-info">
-        <h1 id="userName">Loading...</h1>
-        <p id="userUsername">@loading</p>
-      </div>
-    </header>
+  <h1>⚽ FST Fantasy</h1>
 
-    <!-- Web3 Wallet Connection -->
-    <div class="wallet-section">
-      <div id="walletStatus">Connect wallet to earn $FST & NFTs</div>
-      <button id="connectWallet">Connect Wallet</button>
-    </div>
+  <div id="status">Initializing...</div>
 
-    <!-- Navigation Tabs -->
-    <div class="tabs">
-      <div class="tab active" data-tab="overview">Overview</div>
-      <div class="tab" data-tab="live">Live Scores</div>
-      <div class="tab" data-tab="league">League</div>
-      <div class="tab" data-tab="rewards">Rewards</div>
-    </div>
-
-    <!-- Tab Contents -->
-    <div id="overview" class="tab-content active">
-      <h2 class="section-title">FPL Core Data</h2>
-      <div id="fplDataContainer" class="loading">Fetching FPL data...</div>
-    </div>
-
-    <div id="live" class="tab-content">
-      <h2 class="section-title">Live Gameweek</h2>
-      <div id="liveScoresContainer" class="loading">Loading live scores...</div>
-    </div>
-
-    <div id="league" class="tab-content">
-      <h2 class="section-title">Classic League</h2>
-      <input type="text" id="leagueIdInput" placeholder="Enter League ID" style="width:100%; padding:12px; margin-bottom:12px; border-radius:8px; border:1px solid var(--tg-theme-hint-color); background:var(--card-bg); color:var(--tg-theme-text-color);" />
-      <button id="fetchLeagueBtn">Fetch League</button>
-      <div id="leagueContainer" style="margin-top:16px;"></div>
-    </div>
-
-    <div id="rewards" class="tab-content">
-      <h2 class="section-title">Your Rewards</h2>
-      <div id="rewardsContainer">
-        <div class="card">
-          <h3>$FST Tokens</h3>
-          <p id="fstBalance">0 $FST</p>
-          <button id="claimDaily" class="success">Claim Daily Reward (10 $FST)</button>
-        </div>
-        <div id="nftContainer"></div>
-      </div>
-    </div>
-
-    <!-- Error Display -->
-    <div id="errorMessage" style="display:none;" class="error"></div>
+  <div class="section">
+    <button id="connectWallet">🔐 Connect Wallet</button>
+    <div>✅ Entry is <strong>FREE</strong> this week!</div>
+    <div>Prize Pool: <strong id="prizeAmount">0 FST</strong> (<span id="entries">0</span> managers)</div>
   </div>
 
-  <!-- Player Detail Modal -->
-  <div id="playerModal" class="modal">
-    <div class="modal-content">
-      <button class="close-modal">&times;</button>
-      <div id="playerModalContent"></div>
-    </div>
+  <div class="section">
+    <button id="loadPlayers">📥 Load EPL Players</button>
+    <div class="player-grid" id="playerGrid"></div>
   </div>
 
-  <footer>
-    FST — Fantasy Sport Token • Powered by FPL API & Web3
-  </footer>
+  <div class="section">
+    <h3>✅ Your Team (0/11)</h3>
+    <div id="teamContainer"></div>
+    <button id="joinContest" disabled>🎯 Join Contest (Pick 11 First)</button>
+  </div>
+
+  <div class="section">
+    <h3>🏆 Leaderboard</h3>
+    <div id="leaderboard"></div>
+  </div>
+
+  <!-- BOTTOM TAB BAR -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-league="epl">
+      <i class="fas fa-futbol"></i> EPL
+    </button>
+    <button class="tab-btn" data-league="seriea" disabled>
+      <i class="fas fa-trophy"></i> Serie A
+    </button>
+    <button class="tab-btn" data-league="laliga" disabled>
+      <i class="fas fa-futbol"></i> La Liga
+    </button>
+    <button class="tab-btn" data-league="bundesliga" disabled>
+      <i class="fas fa-flag-checkered"></i> Bundesliga
+    </button>
+    <button class="tab-btn" data-league="wsl" disabled>
+      <i class="fas fa-venus"></i> WSL
+    </button>
+    <button class="tab-btn" data-league="euro" disabled>
+      <i class="fas fa-globe-europe"></i> Euro
+    </button>
+  </div>
 
   <script>
-    // Initialize Telegram WebApp
-    const tgWebApp = window.Telegram.WebApp;
-    tgWebApp.ready();
-    tgWebApp.expand();
-    tgWebApp.BackButton.hide();
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
 
-    // Get user data from Telegram
-    const user = tgWebApp.initDataUnsafe?.user;
-    let currentGameweek = 1;
-    let players = [];
-    let teams = {};
-    let favorites = JSON.parse(localStorage.getItem('fst_favorites') || '[]');
+    // Adjust body height for Telegram viewport
+    tg.onEvent('viewportChanged', () => {
+      document.body.style.height = window.innerHeight + 'px';
+    });
 
-    if (user) {
-      document.getElementById('userName').innerText = user.first_name || 'Anonymous';
-      document.getElementById('userUsername').innerText = user.username ? `@${user.username}` : 'No username';
-      if (user.photo_url) {
-        document.getElementById('userAvatar').src = user.photo_url;
+    // Simulate user ID
+    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+
+    let selectedPlayers = [];
+    const MAX_PLAYERS = 11;
+
+    const connectWalletBtn = document.getElementById('connectWallet');
+    const loadPlayersBtn = document.getElementById('loadPlayers');
+    const joinContestBtn = document.getElementById('joinContest');
+    const playerGrid = document.getElementById('playerGrid');
+    const teamContainer = document.getElementById('teamContainer');
+    const statusDiv = document.getElementById('status');
+    const prizeAmountSpan = document.getElementById('prizeAmount');
+    const entriesSpan = document.getElementById('entries');
+
+    // Initialize
+    statusDiv.innerText = "Tap 'Connect Wallet' to begin";
+
+    // Connect Wallet
+    connectWalletBtn.addEventListener('click', async () => {
+      statusDiv.innerText = "Connecting wallet...";
+      try {
+        const response = await fetch('/connect-wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        if (data.address) {
+          statusDiv.innerText = `✅ Connected: ${data.address.slice(0, 6)}...${data.address.slice(-4)}`;
+          connectWalletBtn.disabled = true;
+          connectWalletBtn.innerText = "Wallet Connected";
+          loadPlayersBtn.disabled = false;
+          updatePrizePool();
+        } else {
+          throw new Error('Connection failed');
+        }
+      } catch (e) {
+        statusDiv.innerText = "❌ Wallet connection failed";
+        alert("Could not connect wallet. Try again.");
       }
-    } else {
-      document.getElementById('userName').innerText = 'Guest User';
-      document.getElementById('userUsername').innerText = '@guest';
-    }
+    });
 
-    // Web3 Setup
-    let web3Modal, provider, signer, address;
-    const connectButton = document.getElementById('connectWallet');
-    const walletStatus = document.getElementById('walletStatus');
-    const fstBalance = document.getElementById('fstBalance');
-    let fstTokens = parseFloat(localStorage.getItem('fst_tokens') || '0');
+    // Load Players (EPL only for MVP)
+    loadPlayersBtn.addEventListener('click', async () => {
+      statusDiv.innerText = "Loading EPL players...";
+      loadPlayersBtn.disabled = true;
+      try {
+        const response = await fetch('/players');
+        const players = await response.json();
+        renderPlayers(players.slice(0, 50)); // top 50 for MVP
+        statusDiv.innerText = "Pick 11 players to join!";
+      } catch (e) {
+        statusDiv.innerText = "❌ Failed to load players";
+        loadPlayersBtn.disabled = false;
+      }
+    });
 
-    async function initWeb3Modal() {
-      const providerOptions = {};
-      web3Modal = new Web3Modal({
-        network: "mainnet",
-        cacheProvider: true,
-        providerOptions
+    // Render Players
+    function renderPlayers(players) {
+      playerGrid.innerHTML = '';
+      players.forEach(player => {
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+          <strong>${player.web_name}</strong><br>
+          Team: ${player.team}<br>
+          Position: ${getPosition(player.element_type)}
+        `;
+        card.dataset.id = player.id;
+        card.dataset.name = player.web_name;
+
+        if (selectedPlayers.find(p => p.id == player.id)) {
+          card.classList.add('selected');
+        }
+
+        card.addEventListener('click', () => {
+          togglePlayerSelection(player);
+          updateTeamDisplay();
+          checkJoinButton();
+        });
+
+        playerGrid.appendChild(card);
       });
     }
 
-    async function connectWallet() {
-      try {
-        provider = await web3Modal.connect();
-        const ethersProvider = new ethers.providers.Web3Provider(provider);
-        signer = ethersProvider.getSigner();
-        address = await signer.getAddress();
-
-        walletStatus.innerHTML = `<strong>Connected:</strong><br/>${address.slice(0,6)}...${address.slice(-4)}`;
-        connectButton.innerText = "Wallet Connected";
-        connectButton.disabled = true;
-
-        // Award tokens for connecting
-        fstTokens += 10;
-        localStorage.setItem('fst_tokens', fstTokens.toString());
-        fstBalance.innerText = `${fstTokens} $FST`;
-        showToast("🎉 Wallet connected! +10 $FST");
-
-        // Unlock NFT if eligible
-        checkAndUnlockNFT();
-
-      } catch (error) {
-        console.error("Web3 connection error:", error);
-        showError("Failed to connect wallet.");
-      }
+    function getPosition(type) {
+      return ["GK", "DEF", "MID", "FWD"][type - 1] || "UNK";
     }
 
-    connectButton.addEventListener('click', connectWallet);
-
-    // Tab Navigation
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        tab.classList.add('active');
-        document.getElementById(tab.dataset.tab).classList.add('active');
+    function togglePlayerSelection(player) {
+      const index = selectedPlayers.findIndex(p => p.id === player.id);
+      if (index > -1) {
+        selectedPlayers.splice(index, 1);
+      } else if (selectedPlayers.length < MAX_PLAYERS) {
+        selectedPlayers.push(player);
+      }
+      // Update UI
+      document.querySelectorAll('.player-card').forEach(card => {
+        if (card.dataset.id == player.id) {
+          card.classList.toggle('selected', selectedPlayers.some(p => p.id == player.id));
+        }
       });
-    });
-
-    // FPL API Integration — NOW USING RELATIVE PATH (NO DOMAIN)
-    const fplDataContainer = document.getElementById('fplDataContainer');
-    const liveScoresContainer = document.getElementById('liveScoresContainer');
-    const leagueContainer = document.getElementById('leagueContainer');
-    const fetchLeagueBtn = document.getElementById('fetchLeagueBtn');
-    const leagueIdInput = document.getElementById('leagueIdInput');
-    const nftContainer = document.getElementById('nftContainer');
-    const claimDailyBtn = document.getElementById('claimDaily');
-    const errorMessage = document.getElementById('errorMessage');
-
-    async function fetchFPLData() {
-      try {
-        fplDataContainer.innerHTML = '<div class="loading">Loading players and teams...</div>';
-        
-        // ✅ KEY CHANGE: Using RELATIVE PATH — no domain, no CORS!
-        const response = await fetch('/api/fpl?path=/bootstrap-static/');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const data = await response.json();
-        players = data.elements;
-        teams = Object.fromEntries(data.teams.map(t => [t.id, t]));
-
-        // Find current gameweek
-        const currentEvent = data.events.find(e => e.is_current);
-        currentGameweek = currentEvent ? currentEvent.id : 1;
-
-        // Display summary
-        fplDataContainer.innerHTML = `
-          <div class="card">
-            <h3>📊 Season Overview</h3>
-            <p><strong>Current GW:</strong> ${currentGameweek}</p>
-            <p><strong>Teams:</strong> ${data.teams.length}</p>
-            <p><strong>Players:</strong> ${players.length}</p>
-          </div>
-          <div class="card">
-            <h3>⚽ Top Players</h3>
-            <div style="max-height: 200px; overflow-y: auto;">
-              ${players
-                .sort((a, b) => b.total_points - a.total_points)
-                .slice(0, 10)
-                .map(p => `
-                  <div class="player-item" data-id="${p.id}" style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <span>${p.web_name} (${teams[p.team]?.short_name || '?'})</span>
-                      <span>${p.total_points} pts</span>
-                    </div>
-                  </div>
-                `)
-                .join('')}
-            </div>
-          </div>
-        `;
-
-        // Add click handlers to players
-        document.querySelectorAll('.player-item').forEach(item => {
-          item.addEventListener('click', () => openPlayerModal(parseInt(item.dataset.id)));
-        });
-
-        // Load live scores for current GW
-        fetchLiveScores(currentGameweek);
-
-      } catch (error) {
-        console.error("FPL API Error:", error);
-        showError("Could not load FPL data.");
-        fplDataContainer.innerHTML = '<div class="error">Failed to load data.</div>';
-      }
     }
 
-    async function fetchLiveScores(gw) {
+    function updateTeamDisplay() {
+      teamContainer.innerHTML = '';
+      selectedPlayers.forEach(player => {
+        const div = document.createElement('div');
+        div.innerText = `${player.web_name} (${getPosition(player.element_type)})`;
+        teamContainer.appendChild(div);
+      });
+      teamContainer.parentElement.querySelector('h3').innerText = `✅ Your Team (${selectedPlayers.length}/11)`;
+    }
+
+    function checkJoinButton() {
+      joinContestBtn.disabled = selectedPlayers.length !== MAX_PLAYERS;
+    }
+
+    // Join Contest (FREE for MVP)
+    joinContestBtn.addEventListener('click', async () => {
+      if (selectedPlayers.length !== MAX_PLAYERS) return;
+
+      statusDiv.innerText = "Joining contest...";
+      joinContestBtn.disabled = true;
+
       try {
-        liveScoresContainer.innerHTML = '<div class="loading">Loading live scores...</div>';
-        
-        // ✅ RELATIVE PATH
-        const response = await fetch(`/api/fpl?path=/event/${gw}/live/`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const response = await fetch('/save-team', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            team: selectedPlayers.map(p => p.id)
+          })
+        });
 
         const data = await response.json();
-        const livePlayers = data.elements;
-
-        // Get top 5 performing players this gameweek
-        const topPerformers = livePlayers
-          .filter(p => p.stats.total_points > 0)
-          .sort((a, b) => b.stats.total_points - a.stats.total_points)
-          .slice(0, 5);
-
-        if (topPerformers.length === 0) {
-          liveScoresContainer.innerHTML = '<div class="card">No live data yet for this gameweek.</div>';
-          return;
+        if (data.success) {
+          statusDiv.innerText = "🎉 Entered contest! Good luck!";
+          joinContestBtn.innerText = "✅ Entered!";
+          joinContestBtn.disabled = true;
+          loadPlayersBtn.style.display = 'none';
+          updatePrizePool();
+          loadLeaderboard();
+        } else {
+          throw new Error('Failed to join');
         }
-
-        liveScoresContainer.innerHTML = `
-          <div class="card">
-            <h3>🔥 Live Top Performers (GW ${gw})</h3>
-            ${topPerformers.map(p => {
-              const player = players.find(pl => pl.id === p.id);
-              return `
-                <div class="player-item" data-id="${p.id}" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>${player?.web_name || 'Unknown'} (${player ? teams[player.team]?.short_name : '?'})</span>
-                    <span>+${p.stats.total_points} pts</span>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `;
-
-        // Add click handlers
-        document.querySelectorAll('.player-item').forEach(item => {
-          item.addEventListener('click', () => openPlayerModal(parseInt(item.dataset.id)));
-        });
-
-      } catch (error) {
-        console.error("Live scores error:", error);
-        liveScoresContainer.innerHTML = '<div class="error">Could not load live scores.</div>';
+      } catch (e) {
+        statusDiv.innerText = "❌ Failed to join contest";
+        joinContestBtn.disabled = false;
       }
-    }
+    });
 
-    async function fetchLeagueStandings(leagueId) {
+    // Update Prize Pool (simulated FST)
+    async function updatePrizePool() {
       try {
-        leagueContainer.innerHTML = '<div class="loading">Loading league...</div>';
-        
-        // ✅ RELATIVE PATH
-        const response = await fetch(`/api/fpl?path=/leagues-classic/${leagueId}/standings/`);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
+        const response = await fetch('/prize-pool');
         const data = await response.json();
-        const standings = data.standings.results;
-
-        if (standings.length === 0) {
-          leagueContainer.innerHTML = '<div class="error">No standings found or private league.</div>';
-          return;
-        }
-
-        leagueContainer.innerHTML = `
-          <div class="card">
-            <h3>🏆 ${data.league.name}</h3>
-            <div style="max-height: 300px; overflow-y: auto;">
-              ${standings.slice(0, 10).map((team, index) => `
-                <div style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span><strong>${index + 1}.</strong> ${team.entry_name}</span>
-                    <span>${team.total} pts</span>
-                  </div>
-                  <div style="font-size: 12px; color: var(--tg-theme-hint-color);">by ${team.player_name}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-
-      } catch (error) {
-        console.error("League error:", error);
-        leagueContainer.innerHTML = '<div class="error">Could not load league. Check ID or try again.</div>';
+        const simulatedFST = data.entries * 10; // 10 FST per entrant
+        prizeAmountSpan.innerText = `${simulatedFST} FST`;
+        entriesSpan.innerText = data.entries;
+      } catch (e) {
+        console.log("Could not fetch prize pool");
       }
     }
 
-    fetchLeagueBtn.addEventListener('click', () => {
-      const leagueId = leagueIdInput.value.trim();
-      if (leagueId && /^\d+$/.test(leagueId)) {
-        fetchLeagueStandings(leagueId);
-      } else {
-        showError("Please enter a valid league ID (numbers only).");
-      }
-    });
-
-    // Player Detail Modal
-    const playerModal = document.getElementById('playerModal');
-    const playerModalContent = document.getElementById('playerModalContent');
-    const closeModalBtn = document.querySelector('.close-modal');
-
-    closeModalBtn.addEventListener('click', () => {
-      playerModal.style.display = 'none';
-    });
-
-    window.addEventListener('click', (event) => {
-      if (event.target === playerModal) {
-        playerModal.style.display = 'none';
-      }
-    });
-
-    async function openPlayerModal(playerId) {
+    // Load Leaderboard
+    async function loadLeaderboard() {
       try {
-        playerModalContent.innerHTML = '<div class="loading">Loading player details...</div>';
-        playerModal.style.display = 'flex';
-
-        const player = players.find(p => p.id === playerId);
-        if (!player) throw new Error("Player not found");
-
-        const team = teams[player.team];
-        // ✅ RELATIVE PATH
-        const response = await fetch(`/api/fpl?path=/element-summary/${playerId}/`);
+        const response = await fetch('/leaderboard');
         const data = await response.json();
-
-        const history = data.history.slice(-5); // Last 5 matches
-
-        playerModalContent.innerHTML = `
-          <div class="player-header">
-            <div class="player-avatar" style="background: linear-gradient(45deg, ${team?.colour || '#555'}, ${team?.colour || '#777'})">
-              ${player.web_name.charAt(0)}
-            </div>
-            <div>
-              <h2>${player.web_name}</h2>
-              <p>${team?.name || 'Unknown Team'} • ${getPosition(player.element_type)}</p>
-              <p>⚽ ${player.total_points} total pts • 💰 ${player.now_cost / 10}m</p>
-            </div>
-          </div>
-
-          <div class="stat-grid">
-            <div class="stat-item">
-              <div class="stat-label">Form</div>
-              <div class="stat-value">${player.form}</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">Goals</div>
-              <div class="stat-value">${player.goals_scored}</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">Assists</div>
-              <div class="stat-value">${player.assists}</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-label">Clean Sheets</div>
-              <div class="stat-value">${player.clean_sheets}</div>
-            </div>
-          </div>
-
-          <h3>📈 Recent Performance</h3>
-          <div style="margin: 16px 0;">
-            ${history.map(h => `
-              <div class="history-item">
-                <div style="display: flex; justify-content: space-between;">
-                  <span>GW${h.round}: vs ${getOpponent(h.opponent_team)}</span>
-                  <span>+${h.total_points} pts</span>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-
-          <button id="toggleFavorite" class="secondary" style="margin-top: 16px;">
-            ${favorites.includes(playerId) ? 'Remove from Favorites' : 'Add to Favorites'}
-          </button>
-        `;
-
-        // Favorite toggle
-        const toggleFavoriteBtn = document.getElementById('toggleFavorite');
-        toggleFavoriteBtn.addEventListener('click', () => {
-          if (favorites.includes(playerId)) {
-            favorites = favorites.filter(id => id !== playerId);
-            toggleFavoriteBtn.innerText = 'Add to Favorites';
-          } else {
-            favorites.push(playerId);
-            toggleFavoriteBtn.innerText = 'Remove from Favorites';
-          }
-          localStorage.setItem('fst_favorites', JSON.stringify(favorites));
-          showToast(favorites.includes(playerId) ? 'Added to favorites!' : 'Removed from favorites');
+        const lbDiv = document.getElementById('leaderboard');
+        lbDiv.innerHTML = '';
+        data.forEach((entry, i) => {
+          const div = document.createElement('div');
+          div.className = 'leaderboard-item';
+          div.innerHTML = `<strong>#${i+1}</strong> User: ${entry.userId.slice(0,6)}... Points: ${entry.points}`;
+          lbDiv.appendChild(div);
         });
-
-      } catch (error) {
-        console.error("Player modal error:", error);
-        playerModalContent.innerHTML = '<div class="error">Could not load player details.</div>';
+      } catch (e) {
+        console.log("Could not load leaderboard");
       }
     }
 
-    function getPosition(elementType) {
-      const positions = {1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD'};
-      return positions[elementType] || 'Unknown';
-    }
+    // === TAB BAR CLICK HANDLER ===
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabBar = document.getElementById('tabBar');
+      const tabButtons = tabBar.querySelectorAll('.tab-btn');
 
-    function getOpponent(teamId) {
-      return teams[teamId]?.short_name || '?';
-    }
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
 
-    // Rewards System
-    claimDailyBtn.addEventListener('click', () => {
-      const lastClaim = localStorage.getItem('fst_last_claim');
-      const today = new Date().toDateString();
-      
-      if (lastClaim === today) {
-        showToast("You've already claimed today's reward!");
-        return;
-      }
+          const league = this.dataset.league;
 
-      fstTokens += 10;
-      localStorage.setItem('fst_tokens', fstTokens.toString());
-      localStorage.setItem('fst_last_claim', today);
-      fstBalance.innerText = `${fstTokens} $FST`;
-      showToast("🎉 +10 $FST claimed!");
+          // Visual feedback
+          tabButtons.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
 
-      checkAndUnlockNFT();
-    });
-
-    function checkAndUnlockNFT() {
-      const unlockedNFTs = JSON.parse(localStorage.getItem('fst_nfts') || '[]');
-      
-      // Unlock "Rookie" NFT for connecting wallet
-      if (address && !unlockedNFTs.includes('rookie')) {
-        unlockedNFTs.push('rookie');
-        localStorage.setItem('fst_nfts', JSON.stringify(unlockedNFTs));
-        displayNFTs();
-        showToast("🏆 Unlocked: Rookie NFT!");
-      }
-
-      // Unlock "Top Performer" NFT if user has > 50 $FST
-      if (fstTokens > 50 && !unlockedNFTs.includes('top_performer')) {
-        unlockedNFTs.push('top_performer');
-        localStorage.setItem('fst_nfts', JSON.stringify(unlockedNFTs));
-        displayNFTs();
-        showToast("🏆 Unlocked: Top Performer NFT!");
-      }
-
-      displayNFTs();
-    }
-
-    function displayNFTs() {
-      const unlockedNFTs = JSON.parse(localStorage.getItem('fst_nfts') || '[]');
-      
-      if (unlockedNFTs.length === 0) {
-        nftContainer.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color);">No NFTs unlocked yet. Keep playing!</p>';
-        return;
-      }
-
-      nftContainer.innerHTML = unlockedNFTs.map(nft => {
-        const nftInfo = {
-          rookie: {
-            name: "Rookie Badge",
-            image: "https://via.placeholder.com/80/ff8c00/ffffff?text=R",
-            description: "First steps in FST universe"
-          },
-          top_performer: {
-            name: "Top Performer",
-            image: "https://via.placeholder.com/80/36c97d/ffffff?text=T",
-            description: "Earned over 50 $FST tokens"
+          if (league !== 'epl') {
+            // Use Telegram native popup (better UX)
+            if (tg.showPopup) {
+              tg.showPopup({
+                title: "🚧 Coming Soon",
+                message: `${league.toUpperCase()} league is under development.\nOnly EPL available for now!`,
+                buttons: [{ type: "ok" }]
+              });
+            } else {
+              alert(`${league.toUpperCase()} coming soon! Only EPL available.`);
+            }
+            return;
           }
-        };
-
-        const info = nftInfo[nft] || {name: "Unknown", image: "https://via.placeholder.com/80", description: ""};
-        
-        return `
-          <div class="nft-badge">
-            <img src="${info.image}" alt="${info.name}" />
-            <h3>${info.name}</h3>
-            <p>${info.description}</p>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Utility Functions
-    function showError(message) {
-      errorMessage.innerText = message;
-      errorMessage.style.display = 'block';
-      setTimeout(() => {
-        errorMessage.style.display = 'none';
-      }, 5000);
-    }
-
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 12px 24px;
-        border-radius: 30px;
-        z-index: 1000;
-        font-size: 14px;
-        text-align: center;
-      `;
-      toast.innerText = message;
-      document.body.appendChild(toast);
-      setTimeout(() => {
-        toast.remove();
-      }, 3000);
-    }
-
-    // Initialize everything
-    document.addEventListener('DOMContentLoaded', async () => {
-      await initWeb3Modal();
-      fetchFPLData();
-      fstBalance.innerText = `${fstTokens} $FST`;
-      displayNFTs();
+          // EPL is default — no reload needed for MVP
+        });
+      });
     });
   </script>
 </body>
