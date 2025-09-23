@@ -5,257 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>FST Fantasy ⚽</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
   <style>
     :root {
+      --primary: #00c3ff;
+      --secondary: #4ecdc4;
+      --accent: #556ee6;
       --bg: #0f1923;
-      --card-bg: rgba(26, 42, 58, 0.7);
-      --header-bg: rgba(15, 25, 35, 0.9);
-      --accent: #00c3ff;
-      --success: #4ecdc4;
-      --primary: #556ee6;
-      --text: #ffffff;
-      --text-secondary: #aaa;
-      --border: #2a3a4a;
-      --selected: rgba(0, 195, 255, 0.2);
+      --card-bg: #1a2a3a;
+      --text: white;
+      --text-secondary: #ccc;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 0 16px 80px 16px;
-      font-size: 15px;
-      line-height: 1.5;
+      padding: 16px 16px 70px 16px;
+      font-size: 16px;
       position: relative;
-      overflow-x: hidden;
+      min-height: 100vh;
     }
 
-    /* ===== PROFILE HEADER ===== */
-    .profile-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background: var(--header-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 12px 16px;
+    .profile-header {
       display: flex;
       align-items: center;
-      z-index: 900;
-      border-bottom: 1px solid rgba(42, 58, 74, 0.5);
+      gap: 12px;
+      padding: 12px 0;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #2a3a4a;
     }
 
     .avatar {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       object-fit: cover;
       background: #222;
-      margin-right: 12px;
-      border: 2px solid var(--accent);
-    }
-
-    .user-info {
-      flex: 1;
+      border: 2px solid var(--primary);
     }
 
     .user-name {
-      font-weight: 600;
+      font-weight: bold;
       font-size: 16px;
-      color: var(--accent);
-      margin: 0;
+      color: white;
     }
 
-    .user-id {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-
-    .balance {
-      display: flex;
-      align-items: center;
-      background: rgba(0, 195, 255, 0.15);
-      padding: 4px 10px;
-      border-radius: 20px;
+    .user-status {
       font-size: 13px;
-      font-weight: 600;
-    }
-
-    .balance i {
-      margin-right: 4px;
-      color: var(--accent);
-    }
-
-    /* ===== MAIN CONTENT ===== */
-    .main-content {
-      margin-top: 70px; /* account for fixed header */
+      color: var(--secondary);
     }
 
     h1 {
       text-align: center;
-      color: var(--accent);
-      margin: 16px 0 12px;
-      font-weight: 700;
+      color: var(--primary);
+      margin: 10px 0;
       font-size: 24px;
+    }
+
+    h2 {
+      color: var(--primary);
+      margin: 16px 0 12px;
+      font-size: 20px;
     }
 
     .section {
       background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 18px;
+      padding: 16px;
+      border-radius: 12px;
       margin: 16px 0;
-      border: 1px solid rgba(42, 58, 74, 0.4);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--accent);
-      margin: 0;
     }
 
     button {
       width: 100%;
       padding: 14px;
-      margin: 10px 0;
+      margin: 8px 0;
       border: none;
-      border-radius: 12px;
+      border-radius: 8px;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: bold;
       cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    button i {
-      margin-right: 8px;
+      transition: 0.2s;
     }
 
     #connectWallet {
-      background: linear-gradient(135deg, #00c3ff, #0077ff);
-      color: white;
-    }
-
-    #connectWallet:hover {
-      opacity: 0.9;
-      transform: translateY(-2px);
+      background: var(--primary);
+      color: #000;
     }
 
     #joinContest {
-      background: linear-gradient(135deg, #4ecdc4, #2a9d8f);
-      color: white;
+      background: var(--secondary);
+      color: #000;
     }
 
     #loadPlayers {
-      background: linear-gradient(135deg, #556ee6, #3a56c0);
-      color: white;
-    }
-
-    /* ===== PLAYER GRID ===== */
-    .controls {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    input, select {
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: rgba(30, 45, 60, 0.6);
-      color: white;
-      font-size: 14px;
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .filter-group {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .filter-btn {
-      padding: 6px 12px;
-      background: rgba(50, 65, 80, 0.7);
-      color: var(--text-secondary);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .filter-btn.active {
       background: var(--accent);
-      color: #000;
-      font-weight: 600;
+      color: white;
     }
 
     .player-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-top: 8px;
+      gap: 12px;
+      margin-top: 16px;
     }
 
     .player-card {
-      background: rgba(40, 55, 70, 0.6);
-      border-radius: 12px;
+      background: #2a3a4a;
       padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
-      transition: all 0.2s;
-      border: 1px solid transparent;
-    }
-
-    .player-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(0, 195, 255, 0.3);
     }
 
     .player-card.selected {
-      background: var(--selected);
-      border-color: var(--accent);
-    }
-
-    .position-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: var(--accent);
+      background: var(--primary);
       color: #000;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 10px;
     }
 
     .player-photo {
@@ -264,7 +138,7 @@
       object-fit: cover;
       border-radius: 6px;
       background: #000;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       border: 2px solid transparent;
     }
 
@@ -273,19 +147,10 @@
     }
 
     .player-name {
-      font-weight: 600;
+      font-weight: bold;
       text-align: center;
       margin: 4px 0;
       font-size: 14px;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .player-team {
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
     }
 
     .player-meta {
@@ -293,237 +158,290 @@
       justify-content: space-between;
       width: 100%;
       font-size: 12px;
+      color: var(--text-secondary);
+      margin: 2px 0;
+      align-items: center;
     }
 
     .price-tag {
-      color: var(--success);
-      font-weight: 600;
+      color: var(--secondary);
+      font-weight: bold;
     }
 
     .points-tag {
       color: gold;
-      font-weight: 600;
+      font-weight: bold;
     }
 
-    /* ===== TEAM PREVIEW ===== */
-    #teamContainer {
+    .player-stats {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
+      justify-content: space-around;
+      width: 100%;
+      margin: 6px 0;
+      font-size: 11px;
     }
 
-    .team-player {
-      background: rgba(0, 195, 255, 0.15);
-      padding: 6px 10px;
-      border-radius: 20px;
+    .player-form {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .form-W { color: #4ecdc4; }
+    .form-D { color: #ccc; }
+    .form-L { color: #ff6b6b; }
+
+    #status {
+      text-align: center;
+      margin: 10px 0;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .leaderboard-item {
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      font-size: 14px;
+    }
+
+    input, select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #222;
+      color: white;
+      font-size: 14px;
+      width: 100%;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: #000;
+    }
+
+    .mode-btn {
+      padding: 6px 12px;
       font-size: 13px;
-      display: flex;
-      align-items: center;
-    }
-
-    .team-player i {
-      margin-left: 6px;
-      color: var(--accent);
+      border: none;
+      border-radius: 6px;
+      background: #333;
+      color: white;
       cursor: pointer;
     }
 
-    /* ===== LEADERBOARD ===== */
-    .leaderboard-item {
+    .mode-btn.active {
+      background: var(--primary);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .lb-mode-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      border: none;
+      border-radius: 4px;
+      background: #333;
+      color: white;
+      cursor: pointer;
+    }
+
+    .lb-mode-btn.active {
+      background: var(--primary);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .match-card {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(42, 58, 74, 0.3);
+      align-items: center;
+      padding: 12px;
+      background: #1a2a3a;
+      border-radius: 8px;
+      margin-bottom: 10px;
     }
 
-    .leaderboard-item:last-child {
-      border-bottom: none;
+    .match-card.live {
+      border-left: 4px solid var(--primary);
     }
 
-    .rank {
-      font-weight: 700;
-      width: 30px;
+    .match-team { font-weight: bold; }
+    .match-score { font-size: 18px; color: var(--secondary); }
+    .match-status { font-size: 12px; color: #aaa; }
+
+    .table-header, .table-row {
+      display: grid;
+      grid-template-columns: 20px 1fr 30px 40px 40px 80px;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 14px;
     }
 
-    .user-display {
-      flex: 1;
-      padding: 0 10px;
+    .table-header { font-weight: bold; border-bottom: 1px solid #333; }
+
+    .app-view {
+      display: none;
+      animation: fadeIn 0.3s ease;
     }
 
-    .points {
-      font-weight: 600;
-      color: gold;
+    .app-view.active {
+      display: block;
     }
 
-    /* ===== TAB BAR ===== */
-    .tab-bar {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       display: flex;
-      justify-content: space-around;
-      background: rgba(15, 25, 35, 0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 10px 0;
-      border-top: 1px solid rgba(42, 58, 74, 0.5);
-      z-index: 1000;
+      background: #15202b;
+      border-top: 1px solid #333;
+      z-index: 10000;
     }
 
-    .tab-btn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .nav-btn {
+      flex: 1;
+      padding: 8px 0;
       background: none;
       border: none;
-      color: var(--text-secondary);
-      font-size: 11px;
-      padding: 6px 4px;
+      color: #aaa;
+      font-size: 10px;
       cursor: pointer;
-      width: 100%;
-      max-width: 80px;
-      text-align: center;
-      transition: all 0.2s;
     }
 
-    .tab-btn.active {
-      color: var(--accent);
-      transform: scale(1.1);
+    .nav-btn.active {
+      color: var(--primary);
+      text-shadow: 0 0 4px rgba(0, 195, 255, 0.7);
     }
 
-    .tab-btn i {
-      font-size: 20px;
-      margin-bottom: 4px;
+    .nav-btn i {
+      font-size: 16px;
+      display: block;
     }
 
-    /* ===== PROFILE SECTION ===== */
-    #profileSection {
-      display: none;
-    }
-
-    .profile-hero {
-      display: flex;
-      align-items: center;
-      padding: 16px;
-      background: linear-gradient(135deg, rgba(0, 195, 255, 0.1), rgba(0, 100, 200, 0.1));
-      border-radius: 16px;
-      margin-bottom: 20px;
-    }
-
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 16px;
-      border: 3px solid var(--accent);
-    }
-
-    .profile-details h2 {
-      margin: 0 0 6px;
-      font-size: 20px;
-      color: var(--accent);
-    }
-
-    .profile-stats {
+    .team-summary {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 16px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
-    .stat-card {
-      background: rgba(40, 55, 70, 0.6);
-      padding: 14px;
-      border-radius: 12px;
-      text-align: center;
-      border: 1px solid var(--border);
-    }
-
-    .stat-value {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
+    .captain-btn {
+      padding: 6px;
+      margin: 4px;
+      background: #2a3a4a;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 4px;
       font-size: 12px;
-      color: var(--text-secondary);
     }
 
-    /* ===== STATUS ===== */
-    #status {
-      text-align: center;
-      margin: 12px 0;
-      font-size: 14px;
-      color: var(--text-secondary);
+    .captain-btn:hover {
+      background: var(--primary);
+      color: #000;
+    }
+
+    .wallet-banner {
+      background: rgba(0, 195, 255, 0.1);
       padding: 8px;
-      background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
+      text-align: center;
+      margin: 10px 0;
+      font-size: 14px;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 375px) {
-      .player-name {
-        font-size: 13px;
-      }
-      
-      .controls {
-        flex-direction: column;
-      }
-      
-      input, select {
-        min-width: auto;
-      }
+    .error {
+      color: #ff6b6b;
+      text-align: center;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
-  <!-- Fixed Profile Header -->
-  <div class="profile-bar">
-    <img id="headerAvatar" class="avatar" src="" alt="Profile">
-    <div class="user-info">
-      <h3 class="user-name" id="headerName">Loading...</h3>
-      <div class="user-id" id="headerId">User ID: ...</div>
-    </div>
-    <div class="balance">
-      <i class="fas fa-coins"></i>
-      <span id="headerBalance">0 FST</span>
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <img id="userAvatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Avatar" class="avatar">
+    <div>
+      <div id="userName" class="user-name">Loading...</div>
+      <div id="userStatus" class="user-status">Free entry • Tap to connect wallet</div>
     </div>
   </div>
 
-  <div class="main-content">
+  <!-- Views -->
+  <div id="view-home" class="app-view active">
     <h1>⚽ FST Fantasy</h1>
     <div id="status">Initializing...</div>
 
-    <!-- Wallet Section -->
     <div class="section">
-      <button id="connectWallet"><i class="fas fa-wallet"></i> Connect Wallet</button>
-      <div style="text-align: center; margin-top: 8px;">
-        <div>✅ Entry is <strong>FREE</strong> this week!</div>
-        <div>Prize Pool: <strong id="prizeAmount">0 FST</strong> (<span id="entries">0</span> managers)</div>
+      <button id="connectWallet">🔐 Connect Wallet</button>
+      <div>✅ Entry is <strong>FREE</strong> this week!</div>
+      <div>Prize Pool: <strong id="prizeAmount">0 FST</strong> (<span id="entries">0</span> managers)</div>
+    </div>
+
+    <div class="section">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <span>🌍 Draft Mode:</span>
+        <div style="display: flex; gap: 8px;">
+          <button id="leagueModeBtn" class="mode-btn active">League-Specific</button>
+          <button id="globalModeBtn" class="mode-btn">Global Draft</button>
+        </div>
       </div>
     </div>
 
-    <!-- Player Selection -->
-    <div class="section" id="playersSection">
-      <div class="section-header">
-        <h3 class="section-title">Select Players</h3>
-        <span id="playerCount">0/11</span>
+    <div class="section">
+      <h3>🏆 Leaderboard</h3>
+      <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+        <button id="leagueLbBtn" class="lb-mode-btn active">League</button>
+        <button id="globalLbBtn" class="lb-mode-btn">Global</button>
       </div>
-      
-      <div class="controls">
-        <input type="text" id="searchInput" placeholder="Search player or team...">
+      <div id="leaderboard"></div>
+    </div>
+  </div>
+
+  <div id="view-live" class="app-view">
+    <h2>⚡ Live Matches</h2>
+    <div id="liveMatches">
+      <div class="error">Loading live scores...</div>
+    </div>
+  </div>
+
+  <div id="view-table" class="app-view">
+    <h2>📊 Premier League Table</h2>
+    <div id="leagueTable">
+      <div class="error">Loading table...</div>
+    </div>
+  </div>
+
+  <div id="view-players" class="app-view">
+    <h2>🧍 Players</h2>
+    
+    <div class="section">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+        <input type="text" id="searchInput" placeholder="🔍 Search player or team..." style="flex: 1;">
         <select id="sortSelect">
-          <option value="name">Name</option>
-          <option value="cost">Cost</option>
-          <option value="points">Points</option>
+          <option value="name">Sort by Name</option>
+          <option value="cost">Sort by Cost</option>
+          <option value="points">Sort by Points</option>
         </select>
       </div>
 
-      <div class="filter-group">
+      <div style="display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;">
         <button class="filter-btn active" data-pos="all">All</button>
         <button class="filter-btn" data-pos="1">GK</button>
         <button class="filter-btn" data-pos="2">DEF</button>
@@ -531,74 +449,52 @@
         <button class="filter-btn" data-pos="4">FWD</button>
       </div>
 
-      <button id="loadPlayers"><i class="fas fa-cloud-download-alt"></i> Load EPL Players</button>
+      <button id="loadPlayers">📥 Load Players</button>
       <div class="player-grid" id="playerGrid"></div>
     </div>
 
-    <!-- Team Preview -->
     <div class="section">
-      <div class="section-header">
-        <h3 class="section-title">Your Team</h3>
-        <span id="teamCount">0/11</span>
-      </div>
+      <h3>✅ Your Team (<span id="teamCount">0</span>/11)</h3>
       <div id="teamContainer"></div>
-      <button id="joinContest" disabled><i class="fas fa-trophy"></i> Join Contest</button>
-    </div>
-
-    <!-- Leaderboard -->
-    <div class="section">
-      <h3 class="section-title">🏆 Leaderboard</h3>
-      <div id="leaderboard"></div>
-    </div>
-
-    <!-- Profile Section (hidden by default) -->
-    <div class="section" id="profileSection">
-      <div class="profile-hero">
-        <img id="profileAvatar" class="profile-avatar" src="" alt="Profile">
-        <div class="profile-details">
-          <h2 id="profileName">Loading...</h2>
-          <div id="profileId">User ID: ...</div>
-        </div>
-      </div>
-      
-      <div class="profile-stats">
-        <div class="stat-card">
-          <div class="stat-value" id="totalEntries">0</div>
-          <div class="stat-label">Entries</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="totalPoints">0</div>
-          <div class="stat-label">Total Points</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" id="rank">-</div>
-          <div class="stat-label">Rank</div>
-        </div>
-      </div>
+      <button id="joinContest" disabled>🎯 Join Contest (Pick 11 First)</button>
     </div>
   </div>
 
-  <!-- Bottom Tab Bar -->
-  <div class="tab-bar">
-    <button class="tab-btn active" data-tab="home">
-      <i class="fas fa-home"></i>
-      <span>Home</span>
+  <div id="view-team" class="app-view">
+    <h2>🧩 My Team</h2>
+    <div id="myTeamDetails">
+      <p>⚽ Pick 11 players in the Players tab first!</p>
+    </div>
+  </div>
+
+  <div id="view-leaderboard" class="app-view">
+    <h2>🏆 Leaderboard</h2>
+    <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+      <button id="lbLeagueBtn" class="lb-mode-btn active">League</button>
+      <button id="lbGlobalBtn" class="lb-mode-btn">Global</button>
+    </div>
+    <div id="fullLeaderboard"></div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" data-view="home">
+      <i class="fas fa-home"></i><br>Home
     </button>
-    <button class="tab-btn" data-tab="profile">
-      <i class="fas fa-user"></i>
-      <span>Profile</span>
+    <button class="nav-btn" data-view="live">
+      <i class="fas fa-bolt"></i><br>Live
     </button>
-    <button class="tab-btn" data-tab="leagues">
-      <i class="fas fa-futbol"></i>
-      <span>Leagues</span>
+    <button class="nav-btn" data-view="table">
+      <i class="fas fa-list-ol"></i><br>Table
     </button>
-    <button class="tab-btn" data-tab="contest">
-      <i class="fas fa-trophy"></i>
-      <span>Contest</span>
+    <button class="nav-btn" data-view="players">
+      <i class="fas fa-users"></i><br>Players
     </button>
-    <button class="tab-btn" data-tab="more">
-      <i class="fas fa-ellipsis-h"></i>
-      <span>More</span>
+    <button class="nav-btn" data-view="team">
+      <i class="fas fa-user-tie"></i><br>My Team
+    </button>
+    <button class="nav-btn" data-view="leaderboard">
+      <i class="fas fa-trophy"></i><br>Top
     </button>
   </div>
 
@@ -607,16 +503,27 @@
     tg.expand();
     tg.ready();
 
-    // Get user data from Telegram
-    const initData = tg.initDataUnsafe;
-    const userData = {
-      id: initData.user?.id || 'guest_' + Math.random().toString(36).substr(2, 9),
-      firstName: initData.user?.first_name || 'Guest',
-      lastName: initData.user?.last_name || '',
-      username: initData.user?.username || '',
-      photoUrl: initData.user?.photo_url || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
-      balance: 0
-    };
+    // Telegram user data
+    const initData = tg.initData;
+    const initDataUnsafe = tg.initDataUnsafe;
+    const telegramUser = initDataUnsafe.user;
+
+    const userId = telegramUser ? `tg_${telegramUser.id}` : 'guest_' + Math.random().toString(36).substr(2, 9);
+    const userName = telegramUser ? (telegramUser.first_name || telegramUser.username || 'Player') : 'Guest';
+    const avatarUrl = telegramUser && telegramUser.photo_url 
+      ? telegramUser.photo_url 
+      : 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
+
+    // Update profile
+    document.getElementById('userName').innerText = userName;
+    document.getElementById('userAvatar').src = avatarUrl;
+
+    // State
+    let selectedPlayers = [];
+    const MAX_PLAYERS = 11;
+    let draftMode = 'league';
+    let currentLeague = 'epl';
+    let leaderboardMode = 'league';
 
     // DOM Elements
     const connectWalletBtn = document.getElementById('connectWallet');
@@ -630,213 +537,77 @@
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     const filterButtons = document.querySelectorAll('.filter-btn');
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const playersSection = document.getElementById('playersSection');
-    const profileSection = document.getElementById('profileSection');
-    const playerCount = document.getElementById('playerCount');
-    const teamCount = document.getElementById('teamCount');
+    const teamCountSpan = document.getElementById('teamCount');
 
-    // Profile elements
-    const headerAvatar = document.getElementById('headerAvatar');
-    const headerName = document.getElementById('headerName');
-    const headerId = document.getElementById('headerId');
-    const headerBalance = document.getElementById('headerBalance');
-    const profileAvatar = document.getElementById('profileAvatar');
-    const profileName = document.getElementById('profileName');
-    const profileId = document.getElementById('profileId');
-    const totalEntries = document.getElementById('totalEntries');
-    const totalPoints = document.getElementById('totalPoints');
-    const rank = document.getElementById('rank');
-
-    let selectedPlayers = [];
-    const MAX_PLAYERS = 11;
     let allPlayers = [];
     let currentFilter = 'all';
     let currentSearch = '';
     let currentSort = 'name';
-    let currentTab = 'home';
-
-    // Initialize profile
-    function initProfile() {
-      const fullName = userData.firstName + (userData.lastName ? ' ' + userData.lastName : '');
-      headerName.textContent = fullName;
-      headerId.textContent = `ID: ${userData.id}`;
-      headerBalance.textContent = `${userData.balance} FST`;
-      headerAvatar.src = userData.photoUrl;
-      
-      profileName.textContent = fullName;
-      profileId.textContent = `User ID: ${userData.id}`;
-      profileAvatar.src = userData.photoUrl;
-    }
-
-    // Switch tabs
-    function switchTab(tab) {
-      // Update active tab
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-      currentTab = tab;
-      
-      // Show/hide sections
-      if (tab === 'home' || tab === 'contest' || tab === 'leagues') {
-        playersSection.style.display = 'block';
-        profileSection.style.display = 'none';
-      } else if (tab === 'profile') {
-        playersSection.style.display = 'none';
-        profileSection.style.display = 'block';
-        loadUserProfile();
-      } else {
-        playersSection.style.display = 'block';
-        profileSection.style.display = 'none';
-      }
-    }
-
-    // Load user profile data
-    function loadUserProfile() {
-      // In real app, fetch from backend
-      totalEntries.textContent = '3';
-      totalPoints.textContent = '142';
-      rank.textContent = '#127';
-    }
-
-    // Update team display
-    function updateTeamDisplay() {
-      teamContainer.innerHTML = '';
-      selectedPlayers.forEach(player => {
-        const div = document.createElement('div');
-        div.className = 'team-player';
-        div.innerHTML = `
-          ${player.web_name} 
-          <i class="fas fa-times" data-id="${player.id}"></i>
-        `;
-        teamContainer.appendChild(div);
-      });
-      
-      const count = selectedPlayers.length;
-      playerCount.textContent = `${count}/${MAX_PLAYERS}`;
-      teamCount.textContent = `${count}/${MAX_PLAYERS}`;
-      
-      // Add remove event listeners
-      teamContainer.querySelectorAll('.fa-times').forEach(icon => {
-        icon.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const id = parseInt(icon.dataset.id);
-          selectedPlayers = selectedPlayers.filter(p => p.id !== id);
-          updateTeamDisplay();
-          checkJoinButton();
-          renderFilteredPlayers();
-        });
-      });
-    }
-
-    // Check join button state
-    function checkJoinButton() {
-      const isReady = selectedPlayers.length === MAX_PLAYERS;
-      joinContestBtn.disabled = !isReady;
-      if (isReady) {
-        joinContestBtn.innerHTML = '<i class="fas fa-check"></i> Ready to Join!';
-      } else {
-        joinContestBtn.innerHTML = '<i class="fas fa-trophy"></i> Join Contest';
-      }
-    }
 
     // Initialize
-    function init() {
-      initProfile();
-      statusDiv.textContent = "Tap 'Connect Wallet' to begin";
-      
-      // Set up tab navigation
-      tabButtons.forEach(btn => {
-        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-      });
-      
-      // Connect Wallet
-      connectWalletBtn.addEventListener('click', async () => {
-        statusDiv.textContent = "Connecting wallet...";
-        try {
-          await new Promise(r => setTimeout(r, 800));
-          userData.balance = 500;
-          initProfile();
-          statusDiv.textContent = "✅ Wallet connected!";
-          connectWalletBtn.disabled = true;
-          connectWalletBtn.innerHTML = '<i class="fas fa-check"></i> Connected';
-          loadPlayersBtn.disabled = false;
-          updatePrizePool();
-        } catch (e) {
-          statusDiv.textContent = "❌ Connection failed";
-        }
-      });
-      
-      // Load Players
-      loadPlayersBtn.addEventListener('click', async () => {
-        statusDiv.textContent = "Loading players...";
-        loadPlayersBtn.disabled = true;
-        try {
-          await new Promise(r => setTimeout(r, 1200));
-          const players = [
-            { id: 1, web_name: "Alisson", position: "GK", team_name: "Liverpool", now_cost: "5.5", total_points: 120, element_type: 1, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p116535.png" },
-            { id: 2, web_name: "Alexander-Arnold", position: "DEF", team_name: "Liverpool", now_cost: "8.0", total_points: 180, element_type: 2, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p169187.png" },
-            { id: 3, web_name: "Salah", position: "FWD", team_name: "Liverpool", now_cost: "12.5", total_points: 220, element_type: 4, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p118748.png" },
-            { id: 4, web_name: "De Bruyne", position: "MID", team_name: "Man City", now_cost: "10.5", total_points: 190, element_type: 3, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p61366.png" },
-            { id: 5, web_name: "Haaland", position: "FWD", team_name: "Man City", now_cost: "14.0", total_points: 240, element_type: 4, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p223094.png" },
-            { id: 6, web_name: "Ødegaard", position: "MID", team_name: "Arsenal", now_cost: "8.5", total_points: 170, element_type: 3, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p209244.png" },
-            { id: 7, web_name: "Saka", position: "MID", team_name: "Arsenal", now_cost: "9.0", total_points: 185, element_type: 3, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p223340.png" },
-            { id: 8, web_name: "Ramsdale", position: "GK", team_name: "Arsenal", now_cost: "4.5", total_points: 110, element_type: 1, photo_url: "https://resources.premierleague.com/premierleague/photos/players/250x250/p220682.png" }
-          ];
-          renderPlayers(players);
-          statusDiv.textContent = "Select 11 players to join!";
-        } catch (e) {
-          statusDiv.textContent = "❌ Failed to load players";
-          loadPlayersBtn.disabled = false;
-        }
-      });
-      
-      // Join Contest
-      joinContestBtn.addEventListener('click', async () => {
-        if (selectedPlayers.length !== MAX_PLAYERS) return;
-        
-        statusDiv.textContent = "Joining contest...";
-        joinContestBtn.disabled = true;
-        
-        try {
-          await new Promise(r => setTimeout(r, 1000));
-          statusDiv.textContent = "🎉 Successfully joined! Good luck!";
-          joinContestBtn.innerHTML = '<i class="fas fa-check"></i> Joined!';
-          joinContestBtn.disabled = true;
-          loadPlayersBtn.style.display = 'none';
-          updatePrizePool();
-          loadLeaderboard();
-        } catch (e) {
-          statusDiv.textContent = "❌ Failed to join";
-          joinContestBtn.disabled = false;
-        }
-      });
-      
-      // Search, Sort, Filter
-      searchInput.addEventListener('input', (e) => {
-        currentSearch = e.target.value.toLowerCase();
-        renderFilteredPlayers();
-      });
-      
-      sortSelect.addEventListener('change', (e) => {
-        currentSort = e.target.value;
-        renderFilteredPlayers();
-      });
-      
-      filterButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-          filterButtons.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          currentFilter = btn.dataset.pos;
-          renderFilteredPlayers();
-        });
-      });
-      
-      // Prize Pool & Leaderboard
-      updatePrizePool();
-      loadLeaderboard();
+    statusDiv.innerText = "Tap 'Connect Wallet' to begin";
+
+    // === API CALL HELPER ===
+    async function apiCall(url, options = {}) {
+      const config = {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Telegram-Init-Data': initData
+        },
+        ...options
+      };
+      return fetch(url, config);
     }
 
-    // Render Players
+    // === Connect Wallet ===
+    connectWalletBtn.addEventListener('click', async () => {
+      statusDiv.innerText = "Connecting wallet...";
+      try {
+        const response = await apiCall('/connect-wallet', { method: 'POST' });
+        const data = await response.json();
+        if (data.address) {
+          statusDiv.innerText = `✅ Connected: ${data.address.slice(0, 6)}...${data.address.slice(-4)}`;
+          document.getElementById('userStatus').innerText = "✅ Wallet connected";
+          connectWalletBtn.disabled = true;
+          connectWalletBtn.innerText = "Wallet Connected";
+          loadPlayersBtn.disabled = false;
+          updatePrizePool();
+        } else {
+          throw new Error('Connection failed');
+        }
+      } catch (e) {
+        statusDiv.innerText = "❌ Wallet connection failed";
+        alert("Could not connect wallet. Try again.");
+      }
+    });
+
+    // === Load Players ===
+    loadPlayersBtn.addEventListener('click', async () => {
+      statusDiv.innerText = "Loading players...";
+      loadPlayersBtn.disabled = true;
+      try {
+        const url = `/players?league=${draftMode === 'global' ? 'epl' : currentLeague}`;
+        const response = await apiCall(url);
+        const players = await response.json();
+        
+        if (draftMode === 'global') {
+          // Load all leagues
+          const leagues = ['epl', 'seriea', 'laliga', 'bundesliga', 'wsl', 'euro'];
+          const allPromises = leagues.map(lg => apiCall(`/players?league=${lg}`).then(r => r.json()));
+          const allLeaguePlayers = await Promise.all(allPromises);
+          renderPlayers(allLeaguePlayers.flat());
+          statusDiv.innerText = "Pick 11 players from any league!";
+        } else {
+          renderPlayers(players);
+          statusDiv.innerText = `Pick 11 ${currentLeague.toUpperCase()} players!`;
+        }
+      } catch (e) {
+        statusDiv.innerText = "❌ Failed to load players";
+        loadPlayersBtn.disabled = false;
+      }
+    });
+
+    // === Render Players ===
     function renderPlayers(players) {
       allPlayers = players;
       renderFilteredPlayers();
@@ -854,9 +625,13 @@
       });
 
       filtered.sort((a, b) => {
-        if (currentSort === 'cost') return parseFloat(b.now_cost) - parseFloat(a.now_cost);
-        if (currentSort === 'points') return b.total_points - a.total_points;
-        return a.web_name.localeCompare(b.web_name);
+        if (currentSort === 'cost') {
+          return parseFloat(b.now_cost) - parseFloat(a.now_cost);
+        } else if (currentSort === 'points') {
+          return b.total_points - a.total_points;
+        } else {
+          return a.web_name.localeCompare(b.web_name);
+        }
       });
 
       playerGrid.innerHTML = '';
@@ -865,56 +640,304 @@
         const card = document.createElement('div');
         card.className = `player-card ${isSelected ? 'selected' : ''}`;
         card.innerHTML = `
-          <div class="position-badge">${player.position}</div>
-          <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'">
+          <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
           <div class="player-name">${player.web_name}</div>
-          <div class="player-team">${player.team_name}</div>
           <div class="player-meta">
+            <span>${player.position} • ${player.team_name}</span>
             <span class="price-tag">£${player.now_cost}m</span>
+          </div>
+          <div class="player-stats">
+            <div><small>⚽ ${player.goals || 0}</small></div>
+            <div><small>🅰️ ${player.assists || 0}</small></div>
+            <div><small>🛡️ ${player.clean_sheets || 0}</small></div>
+            <div><small>⭐ ${player.total_points}</small></div>
+          </div>
+          <div class="player-meta">
+            <span>${draftMode === 'global' ? player.league?.toUpperCase() || 'EPL' : ''}</span>
             <span class="points-tag">${player.total_points} pts</span>
+          </div>
+          <div class="player-form">
+            ${(player.form || '').split('').map(f => `<span class="form-${f}">${f}</span>`).join('')}
           </div>
         `;
 
         card.addEventListener('click', () => {
-          if (isSelected) {
-            selectedPlayers = selectedPlayers.filter(p => p.id !== player.id);
-          } else if (selectedPlayers.length < MAX_PLAYERS) {
-            selectedPlayers.push(player);
-          }
+          togglePlayerSelection(player);
           updateTeamDisplay();
           checkJoinButton();
-          renderFilteredPlayers();
         });
 
         playerGrid.appendChild(card);
       });
     }
 
-    function updatePrizePool() {
-      prizeAmountSpan.textContent = "1,000 FST";
-      entriesSpan.textContent = "42";
+    function togglePlayerSelection(player) {
+      const index = selectedPlayers.findIndex(p => p.id === player.id);
+      if (index > -1) {
+        selectedPlayers.splice(index, 1);
+      } else if (selectedPlayers.length < MAX_PLAYERS) {
+        selectedPlayers.push(player);
+      }
+      renderFilteredPlayers();
     }
 
-    function loadLeaderboard() {
-      const leaderboardData = [
-        { id: "user1", name: "Alex ⭐", points: 240 },
-        { id: "user2", name: "Jamie", points: 220 },
-        { id: userData.id, name: "You", points: 180 },
-        { id: "user4", name: "Taylor", points: 175 }
-      ];
-      
-      const lbDiv = document.getElementById('leaderboard');
-      lbDiv.innerHTML = leaderboardData.map((item, i) => `
-        <div class="leaderboard-item">
-          <div class="rank">#${i+1}</div>
-          <div class="user-display">${item.name}</div>
-          <div class="points">${item.points}</div>
+    function updateTeamDisplay() {
+      teamContainer.innerHTML = '';
+      selectedPlayers.forEach(player => {
+        const div = document.createElement('div');
+        div.innerText = `${player.web_name} (${player.position}) - £${player.now_cost}m`;
+        teamContainer.appendChild(div);
+      });
+      teamCountSpan.innerText = selectedPlayers.length;
+      document.getElementById('myTeamDetails').innerHTML = `
+        <div class="team-summary">
+          <div>💰 Total Cost: £${selectedPlayers.reduce((sum, p) => sum + parseFloat(p.now_cost), 0).toFixed(1)}m</div>
+          <div>⭐ Total Points: ${selectedPlayers.reduce((sum, p) => sum + p.total_points, 0)}</div>
+          <div>👥 Players: ${selectedPlayers.length}/11</div>
         </div>
-      `).join('');
+        <div><strong>Pick your captain:</strong></div>
+        <div id="captainSelect"></div>
+      `;
+      const capDiv = document.getElementById('captainSelect');
+      selectedPlayers.forEach(p => {
+        const btn = document.createElement('button');
+        btn.className = 'captain-btn';
+        btn.innerText = p.web_name;
+        btn.onclick = () => alert(`🏆 ${p.web_name} is your captain!`);
+        capDiv.appendChild(btn);
+      });
     }
 
-    // Start the app
-    init();
+    function checkJoinButton() {
+      joinContestBtn.disabled = selectedPlayers.length !== MAX_PLAYERS;
+    }
+
+    // === Join Contest ===
+    joinContestBtn.addEventListener('click', async () => {
+      if (selectedPlayers.length !== MAX_PLAYERS) return;
+
+      statusDiv.innerText = "Joining contest...";
+      joinContestBtn.disabled = true;
+
+      try {
+        const response = await apiCall('/save-team', {
+          method: 'POST',
+          body: JSON.stringify({
+            team: selectedPlayers.map(p => p.id),
+            mode: draftMode,
+            league: draftMode === 'league' ? currentLeague : null
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          statusDiv.innerText = "🎉 Entered contest! Good luck!";
+          document.getElementById('userStatus').innerText = "✅ Entered contest";
+          joinContestBtn.innerText = "✅ Entered!";
+          joinContestBtn.disabled = true;
+          updatePrizePool();
+          loadLeaderboard();
+        } else {
+          throw new Error('Failed to join');
+        }
+      } catch (e) {
+        statusDiv.innerText = "❌ Failed to join contest";
+        joinContestBtn.disabled = false;
+      }
+    });
+
+    // === Prize Pool ===
+    async function updatePrizePool() {
+      try {
+        const response = await apiCall('/prize-pool');
+        const data = await response.json();
+        prizeAmountSpan.innerText = `${data.fst} FST`;
+        entriesSpan.innerText = data.entries;
+      } catch (e) {
+        console.log("Could not fetch prize pool");
+      }
+    }
+
+    // === Leaderboard ===
+    async function loadLeaderboard(containerId = 'leaderboard') {
+      try {
+        const url = leaderboardMode === 'global' 
+          ? '/leaderboard/global' 
+          : `/leaderboard?league=${currentLeague}`;
+        const response = await apiCall(url);
+        const data = await response.json();
+        const lbDiv = document.getElementById(containerId);
+        lbDiv.innerHTML = '';
+        if (data.length === 0) {
+          lbDiv.innerHTML = '<div class="leaderboard-item">No entries yet.</div>';
+          return;
+        }
+        data.forEach((entry, i) => {
+          const div = document.createElement('div');
+          div.className = 'leaderboard-item';
+          if (leaderboardMode === 'global') {
+            const leagueTag = entry.league?.toUpperCase() || 'EPL';
+            const modeTag = entry.mode === 'global' ? '🌍' : '🏟️';
+            div.innerHTML = `
+              <strong>#${i+1}</strong> ${entry.userId} • ${entry.points} pts<br>
+              <small>${modeTag} ${leagueTag}</small>
+            `;
+          } else {
+            div.innerHTML = `<strong>#${i+1}</strong> ${entry.userId} • ${entry.points} pts`;
+          }
+          lbDiv.appendChild(div);
+        });
+      } catch (e) {
+        console.log("Could not load leaderboard");
+      }
+    }
+
+    // === Live Scores ===
+    async function loadLiveScores() {
+      try {
+        const response = await apiCall('/api/live');
+        const matches = await response.json();
+        const container = document.getElementById('liveMatches');
+        container.innerHTML = matches.map(m => `
+          <div class="match-card ${m.live ? 'live' : ''}">
+            <div class="match-team">${m.home}</div>
+            <div class="match-score">${m.homeScore} - ${m.awayScore}</div>
+            <div class="match-team">${m.away}</div>
+            <div class="match-status">${m.status}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('liveMatches').innerHTML = '<div class="error">Failed to load live scores</div>';
+      }
+    }
+
+    // === League Table ===
+    async function loadLeagueTable() {
+      try {
+        const response = await apiCall('/api/table');
+        const table = await response.json();
+        document.getElementById('leagueTable').innerHTML = `
+          <div class="table-header">
+            <div>#</div><div>Team</div><div>P</div><div>GD</div><div>Pts</div><div>Form</div>
+          </div>
+          ${table.map(t => `
+            <div class="table-row">
+              <div>${t.pos}</div>
+              <div>${t.team}</div>
+              <div>${t.played}</div>
+              <div>${t.gd > 0 ? '+' + t.gd : t.gd}</div>
+              <div>${t.points}</div>
+              <div class="player-form">
+                ${(t.form || '').split('').map(f => `<span class="form-${f}">${f}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        `;
+      } catch (e) {
+        document.getElementById('leagueTable').innerHTML = '<div class="error">Failed to load table</div>';
+      }
+    }
+
+    // === Event Listeners ===
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value.toLowerCase();
+      renderFilteredPlayers();
+    });
+
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      renderFilteredPlayers();
+    });
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.pos;
+        renderFilteredPlayers();
+      });
+    });
+
+    // === Mode Toggles ===
+    document.getElementById('leagueModeBtn').addEventListener('click', () => {
+      draftMode = 'league';
+      document.getElementById('leagueModeBtn').classList.add('active');
+      document.getElementById('globalModeBtn').classList.remove('active');
+      resetSelection();
+    });
+
+    document.getElementById('globalModeBtn').addEventListener('click', () => {
+      draftMode = 'global';
+      document.getElementById('globalModeBtn').classList.add('active');
+      document.getElementById('leagueModeBtn').classList.remove('active');
+      resetSelection();
+    });
+
+    document.getElementById('leagueLbBtn').addEventListener('click', () => {
+      leaderboardMode = 'league';
+      document.getElementById('leagueLbBtn').classList.add('active');
+      document.getElementById('globalLbBtn').classList.remove('active');
+      loadLeaderboard();
+    });
+
+    document.getElementById('globalLbBtn').addEventListener('click', () => {
+      leaderboardMode = 'global';
+      document.getElementById('globalLbBtn').classList.add('active');
+      document.getElementById('leagueLbBtn').classList.remove('active');
+      loadLeaderboard();
+    });
+
+    document.getElementById('lbLeagueBtn').addEventListener('click', () => {
+      leaderboardMode = 'league';
+      document.getElementById('lbLeagueBtn').classList.add('active');
+      document.getElementById('lbGlobalBtn').classList.remove('active');
+      loadLeaderboard('fullLeaderboard');
+    });
+
+    document.getElementById('lbGlobalBtn').addEventListener('click', () => {
+      leaderboardMode = 'global';
+      document.getElementById('lbGlobalBtn').classList.add('active');
+      document.getElementById('lbLeagueBtn').classList.remove('active');
+      loadLeaderboard('fullLeaderboard');
+    });
+
+    function resetSelection() {
+      selectedPlayers = [];
+      updateTeamDisplay();
+      checkJoinButton();
+      playerGrid.innerHTML = '';
+      statusDiv.innerText = draftMode === 'global' 
+        ? "Tap 'Load Players' to see all leagues" 
+        : `Switched to ${currentLeague.toUpperCase()}. Tap 'Load Players'.`;
+    }
+
+    // === View Navigation ===
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const view = btn.dataset.view;
+        document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`view-${view}`).classList.add('active');
+        btn.classList.add('active');
+
+        if (view === 'live') loadLiveScores();
+        if (view === 'table') loadLeagueTable();
+        if (view === 'leaderboard') loadLeaderboard('fullLeaderboard');
+        if (view === 'team') renderMyTeam();
+      });
+    });
+
+    function renderMyTeam() {
+      if (selectedPlayers.length === 0) {
+        document.getElementById('myTeamDetails').innerHTML = '<p>⚽ Pick 11 players in the Players tab first!</p>';
+      } else {
+        updateTeamDisplay();
+      }
+    }
+
+    // === Initialize ===
+    updatePrizePool();
+    loadLeaderboard();
   </script>
 </body>
 </html>
