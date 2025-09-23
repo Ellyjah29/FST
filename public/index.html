@@ -87,6 +87,7 @@
       width: 24px;
       height: 24px;
       margin-bottom: 6px;
+      border-radius: 4px;
     }
     .player-name {
       font-weight: bold;
@@ -366,8 +367,10 @@
         const card = document.createElement('div');
         card.className = `player-card ${isSelected ? 'selected' : ''}`;
         card.innerHTML = `
-          <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
-          <img src="${player.team_logo}" class="team-logo" onerror="this.style.display='none'">
+          <img src="${player.photo_url}" class="player-photo" 
+               onerror="this.onerror=null; this.src='https://via.placeholder.com/60x75/333/fff?text=NO+IMG'">
+          <img src="${player.team_logo}" class="team-logo" 
+               onerror="this.onerror=null; this.style.display='none'">
           <div class="player-name">${player.web_name}</div>
           <div class="player-meta">
             <span>${player.position}</span>
