@@ -9,13 +9,11 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public')); // serve index.html and assets
+app.use(express.static('public')); // 👈 Serves /public/index.html on /
 
-// In-memory storage (replace with MongoDB/PostgreSQL later)
+// In-memory storage
 let users = {};
 let globalEntries = 0;
-
-// Simulated FST reward: 10 FST per entrant
 const FST_PER_ENTRY = 10;
 
 // ========================
@@ -29,10 +27,8 @@ app.post('/connect-wallet', (req, res) => {
     return res.status(400).json({ error: 'User ID required' });
   }
 
-  // Simulate wallet address from Telegram user ID
   const simulatedAddress = '0x' + userId.padEnd(40, 'a').slice(0, 40);
 
-  // Initialize user if new
   if (!users[userId]) {
     users[userId] = {
       address: simulatedAddress,
@@ -58,13 +54,12 @@ app.get('/players', async (req, res) => {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/');
     const players = response.data.elements;
 
-    // Simplify player data for frontend
     const simplified = players.map(p => ({
       id: p.id,
       web_name: p.web_name,
       team: p.team,
-      element_type: p.element_type, // 1=GK, 2=DEF, 3=MID, 4=FWD
-      points: p.total_points // for leaderboard simulation
+      element_type: p.element_type,
+      points: p.total_points
     }));
 
     res.json(simplified);
@@ -89,12 +84,9 @@ app.post('/save-team', (req, res) => {
     return res.status(404).json({ error: 'User not found. Connect wallet first.' });
   }
 
-  // Save team
   users[userId].team = team;
   users[userId].joined = true;
   globalEntries += 1;
-
-  // Simulate random points for MVP (replace with real FPL scoring later)
   users[userId].points = Math.floor(Math.random() * 150) + 20;
 
   res.json({
@@ -108,10 +100,8 @@ app.post('/save-team', (req, res) => {
 // ========================
 
 app.get('/get-team', (req, res) => {
-  // For MVP, simulate current user (in real app, parse Telegram initData)
   const userId = Object.keys(users)[0] || 'no_user';
   const user = users[userId];
-
   res.json(user?.team || []);
 });
 
@@ -127,7 +117,7 @@ app.get('/leaderboard', (req, res) => {
       points: user.points || 0
     }))
     .sort((a, b) => b.points - a.points)
-    .slice(0, 10); // Top 10
+    .slice(0, 10);
 
   res.json(leaderboard);
 });
@@ -145,10 +135,10 @@ app.get('/prize-pool', (req, res) => {
 });
 
 // ========================
-// HEALTH CHECK + HOME ROUTE
+// STATUS PAGE (optional)
 // ========================
 
-app.get('/', (req, res) => {
+app.get('/status', (req, res) => {
   res.send(`
     <h1>⚽ FST Fantasy Backend</h1>
     <p>Status: <strong>Running</strong></p>
@@ -164,5 +154,5 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`✅ FST Fantasy Server running on port ${PORT}`);
-  console.log(`🌐 Access your Telegram Mini App at: https://your-render-url.onrender.com`);
+  console.log(`🌐 Visit: https://your-render-url.onrender.com`);
 });
