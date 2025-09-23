@@ -17,17 +17,6 @@
 
 <main class="p-4 max-w-6xl mx-auto">
 
-<!-- Telegram User Info -->
-<section id="telegramUser" class="mb-4 p-3 bg-gray-200 rounded">
-    <h2 class="text-lg font-semibold">Hello, <span id="tgName">Guest</span></h2>
-    <p id="tgUsername"></p>
-</section>
-
-<!-- User Local Time -->
-<section id="localTime" class="mb-4 p-2 bg-gray-200 rounded">
-    <p>Your local time: <span id="userTime"></span></p>
-</section>
-
 <!-- Wallet Section -->
 <section id="wallet" class="mb-6">
     <h2 class="text-xl font-semibold mb-2">Connect Wallet</h2>
@@ -37,27 +26,19 @@
     <p id="walletAddress" class="mt-2 text-sm"></p>
 </section>
 
-<!-- Top Players Section -->
+<!-- Players Section -->
 <section id="players" class="mb-6">
     <h2 class="text-xl font-semibold mb-2">Top Players</h2>
     <div id="playersList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
 </section>
 
-<!-- Search Section -->
-<section id="search" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Search Players</h2>
-    <input type="text" id="playerSearch" placeholder="Search by name, team, or position..." 
-        class="w-full p-2 border rounded shadow mb-2">
-    <div id="searchResults" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+<!-- Live Scores Section -->
+<section id="liveScores" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Live Scores</h2>
+    <div id="liveScoresList" class="space-y-2"></div>
 </section>
 
-<!-- Favorites Section -->
-<section id="favoritesLive" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Favorite Players Live Points</h2>
-    <div id="favoritesLiveList" class="space-y-2"></div>
-</section>
-
-<!-- Transfers Chart Section -->
+<!-- Transfers Graph -->
 <section id="transfers" class="mb-6">
     <h2 class="text-xl font-semibold mb-2">Gameweek Transfers</h2>
     <canvas id="transfersChart" class="bg-white p-4 rounded shadow"></canvas>
@@ -69,158 +50,133 @@
     <div id="leagueTable" class="overflow-x-auto"></div>
 </section>
 
-<!-- Leaderboard Section -->
-<section id="leaderboard" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">FST Token Leaderboard</h2>
-    <div id="leaderboardList" class="overflow-x-auto bg-white p-4 rounded shadow"></div>
-</section>
+</main>
 
 <script>
-const tg = window.Telegram.WebApp;
-tg.expand();
+    // Telegram Web App setup
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-// Telegram user info
-const tgUser = tg.initDataUnsafe?.user;
-if(tgUser){
-    document.getElementById('tgName').textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
-    document.getElementById('tgUsername').textContent = tgUser.username ? '@' + tgUser.username : '';
-}
+    // Web3 wallet connection (Metamask)
+    const connectWalletBtn = document.getElementById('connectWallet');
+    const walletAddressEl = document.getElementById('walletAddress');
 
-// Auto-detect user local time
-function updateLocalTime(){
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    document.getElementById('userTime').textContent = timeStr;
-}
-setInterval(updateLocalTime,1000);
-updateLocalTime();
+    connectWalletBtn.addEventListener('click', async () => {
+        if (window.ethereum) {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            walletAddressEl.textContent = `Connected: ${accounts[0]}`;
+        } else {
+            alert('Please install Metamask!');
+        }
+    });
 
-// Web3 Wallet
-const connectWalletBtn = document.getElementById('connectWallet');
-const walletAddressEl = document.getElementById('walletAddress');
-connectWalletBtn.addEventListener('click', async () => {
-    if(window.ethereum){
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        walletAddressEl.textContent = `Connected: ${accounts[0]}`;
-    } else {
-        alert('Please install Metamask!');
-    }
-});
+    // FPL API base (CORS proxy recommended)
+    const FPL_BASE = 'https://cors-anywhere.herokuapp.com/https://fantasy.premierleague.com/api';
 
-// FPL API base (CORS proxy)
-const FPL_BASE = 'https://cors-anywhere.herokuapp.com/https://fantasy.premierleague.com/api';
-
-// Data stores
-let allPlayers = [];
-let favorites = {}; // keyed by Telegram user id
-let fstTokens = {}; // FST tokens per Telegram user
-let currentGW = 1;
-
-// Initialize for current user
-if(tgUser){
-    favorites[tgUser.id] = [];
-    fstTokens[tgUser.id] = 0;
-}
-
-// Fetch top players
-async function fetchPlayers() {
-    try {
-        const res = await axios.get(`${FPL_BASE}/bootstrap-static/`);
-        allPlayers = res.data.elements;
-        displayPlayers(allPlayers.slice(0,20));
-    } catch(err){ console.error(err); }
-}
-
-// Display players
-function displayPlayers(players){
-    const container = document.getElementById('searchResults');
-    container.innerHTML='';
-    players.forEach(player=>{
-        const card = document.createElement('div');
-        card.className='bg-white p-4 rounded shadow hover:shadow-lg transition cursor-pointer';
-        card.innerHTML=`
-            <h3 class="font-semibold">${player.web_name}</h3>
-            <p>Team: ${player.team}</p>
-            <p>Position: ${player.element_type}</p>
-            <p>Price: £${player.now_cost/10}</p>
-            <p>Points: ${player.total_points}</p>
-            <button class="addFav bg-yellow-400 px-2 py-1 rounded mt-2">☆ Favorite</button>
-            <div class="playerDetails mt-2 hidden"></div>
-        `;
-        // Player details on click
-        card.addEventListener('click', async e=>{
-            if(e.target.classList.contains('addFav')) return;
-            const detailsDiv = card.querySelector('.playerDetails');
-            if(detailsDiv.innerHTML===''){
-                const detailRes = await axios.get(`${FPL_BASE}/element-summary/${player.id}/`);
-                detailsDiv.innerHTML=`
-                    <p>Goals: ${detailRes.data.history.reduce((a,b)=>a+b.goals_scored,0)}</p>
-                    <p>Assists: ${detailRes.data.history.reduce((a,b)=>a+b.assists,0)}</p>
-                    <p>Minutes Played: ${detailRes.data.history.reduce((a,b)=>a+b.minutes,0)}</p>
+    // Fetch top players
+    async function fetchPlayers() {
+        try {
+            const res = await axios.get(`${FPL_BASE}/bootstrap-static/`);
+            const players = res.data.elements.slice(0, 20); // top 20 for demo
+            const container = document.getElementById('playersList');
+            players.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded shadow hover:shadow-lg transition';
+                card.innerHTML = `
+                    <h3 class="font-semibold">${player.web_name}</h3>
+                    <p>Team: ${res.data.teams.find(t => t.id === player.team).name}</p>
+                    <p>Position: ${res.data.element_types.find(e => e.id === player.element_type).singular_name}</p>
+                    <p>Price: £${player.now_cost / 10}</p>
+                    <p>Points: ${player.total_points}</p>
                 `;
-            }
-            detailsDiv.classList.toggle('hidden');
-        });
-        // Favorite button
-        const favBtn = card.querySelector('.addFav');
-        favBtn.addEventListener('click', e=>{
-            e.stopPropagation();
-            if(tgUser){
-                const userFavs = favorites[tgUser.id];
-                if(!userFavs.includes(player.id)){
-                    userFavs.push(player.id);
-                    favBtn.textContent='★ Favorited';
-                    favBtn.classList.add('bg-yellow-600');
-                } else {
-                    favorites[tgUser.id] = userFavs.filter(id=>id!==player.id);
-                    favBtn.textContent='☆ Favorite';
-                    favBtn.classList.remove('bg-yellow-600');
-                }
-                updateFavoritesLive();
-            }
-        });
-        container.appendChild(card);
-    });
-}
+                container.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
-// Search players
-document.getElementById('playerSearch').addEventListener('input', e=>{
-    const query = e.target.value.toLowerCase();
-    const filtered = allPlayers.filter(p=>{
-        const team = p.team.toString();
-        const pos = p.element_type.toString();
-        return p.web_name.toLowerCase().includes(query) || team.includes(query) || pos.includes(query);
-    });
-    displayPlayers(filtered);
-});
-
-// Fetch current GW
-async function fetchCurrentGW(){
-    try{
-        const res = await axios.get(`${FPL_BASE}/events/`);
-        currentGW = res.data.current;
-    } catch(err){ console.error(err); }
-}
-
-// Update live points and FST tokens
-async function updateFavoritesLive(){
-    try{
-        if(!tgUser || favorites[tgUser.id].length===0) return;
-        const res = await axios.get(`${FPL_BASE}/event/${currentGW}/live/`);
-        const picks = res.data.elements;
-        const container = document.getElementById('favoritesLiveList');
-        container.innerHTML='';
-
-        favorites[tgUser.id].forEach(favId=>{
-            const playerLive = picks.find(p=>p.id===favId);
-            if(playerLive){
-                const points = playerLive.stats.total_points;
-                fstTokens[tgUser.id] += points;
-
+    // Fetch live scores for current GW
+    async function fetchLiveScores() {
+        try {
+            const eventsRes = await axios.get(`${FPL_BASE}/events/`);
+            const currentGW = eventsRes.data.current;
+            const liveRes = await axios.get(`${FPL_BASE}/event/${currentGW}/live/`);
+            const container = document.getElementById('liveScoresList');
+            liveRes.data.picks.slice(0, 10).forEach(pick => {
                 const div = document.createElement('div');
-                div.className='bg-white p-3 rounded shadow';
-                div.innerHTML=`
-                    <strong>${allPlayers.find(p=>p.id===favId).web_name}</strong>
-                    <p>Live Points: ${points}</p>
-                    <p>Goals: ${playerLive.stats.goals_scored||0}</p>
-                    <p>Assists: ${playerLive.stats.assists||0}</
+                div.className = 'bg-white p-2 rounded shadow';
+                div.textContent = `Player ID: ${pick.element}, Points: ${pick.stats.total_points}`;
+                container.appendChild(div);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Fetch transfers per GW and draw chart
+    async function fetchTransfers() {
+        try {
+            const GW = 1; // Example: GW1
+            const res = await axios.get(`${FPL_BASE}/game-week-transfers/${GW}/`);
+            const ctx = document.getElementById('transfersChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(res.data).slice(0, 10),
+                    datasets: [{
+                        label: 'Transfers In',
+                        data: Object.values(res.data).slice(0, 10).map(d => d.in),
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                    },{
+                        label: 'Transfers Out',
+                        data: Object.values(res.data).slice(0, 10).map(d => d.out),
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'top' } } }
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Fetch league table
+    async function fetchLeague() {
+        try {
+            const LEAGUE_ID = 123456;
+            const res = await axios.get(`${FPL_BASE}/leagues-classic/${LEAGUE_ID}/standings/`);
+            const container = document.getElementById('leagueTable');
+            const table = document.createElement('table');
+            table.className = 'min-w-full bg-white';
+            table.innerHTML = `
+                <tr class="bg-gray-200">
+                    <th class="p-2">Rank</th>
+                    <th class="p-2">Manager</th>
+                    <th class="p-2">Points</th>
+                </tr>
+            `;
+            res.data.standings.results.slice(0, 10).forEach(m => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-2">${m.rank}</td>
+                    <td class="p-2">${m.entry_name}</td>
+                    <td class="p-2">${m.total}</td>
+                `;
+                table.appendChild(tr);
+            });
+            container.appendChild(table);
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Initialize dashboard
+    fetchPlayers();
+    fetchLiveScores();
+    fetchTransfers();
+    fetchLeague();
+</script>
+
+</body>
+</html>
