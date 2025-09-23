@@ -1,722 +1,499 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FST Button Fix 🛠️</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fantasy Sport Token (FST) — Dashboard</title>
+
+  <!-- Fav & theme -->
+  <meta name="theme-color" content="#071226" />
   <style>
-    :root {
-      --bg-color: #0f1117;
-      --text-color: #ffffff;
-      --primary: #6c5ce7;
-      --secondary: #a29bfe;
-      --accent: #fdcb6e;
-      --card-bg: #1e212c;
-      --border-color: #333;
-      --success: #00b894;
-      --danger: #e84393;
-      --warning: #fdcb6e;
+    /* -------------------------
+       CLEAN & PROFESSIONAL STYLING
+    --------------------------*/
+    :root{
+      --bg:#071226;
+      --card:#0f1724;
+      --muted:#9aa6b2;
+      --accent:#00d1a1;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --danger: #ff6b6b;
+      --radius:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#051026 0%, #071226 100%);color:#e6eef3}
+    .wrap{max-width:1200px;margin:28px auto;padding:20px;}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#3dd7b6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022;box-shadow:0 8px 28px rgba(2,28,40,0.45)
     }
-
-    body {
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-      position: relative;
-      min-height: 100vh;
-      line-height: 1.6;
+    .title{font-size:1.15rem;font-weight:700;line-height:1}
+    .subtitle{font-size:0.85rem;color:var(--muted);margin-top:2px}
+    .controls{display:flex;gap:8px;align-items:center}
+    .chip{background:var(--glass);padding:8px 12px;border-radius:10px;font-size:0.9rem;color:var(--muted);display:flex;gap:8px;align-items:center}
+    .btn{
+      background:linear-gradient(90deg,var(--accent),#23caa0);border:none;padding:10px 14px;border-radius:10px;color:#022;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(3,27,33,0.35);
     }
-
-    .container {
-      max-width: 100%;
-      padding: 16px;
-      padding-bottom: 80px;
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:8px 10px;border-radius:10px;cursor:pointer}
+    main{display:grid;grid-template-columns: 360px 1fr;gap:20px}
+    /* sidebar */
+    .panel{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow: 0 6px 22px rgba(2,14,20,0.6);}
+    .small{font-size:0.85rem;color:var(--muted)}
+    .time-box{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+    .big-time{font-weight:700;font-size:1.3rem;color:#dffbf0}
+    .toggle{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .stat{display:flex;justify-content:space-between;align-items:center;padding:10px 6px;border-radius:10px;background:var(--glass-2);margin-bottom:8px}
+    .search{display:flex;gap:8px;margin:12px 0}
+    .search input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+    .filter{display:flex;gap:8px;flex-wrap:wrap}
+    .chip-filter{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer}
+    /* content */
+    .content-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .player-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 28px rgba(2,8,12,0.5);}
+    .player-photo{width:76px;height:76px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.03)}
+    .player-meta{flex:1}
+    .player-name{font-weight:700}
+    .player-team{font-size:0.85rem;color:var(--muted);margin-top:4px}
+    .points{font-weight:800;color:var(--accent);font-size:1.05rem}
+    .badge{width:38px;height:38px;border-radius:8px;object-fit:contain}
+    .empty{color:var(--muted);padding:26px;border-radius:10px;background:var(--glass);text-align:center}
+    footer{margin-top:22px;color:var(--muted);font-size:0.85rem;text-align:center}
+    /* responsive */
+    @media (max-width:980px){
+      main{grid-template-columns:1fr; }
+      .logo{width:48px;height:48px}
     }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 24px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      font-size: 20px;
-    }
-
-    .logo svg {
-      width: 28px;
-      height: 28px;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 16px;
-      color: var(--warning);
-    }
-
-    h2 {
-      font-size: 20px;
-      margin: 24px 0 16px;
-      color: var(--primary);
-    }
-
-    h3 {
-      font-size: 18px;
-      margin: 20px 0 12px;
-      color: var(--secondary);
-    }
-
-    p {
-      margin-bottom: 16px;
-      color: #ccc;
-    }
-
-    .subtitle {
-      color: #aaa;
-      font-size: 14px;
-      margin-bottom: 24px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
-      border: 1px solid var(--border-color);
-    }
-
-    .diagnosis {
-      background: rgba(232, 67, 147, 0.2);
-      border-left: 4px solid var(--danger);
-      padding: 16px;
-      margin: 16px 0;
-      border-radius: 0 8px 8px 0;
-    }
-
-    .solution {
-      background: rgba(0, 184, 148, 0.2);
-      border-left: 4px solid var(--success);
-      padding: 16px;
-      margin: 16px 0;
-      border-radius: 0 8px 8px 0;
-    }
-
-    .code-block {
-      background: #111;
-      padding: 16px;
-      border-radius: 8px;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      overflow-x: auto;
-      margin: 16px 0;
-      border: 1px solid #333;
-    }
-
-    .btn {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin: 10px 0;
-      transition: all 0.2s ease;
-      width: 100%;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .btn:hover {
-      background: #5649c7;
-      transform: translateY(-2px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .btn svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .test-btn {
-      background: var(--accent);
-      color: #0f1117;
-    }
-
-    .test-btn:hover {
-      background: #eaae3d;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--card-bg);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      z-index: 100;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      color: #888;
-      text-decoration: none;
-      padding: 8px 0;
-    }
-
-    .nav-item.active {
-      color: var(--primary);
-    }
-
-    .nav-icon {
-      font-size: 20px;
-    }
-
-    .check {
-      color: var(--success);
-      font-weight: bold;
-      margin-right: 8px;
-    }
-
-    .cross {
-      color: var(--danger);
-      font-weight: bold;
-      margin-right: 8px;
-    }
-
-    .tip {
-      background: rgba(253, 203, 110, 0.2);
-      border-left: 4px solid var(--accent);
-      padding: 16px;
-      margin: 16px 0;
-      border-radius: 0 8px 8px 0;
-    }
-
-    .debug-info {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 16px;
-      border-radius: 8px;
-      margin: 16px 0;
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(253, 203, 110, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(253, 203, 110, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(253, 203, 110, 0); }
-    }
+    /* loader */
+    .loader{width:28px;height:28px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:var(--accent);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="wrap">
     <header>
-      <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L4 6V18L12 22L20 18V6L12 2Z" fill="#6c5ce7" stroke="#6c5ce7" stroke-width="2"/>
-          <path d="M4 10L12 14L20 10" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          <path d="M4 14L12 18L20 14" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="12" cy="8" r="2" fill="white"/>
-        </svg>
-        <span style="background: linear-gradient(45deg, #6c5ce7, #fdcb6e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800;">FST</span>
+      <div class="brand">
+        <div class="logo">FST</div>
+        <div>
+          <div class="title">Fantasy Sport Token <span style="color:var(--muted)"> (FST)</span></div>
+          <div class="subtitle">EPL live data · demo · Telegram Mini App</div>
+        </div>
       </div>
-      <div style="color: #aaa; font-size: 14px;">Button Fix Guide</div>
+
+      <div class="controls">
+        <div id="statusChip" class="chip"><span id="statusDot">●</span><span id="statusText"> Offline</span></div>
+        <button id="refreshBtn" class="btn-ghost">🔁 Refresh</button>
+        <button id="openBotBtn" class="btn">Open in Telegram</button>
+      </div>
     </header>
 
-    <div class="diagnosis fade-in">
-      <h1>🔧 Button Not Responding? Let's Fix It!</h1>
-      <p><span class="cross">❌</span> Yes, this is likely because you don't have your <code>bot.js</code> running yet, BUT that's not the only possible cause.</p>
-      <p>Let's diagnose and fix this step by step!</p>
-    </div>
+    <main>
+      <!-- LEFT SIDEBAR -->
+      <aside class="panel">
+        <div class="time-box">
+          <div class="small">Local Time</div>
+          <div id="localTime" class="big-time">--:--</div>
+          <div class="small">Nigeria (Lagos)</div>
+          <div id="naijaTime" class="big-time">--:--</div>
 
-    <div class="card fade-in">
-      <h2>🔍 Diagnosis: Why Buttons Might Not Work</h2>
-      
-      <div class="diagnosis">
-        <h3>Possible Causes:</h3>
-        <ol style="margin: 10px 0 10px 20px; padding: 0;">
-          <li><strong>No bot.js running</strong> - Your backend isn't processing the tg.sendData() calls</li>
-          <li><strong>JavaScript errors</strong> - Check browser console for errors in your index.html</li>
-          <li><strong>Event listeners not attached</strong> - Buttons might not have click handlers</li>
-          <li><strong>Telegram WebApp not ready</strong> - tg.ready() not called or called too late</li>
-          <li><strong>Render deployment issues</strong> - Old version deployed or cache issues</li>
-        </ol>
-      </div>
-    </div>
-
-    <div class="card fade-in">
-      <h2>✅ Solution 1: Test Without bot.js (Temporary Fix)</h2>
-      
-      <div class="solution">
-        <h3>Modify Your Buttons to Work Without Backend</h3>
-        <p>Until your bot.js is running, update your button event listeners to show feedback locally:</p>
-        
-        <div class="code-block">
-// BEFORE (requires bot.js):
-document.getElementById('transfer-btn').addEventListener('click', () => {
-  const data = { action: 'make_transfer', ... };
-  tg.sendData(JSON.stringify(data)); // Won't work without bot.js
-  tg.close();
-});
-
-// AFTER (works without bot.js):
-document.getElementById('transfer-btn').addEventListener('click', () => {
-  tg.showPopup({
-    title: "🚧 Coming Soon!",
-    message: "This feature will work once our backend is ready!"
-  });
-  
-  // Optional: Close after delay
-  setTimeout(() => {
-    tg.close();
-  }, 3000);
-});
+          <div class="toggle">
+            <div class="small">Show:</div>
+            <div id="toggleLive" class="chip-filter">Live GW</div>
+            <div id="toggleTop" class="chip-filter">Top Players</div>
+          </div>
         </div>
-      </div>
-      
-      <button id="test-button" class="btn test-btn fade-in pulse">
-        <span>🧪 Test Button (Click Me!)</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-        </svg>
-      </button>
-    </div>
 
-    <div class="card fade-in">
-      <h2>✅ Solution 2: Debug Your Current index.html</h2>
-      
-      <div class="solution">
-        <h3>Step-by-Step Debugging:</h3>
-        <ol style="margin: 10px 0 10px 20px; padding: 0;">
-          <li><strong>Open browser dev tools</strong> - Right-click → "Inspect" or F12</li>
-          <li><strong>Check Console tab</strong> - Look for JavaScript errors</li>
-          <li><strong>Test tg object</strong> - Type <code>Telegram.WebApp</code> in console</li>
-          <li><strong>Verify button exists</strong> - Check if your button IDs match</li>
-          <li><strong>Check event listeners</strong> - Ensure they're attached after DOM loads</li>
-        </ol>
-      </div>
-      
-      <div class="debug-info">
-        <h3>Debug Info (click "Show Debug Info" button below):</h3>
-        <div id="debug-output" style="color: #aaa; font-size: 12px; margin-top: 10px;">
-          Click the button below to run diagnostics...
+        <div style="height:12px"></div>
+
+        <div class="small">Search players</div>
+        <div class="search">
+          <input id="searchInput" placeholder="Search by name (e.g. Haaland)"/>
+          <button id="clearSearch" class="btn-ghost">Clear</button>
         </div>
-      </div>
-      
-      <button id="debug-btn" class="btn fade-in">
-        <span>🔍 Show Debug Info</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </button>
-    </div>
 
-    <div class="card fade-in">
-      <h2>✅ Solution 3: Quick Fix for Your Deployed index.html</h2>
-      
-      <div class="solution">
-        <h3>Update Your Button Code:</h3>
-        <p>Replace your current button event listeners with this temporary code:</p>
-        
-        <div class="code-block">
-// Add this to your index.html script section
-function setupButtons() {
-  // Transfer button
-  const transferBtn = document.getElementById('transfer-btn');
-  if (transferBtn) {
-    transferBtn.addEventListener('click', () => {
-      tg.showPopup({
-        title: "🔄 Processing",
-        message: "Transfer feature is being prepared! Check back soon."
-      });
-      
-      // Log for debugging
-      console.log('Transfer button clicked');
-      
-      // Close after 3 seconds
-      setTimeout(() => {
-        tg.close();
-      }, 3000);
-    });
-  }
-  
-  // Captain button
-  const captainBtn = document.getElementById('captain-btn');
-  if (captainBtn) {
-    captainBtn.addEventListener('click', () => {
-      tg.showPopup({
-        title: "👑 Captain Feature",
-        message: "Setting captain will be available soon!"
-      });
-      
-      console.log('Captain button clicked');
-      
-      setTimeout(() => {
-        tg.close();
-      }, 3000);
-    });
-  }
-}
+        <div class="small">Filter by team</div>
+        <div id="teamFilter" class="filter" style="margin-top:8px"></div>
 
-// Call this after tg.ready()
-tg.ready();
-setupButtons();
+        <div style="height:10px"></div>
+
+        <div class="small" style="margin-top:10px">Live Gameweek</div>
+        <div id="liveBox" class="stat" style="margin-top:8px">
+          <div>
+            <div style="font-weight:700" id="liveGW">GW —</div>
+            <div class="small" id="gwStatus">—</div>
+          </div>
+          <div id="liveLoader" style="display:none" class="loader"></div>
         </div>
-      </div>
-      
-      <div class="tip">
-        <h3>💡 Pro Tip: Always add console.log() for debugging:</h3>
-        <p>Add <code>console.log('Button clicked')</code> inside your event listeners to verify they're working, even if tg.sendData() isn't connected to your bot yet.</p>
-      </div>
-    </div>
 
-    <div class="card fade-in">
-      <h2>🚀 Next Steps: Get Your bot.js Running</h2>
-      
-      <div class="solution">
-        <h3>Ubuntu Server Setup Checklist:</h3>
-        <ol style="margin: 10px 0 10px 20px; padding: 0;">
-          <li>Install Node.js: <code>sudo apt update && sudo apt install nodejs npm</code></li>
-          <li>Create project folder: <code>mkdir fst-bot && cd fst-bot</code></li>
-          <li>Initialize: <code>npm init -y</code></li>
-          <li>Install Telegraf: <code>npm install telegraf dotenv</code></li>
-          <li>Create bot.js with your code</li>
-          <li>Create .env file with BOT_TOKEN</li>
-          <li>Start bot: <code>node bot.js</code></li>
-          <li>Use PM2 for production: <code>npm install -g pm2 && pm2 start bot.js</code></li>
-        </ol>
-      </div>
-      
-      <div class="tip">
-        <h3>⏱️ Timeline:</h3>
-        <p>You can have your bot.js running on Ubuntu in under 15 minutes! Once it's running, your tg.sendData() calls will work properly.</p>
-      </div>
-    </div>
+        <div style="height:12px"></div>
+        <div class="small">Info</div>
+        <div class="small" style="margin-top:8px;color:var(--muted)">This frontend uses the public FPL endpoints. For private/protected APIs, configure a backend and set BACKEND_API_BASE.</div>
+      </aside>
 
-    <div class="tip fade-in">
-      <h3>💡 Temporary Workaround Until bot.js is Ready:</h3>
-      <p>Update your index.html with local feedback (showPopup, alerts) instead of tg.sendData(). This way your users get immediate feedback while you finish setting up your backend.</p>
-    </div>
+      <!-- RIGHT CONTENT -->
+      <section>
+        <div class="content-top">
+          <div>
+            <h2 style="margin:0">Top Players</h2>
+            <div class="small" id="subtext">Based on total points (auto-updates)</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div id="playersCount" class="chip">— players</div>
+            <div class="small" id="lastUpdated">Last update: —</div>
+          </div>
+        </div>
 
-    <button id="copy-fixed-code-btn" class="btn fade-in">
-      <span>📋 Copy Fixed Button Code</span>
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-      </svg>
-    </button>
-  </div>
+        <div id="contentArea">
+          <div id="playersGrid" class="cards">
+            <!-- player cards injected here -->
+          </div>
 
-  <div class="bottom-nav">
-    <a href="#" class="nav-item active">
-      <div class="nav-icon">🔧</div>
-      <div>Fix</div>
-    </a>
-    <a href="#" class="nav-item">
-      <div class="nav-icon">🔍</div>
-      <div>Debug</div>
-    </a>
-    <a href="#" class="nav-item">
-      <div class="nav-icon">🚀</div>
-      <div>Deploy</div>
-    </a>
-    <a href="#" class="nav-item">
-      <div class="nav-icon">❓</div>
-      <div>Help</div>
-    </a>
+          <div id="emptyState" class="empty" style="display:none">No players to show</div>
+        </div>
+
+        <footer>
+          Built for FST · Demo · Data from Fantasy Premier League · Deploy to Render or Vercel
+        </footer>
+      </section>
+    </main>
   </div>
 
   <script>
-    // Initialize Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    
-    // Expand the app to full height
-    tg.expand();
-    
-    // Set background color based on theme
-    updateTheme();
-    
-    // Update theme based on Telegram settings
-    function updateTheme() {
-      const themeParams = tg.themeParams;
-      const root = document.documentElement;
-      root.style.setProperty('--bg-color', themeParams.bg_color || '#0f1117');
-      root.style.setProperty('--text-color', themeParams.text_color || '#ffffff');
-      root.style.setProperty('--primary', themeParams.button_color || '#6c5ce7');
-      root.style.setProperty('--secondary', '#a29bfe');
-      root.style.setProperty('--accent', '#fdcb6e');
-      root.style.setProperty('--card-bg', themeParams.hint_color ? 
-        themeParams.hint_color + '20' : '#1e212c');
-      root.style.setProperty('--border-color', themeParams.hint_color || '#333');
-      root.style.setProperty('--success', '#00b894');
-      root.style.setProperty('--danger', '#e84393');
-      root.style.setProperty('--warning', '#fdcb6e');
-      document.body.style.backgroundColor = themeParams.bg_color || '#0f1117';
+  /************************************************************************
+   * Professional single-file FPL frontend
+   * - Configure BACKEND_API_BASE to proxy calls to your Ubuntu server if you have one.
+   * - Otherwise it will attempt to fetch public FPL endpoints directly (may run into CORS,
+   *   so backend proxy is recommended for production).
+   *
+   * How to configure:
+   *  - If you have a backend: set BACKEND_API_BASE = "https://your-domain.com"
+   *  - The frontend will call /api/fpl/bootstrap-static, /api/fpl/fixtures, /api/fpl/event/{gw}/live
+   *
+   ************************************************************************/
+
+  const BACKEND_API_BASE = ""; // <-- if you have a backend, set your URL here (no trailing slash). Leave empty to use public endpoints.
+  const USE_BACKEND = Boolean(BACKEND_API_BASE && BACKEND_API_BASE.length);
+
+  // Helper endpoints (frontend chooses)
+  const endpoints = {
+    bootstrap: USE_BACKEND ? `${BACKEND_API_BASE}/api/fpl/bootstrap-static` : "https://fantasy.premierleague.com/api/bootstrap-static/",
+    fixtures: USE_BACKEND ? `${BACKEND_API_BASE}/api/fpl/fixtures` : "https://fantasy.premierleague.com/api/fixtures/",
+    liveEvent: (gw) => USE_BACKEND ? `${BACKEND_API_BASE}/api/fpl/event/${gw}/live` : `https://fantasy.premierleague.com/api/event/${gw}/live/`
+  };
+
+  // UI nodes
+  const localTimeEl = document.getElementById('localTime');
+  const naijaTimeEl = document.getElementById('naijaTime');
+  const statusChip = document.getElementById('statusChip');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const playersGrid = document.getElementById('playersGrid');
+  const playersCount = document.getElementById('playersCount');
+  const lastUpdated = document.getElementById('lastUpdated');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const openBotBtn = document.getElementById('openBotBtn');
+  const searchInput = document.getElementById('searchInput');
+  const clearSearch = document.getElementById('clearSearch');
+  const teamFilter = document.getElementById('teamFilter');
+  const toggleLive = document.getElementById('toggleLive');
+  const toggleTop = document.getElementById('toggleTop');
+  const liveGW = document.getElementById('liveGW');
+  const gwStatus = document.getElementById('gwStatus');
+  const liveLoader = document.getElementById('liveLoader');
+  const emptyState = document.getElementById('emptyState');
+  const subtext = document.getElementById('subtext');
+
+  // App state
+  let app = {
+    bootstrap: null,
+    players: [],
+    teams: [],
+    fixtures: [],
+    currentGW: null,
+    liveData: null,
+    filteredPlayers: [],
+    filters: {
+      team: null,
+      query: ""
     }
-    
-    // Test button functionality
-    document.getElementById('test-button').addEventListener('click', () => {
-      tg.showPopup({
-        title: "✅ Button Working!",
-        message: "Great! Your buttons are responding. The issue is likely with tg.sendData() which requires your bot.js to be running.",
-        buttons: [{ text: "OK" }]
-      });
-      
-      // Vibrate device if supported
-      if (tg.HapticFeedback) {
-        tg.HapticFeedback.impactOccurred('medium');
+  };
+
+  // Auto clock updater
+  function updateClocks() {
+    const now = new Date();
+    localTimeEl.textContent = now.toLocaleTimeString();
+    // Always show Lagos as requested (auto convert)
+    try {
+      const naija = now.toLocaleString('en-GB', { timeZone: 'Africa/Lagos' });
+      naijaTimeEl.textContent = new Date(naija).toLocaleTimeString('en-GB');
+    } catch(e) {
+      // fallback: compute offset Lagos = UTC+1 or UTC+2 (DST not used)
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const lagos = new Date(utc + (3600000)); // Lagos UTC+1
+      naijaTimeEl.textContent = lagos.toLocaleTimeString();
+    }
+  }
+  setInterval(updateClocks, 1000);
+  updateClocks();
+
+  // Small helper
+  function fmtPrice(cost) {
+    return (cost/10).toFixed(1) + 'm';
+  }
+
+  function setStatus(online, text) {
+    statusDot.style.color = online ? '#00d1a1' : '#ff6b6b';
+    statusText.textContent = ` ${text}`;
+  }
+
+  // Fetch helper with timeout & nice error logging
+  async function fetchJSON(url, opts = {}) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 15000);
+    try {
+      const r = await fetch(url, { signal: controller.signal, ...opts });
+      clearTimeout(id);
+      if (!r.ok) {
+        const ct = r.headers.get('content-type') || '';
+        const body = await (ct.includes('application/json') ? r.json() : r.text());
+        console.error('Fetch error', url, r.status, body);
+        throw new Error(`HTTP ${r.status}`);
       }
+      return await r.json();
+    } catch (err) {
+      clearTimeout(id);
+      console.error('Fetch failed', url, err);
+      throw err;
+    }
+  }
+
+  // Load bootstrap (players + teams)
+  async function loadBootstrap() {
+    setStatus(false, 'Loading bootstrap...');
+    try {
+      const data = await fetchJSON(endpoints.bootstrap);
+      app.bootstrap = data;
+      app.players = data.elements || [];
+      app.teams = data.teams || [];
+      playersCount.textContent = `${app.players.length} players`;
+      lastUpdated.textContent = `Last update: ${new Date().toLocaleString()}`;
+      setStatus(true, 'Live');
+      buildTeamFilter();
+      applyFiltersAndRender();
+      // detect current GW from bootstrap
+      const events = data.events || [];
+      const current = events.find(e => e.is_current) || events.find(e => e.is_next) || events[0];
+      if (current) {
+        app.currentGW = current.id;
+        liveGW.textContent = `GW ${app.currentGW}`;
+        gwStatus.textContent = current.name || 'Gameweek';
+      }
+      return data;
+    } catch (err) {
+      setStatus(false, 'Offline (could not load)');
+      playersGrid.innerHTML = '';
+      emptyState.style.display = 'block';
+      emptyState.textContent = 'Failed to load FPL data. If deploying from a browser you may need a backend proxy (CORS).';
+      throw err;
+    }
+  }
+
+  async function loadFixtures() {
+    try {
+      const fx = await fetchJSON(endpoints.fixtures);
+      app.fixtures = fx;
+      return fx;
+    } catch (err) {
+      console.warn('fixtures failed', err);
+      return [];
+    }
+  }
+
+  async function loadLiveGW() {
+    if (!app.currentGW) return null;
+    liveLoader.style.display = 'inline-block';
+    try {
+      const data = await fetchJSON(endpoints.liveEvent(app.currentGW));
+      app.liveData = data;
+      liveLoader.style.display = 'none';
+      return data;
+    } catch (err) {
+      liveLoader.style.display = 'none';
+      console.warn('live gw failed', err);
+      return null;
+    }
+  }
+
+  function buildTeamFilter() {
+    teamFilter.innerHTML = '';
+    const allBtn = document.createElement('button');
+    allBtn.className='chip-filter';
+    allBtn.textContent='All';
+    allBtn.onclick = () => { app.filters.team = null; applyFiltersAndRender(); };
+    teamFilter.appendChild(allBtn);
+
+    app.teams.forEach(t => {
+      const b = document.createElement('button');
+      b.className = 'chip-filter';
+      b.textContent = t.name;
+      b.onclick = () => { app.filters.team = t.id; applyFiltersAndRender(); };
+      teamFilter.appendChild(b);
     });
-    
-    // Debug button functionality
-    document.getElementById('debug-btn').addEventListener('click', () => {
-      let debugInfo = '';
-      
-      // Check if Telegram WebApp is available
+  }
+
+  function getPlayerPhoto(player) {
+    // player.photo is like "12345.jpg"
+    const id = (player.photo || '').replace('.jpg','').replace('.png','');
+    return `https://resources.premierleague.com/premierleague/photos/players/250x250/p${id}.png`;
+  }
+
+  function getTeamBadge(team) {
+    // team.code is numeric code but better use team.id
+    return `https://resources.premierleague.com/premierleague/badges/70/t${team.code}.png`;
+  }
+
+  function applyFiltersAndRender() {
+    const q = app.filters.query.trim().toLowerCase();
+    let list = app.players.slice();
+
+    if (app.filters.team) {
+      list = list.filter(p => p.team === app.filters.team);
+    }
+    if (q) {
+      list = list.filter(p => (p.web_name || '').toLowerCase().includes(q) || (p.first_name || '').toLowerCase().includes(q));
+    }
+
+    // sort by total points
+    list.sort((a,b) => b.total_points - a.total_points);
+    app.filteredPlayers = list;
+    renderPlayers(list.slice(0, 40)); // limit to 40
+  }
+
+  function renderPlayers(list) {
+    playersGrid.innerHTML = '';
+    emptyState.style.display = list.length ? 'none' : 'block';
+    if (!list.length) {
+      emptyState.textContent = 'No players match your filters.';
+      return;
+    }
+
+    list.forEach(p => {
+      const team = app.teams.find(t => t.id === p.team) || {};
+      const card = document.createElement('div');
+      card.className = 'player-card';
+      card.innerHTML = `
+        <img src="${getPlayerPhoto(p)}" class="player-photo" onerror="this.onerror=null;this.src='https://via.placeholder.com/120x120?text=No+Img'"/>
+        <div class="player-meta">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div>
+              <div class="player-name">${p.web_name}</div>
+              <div class="player-team">${team.name || 'Unknown'} · ${p.element_type ? p.element_type : ''}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="points">${p.total_points}</div>
+              <div class="small" style="color:var(--muted)">${fmtPrice(p.now_cost)}</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;gap:8px;align-items:center">
+              <img class="badge" src="${getTeamBadge(team)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/38'"/>
+            </div>
+            <div>
+              <button class="btn-ghost" onclick="copyToClipboard('${team.name} - ${p.web_name}');">Copy</button>
+            </div>
+          </div>
+        </div>
+      `;
+      playersGrid.appendChild(card);
+    });
+  }
+
+  function copyToClipboard(text) {
+    navigator.clipboard?.writeText(text).then(() => {
+      alert('Copied: ' + text);
+    }).catch(() => { prompt('Copy manually:', text); });
+  }
+
+  // UI wiring
+  searchInput.addEventListener('input', e => {
+    app.filters.query = e.target.value;
+    applyFiltersAndRender();
+  });
+  clearSearch.addEventListener('click', () => {
+    searchInput.value = '';
+    app.filters.query = '';
+    applyFiltersAndRender();
+  });
+  refreshBtn.addEventListener('click', async () => {
+    await bootAndRender(true);
+  });
+
+  toggleLive.addEventListener('click', async () => {
+    toggleLive.classList.toggle('active');
+    // toggle live panel: load live gw
+    await loadLiveGW();
+    alert('Live GW refresh triggered (check console for details).');
+  });
+
+  toggleTop.addEventListener('click', () => {
+    toggleTop.classList.toggle('active');
+    // just visual for now
+    alert('Top players view (already active).');
+  });
+
+  openBotBtn.addEventListener('click', () => {
+    // open Telegram if inside UA or suggest copy
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.openTelegram();
+    } else {
+      const botLink = 'https://t.me/your_bot_username';
+      window.open(botLink, '_blank');
+    }
+  });
+
+  // Boot sequence
+  async function bootAndRender(force=false) {
+    try {
+      setStatus(false, 'Booting...');
+      await loadBootstrap();
+      await loadFixtures();
+      await loadLiveGW();
+      setStatus(true, 'Live');
+      console.log('Bootstrap loaded, players:', app.players.length, 'teams:', app.teams.length);
+    } catch (err) {
+      console.error('Boot failed', err);
+    }
+  }
+
+  // Telegram WebApp integration (optional)
+  function initTelegramWebApp() {
+    try {
       if (window.Telegram && window.Telegram.WebApp) {
-        debugInfo += '✅ Telegram WebApp API: Available\n';
-        debugInfo += `✅ tg object: ${typeof tg}\n`;
-        debugInfo += `✅ tg.ready(): ${typeof tg.ready}\n`;
-        
-        // Check user info
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-          debugInfo += `✅ User info: ${user.first_name} (ID: ${user.id})\n`;
-        } else {
-          debugInfo += '⚠️ User info: Not available\n';
-        }
-      } else {
-        debugInfo += '❌ Telegram WebApp API: NOT available\n';
+        const tg = window.Telegram.WebApp;
+        console.log('Telegram WebApp initDataUnsafe:', tg.initDataUnsafe);
+        // optionally expand
+        try { tg.expand(); } catch(e){}
+        // show a small greeting
+        const name = tg.initDataUnsafe.user?.first_name || 'Guest';
+        statusChip.innerHTML = `<span id="statusDot" style="color:#00d1a1">●</span> <span id="statusText"> Connected: ${name}</span>`;
+        // If you need to send data back to bot:
+        // tg.sendData(JSON.stringify({event:'app_opened', user: tg.initDataUnsafe.user}));
       }
-      
-      // Check if buttons exist
-      const transferBtn = document.getElementById('transfer-btn');
-      const captainBtn = document.getElementById('captain-btn');
-      
-      debugInfo += `\n🔍 DOM Elements:\n`;
-      debugInfo += `Transfer button: ${transferBtn ? 'FOUND' : 'NOT FOUND'}\n`;
-      debugInfo += `Captain button: ${captainBtn ? 'FOUND' : 'NOT FOUND'}\n`;
-      
-      // Check event listeners (basic check)
-      debugInfo += `\n🔄 Event Listeners:\n`;
-      if (transferBtn) {
-        // Add test event listener if none exists
-        if (!transferBtn.onclick) {
-          transferBtn.addEventListener('click', () => {
-            console.log('Test click handler working');
-            tg.showPopup({
-              title: "🔧 Debug Mode",
-              message: "This click handler was added dynamically for testing!"
-            });
-          });
-          debugInfo += 'Transfer button: Added test event listener\n';
-        } else {
-          debugInfo += 'Transfer button: Has event listener\n';
-        }
-      }
-      
-      document.getElementById('debug-output').textContent = debugInfo;
-      
-      tg.showPopup({
-        title: "🔍 Debug Results",
-        message: "Check the debug info below for details about your setup.",
-        buttons: [{ text: "OK" }]
-      });
-    });
-    
-    // Copy fixed code button functionality
-    document.getElementById('copy-fixed-code-btn').addEventListener('click', async () => {
-      const fixedCode = `// Add this function to your index.html script section
-function setupButtons() {
-  // Transfer button
-  const transferBtn = document.getElementById('transfer-btn');
-  if (transferBtn) {
-    transferBtn.addEventListener('click', () => {
-      tg.showPopup({
-        title: "🔄 Processing",
-        message: "Transfer feature is being prepared! Check back soon."
-      });
-      
-      // Log for debugging
-      console.log('Transfer button clicked');
-      
-      // Close after 3 seconds
-      setTimeout(() => {
-        tg.close();
-      }, 3000);
-    });
+    } catch(e){
+      console.warn('Telegram WebApp not available', e);
+    }
   }
-  
-  // Captain button
-  const captainBtn = document.getElementById('captain-btn');
-  if (captainBtn) {
-    captainBtn.addEventListener('click', () => {
-      tg.showPopup({
-        title: "👑 Captain Feature",
-        message: "Setting captain will be available soon!"
-      });
-      
-      console.log('Captain button clicked');
-      
-      setTimeout(() => {
-        tg.close();
-      }, 3000);
-    });
-  }
-}
 
-// Make sure to call this after tg.ready()
-tg.ready();
-setupButtons();
+  // run
+  (async function(){
+    initTelegramWebApp();
+    await bootAndRender();
+  })();
 
-// Also add this for theme changes
-tg.onEvent('themeChanged', updateTheme);`;
-      
-      try {
-        await navigator.clipboard.writeText(fixedCode);
-        tg.showPopup({
-          title: "✅ Success!",
-          message: "Fixed button code copied to clipboard! Paste this into your index.html to make buttons work temporarily.",
-          buttons: [{ text: "OK" }]
-        });
-        
-        // Vibrate device if supported
-        if (tg.HapticFeedback) {
-          tg.HapticFeedback.impactOccurred('light');
-        }
-      } catch (err) {
-        tg.showPopup({
-          title: "❌ Error",
-          message: "Failed to copy code. Please manually copy the fixed button code above.",
-          buttons: [{ text: "OK" }]
-        });
-      }
-    });
-    
-    // Handle navigation clicks
-    document.querySelectorAll('.nav-item').forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        
-        const section = item.querySelector('.nav-icon').textContent;
-        switch(section) {
-          case '🔧':
-            tg.showPopup({
-              title: "Button Fix",
-              message: "Buttons not working? Update them to use tg.showPopup() temporarily until your bot.js is running!",
-              buttons: [{ text: "OK" }]
-            });
-            break;
-          case '🔍':
-            tg.showPopup({
-              title: "Debugging",
-              message: "1. Open browser dev tools\n2. Check console for errors\n3. Verify tg object exists\n4. Test button IDs",
-              buttons: [{ text: "OK" }]
-            });
-            break;
-          case '🚀':
-            tg.showPopup({
-              title: "Deployment",
-              message: "Your index.html is deployed! Now set up bot.js on Ubuntu: install Node.js, create bot.js, run with PM2",
-              buttons: [{ text: "OK" }]
-            });
-            break;
-          case '❓':
-            tg.showPopup({
-              title: "Need Help?",
-              message: "Yes, buttons may not work without bot.js, but you can fix them temporarily with local feedback using tg.showPopup()!",
-              buttons: [{ text: "OK" }]
-            });
-            break;
-        }
-      });
-    });
-    
-    // Listen for theme changes
-    tg.onEvent('themeChanged', () => {
-      updateTheme();
-    });
-    
-    // Notify Telegram the app is ready
-    tg.ready();
-    
-    // Setup any additional button event listeners
-    setTimeout(() => {
-      // Try to setup buttons if they exist
-      const transferBtn = document.getElementById('transfer-btn');
-      const captainBtn = document.getElementById('captain-btn');
-      
-      if (transferBtn && !transferBtn.onclick) {
-        transferBtn.addEventListener('click', () => {
-          tg.showPopup({
-            title: "🚧 Under Construction",
-            message: "This feature is being prepared! Your bot.js backend needs to be running for full functionality."
-          });
-        });
-      }
-      
-      if (captainBtn && !captainBtn.onclick) {
-        captainBtn.addEventListener('click', () => {
-          tg.showPopup({
-            title: "🚧 Coming Soon",
-            message: "Captain feature will be available once your backend is complete!"
-          });
-        });
-      }
-    }, 1000);
-    
-    // Show welcome message
-    setTimeout(() => {
-      tg.showPopup({
-        title: "🔧 Button Fix Guide",
-        message: "Don't worry! Your buttons can work even without bot.js. Use tg.showPopup() for temporary feedback until your backend is ready!",
-        buttons: [{ text: "Let's Fix It!" }]
-      });
-    }, 500);
   </script>
 </body>
 </html>
