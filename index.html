@@ -452,7 +452,7 @@
       });
     });
 
-    // FPL API Integration — NOW USING YOUR LIVE PROXY
+    // FPL API Integration — NOW USING RELATIVE PATH (NO DOMAIN)
     const fplDataContainer = document.getElementById('fplDataContainer');
     const liveScoresContainer = document.getElementById('liveScoresContainer');
     const leagueContainer = document.getElementById('leagueContainer');
@@ -466,8 +466,8 @@
       try {
         fplDataContainer.innerHTML = '<div class="loading">Loading players and teams...</div>';
         
-        // ✅ USING YOUR LIVE PROXY — NO PLACEHOLDERS!
-        const response = await fetch('https://backend-server-w753.onrender.com/api/fpl?path=/bootstrap-static/');
+        // ✅ KEY CHANGE: Using RELATIVE PATH — no domain, no CORS!
+        const response = await fetch('/api/fpl?path=/bootstrap-static/');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -524,8 +524,8 @@
       try {
         liveScoresContainer.innerHTML = '<div class="loading">Loading live scores...</div>';
         
-        // ✅ USING YOUR LIVE PROXY
-        const response = await fetch(`https://backend-server-w753.onrender.com/api/fpl?path=/event/${gw}/live/`);
+        // ✅ RELATIVE PATH
+        const response = await fetch(`/api/fpl?path=/event/${gw}/live/`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -574,8 +574,8 @@
       try {
         leagueContainer.innerHTML = '<div class="loading">Loading league...</div>';
         
-        // ✅ USING YOUR LIVE PROXY
-        const response = await fetch(`https://backend-server-w753.onrender.com/api/fpl?path=/leagues-classic/${leagueId}/standings/`);
+        // ✅ RELATIVE PATH
+        const response = await fetch(`/api/fpl?path=/leagues-classic/${leagueId}/standings/`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -642,8 +642,8 @@
         if (!player) throw new Error("Player not found");
 
         const team = teams[player.team];
-        // ✅ USING YOUR LIVE PROXY
-        const response = await fetch(`https://backend-server-w753.onrender.com/api/fpl?path=/element-summary/${playerId}/`);
+        // ✅ RELATIVE PATH
+        const response = await fetch(`/api/fpl?path=/element-summary/${playerId}/`);
         const data = await response.json();
 
         const history = data.history.slice(-5); // Last 5 matches
