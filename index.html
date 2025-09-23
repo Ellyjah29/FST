@@ -452,7 +452,7 @@
       });
     });
 
-    // FPL API Integration
+    // FPL API Integration — NOW USING PROXY
     const fplDataContainer = document.getElementById('fplDataContainer');
     const liveScoresContainer = document.getElementById('liveScoresContainer');
     const leagueContainer = document.getElementById('leagueContainer');
@@ -466,7 +466,8 @@
       try {
         fplDataContainer.innerHTML = '<div class="loading">Loading players and teams...</div>';
         
-        const response = await fetch('https://fantasy.premierleague.com/api/bootstrap-static/');
+        // ✅ PROXY URL — REPLACE "YOUR-SUBDOMAIN" WITH YOUR ACTUAL RENDER PROXY URL
+        const response = await fetch('https://fpl-proxy-YOUR-SUBDOMAIN.onrender.com/api/fpl?path=/bootstrap-static/');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -523,7 +524,8 @@
       try {
         liveScoresContainer.innerHTML = '<div class="loading">Loading live scores...</div>';
         
-        const response = await fetch(`https://fantasy.premierleague.com/api/event/${gw}/live/`);
+        // ✅ PROXY URL
+        const response = await fetch(`https://fpl-proxy-YOUR-SUBDOMAIN.onrender.com/api/fpl?path=/event/${gw}/live/`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -572,7 +574,8 @@
       try {
         leagueContainer.innerHTML = '<div class="loading">Loading league...</div>';
         
-        const response = await fetch(`https://fantasy.premierleague.com/api/leagues-classic/${leagueId}/standings/`);
+        // ✅ PROXY URL
+        const response = await fetch(`https://fpl-proxy-YOUR-SUBDOMAIN.onrender.com/api/fpl?path=/leagues-classic/${leagueId}/standings/`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const data = await response.json();
@@ -639,7 +642,8 @@
         if (!player) throw new Error("Player not found");
 
         const team = teams[player.team];
-        const response = await fetch(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`);
+        // ✅ PROXY URL
+        const response = await fetch(`https://fpl-proxy-YOUR-SUBDOMAIN.onrender.com/api/fpl?path=/element-summary/${playerId}/`);
         const data = await response.json();
 
         const history = data.history.slice(-5); // Last 5 matches
