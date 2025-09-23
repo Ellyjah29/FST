@@ -1,182 +1,839 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FST - Fantasy Sport Token</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FST — Fantasy Sport Token</title>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Web3Modal & Ethers -->
+  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.9/dist/web3modal.min.js"></script>
+  <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+
+  <!-- Styling -->
+  <style>
+    :root {
+      --tg-theme-bg-color: #141d26;
+      --tg-theme-text-color: #ffffff;
+      --tg-theme-hint-color: #7f8fa4;
+      --primary: #ff8c00;
+      --secondary: #2a3b4c;
+      --card-bg: #1e2c38;
+      --border-radius: 12px;
+      --danger: #ff4d4d;
+      --success: #36c97d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+      background-color: var(--tg-theme-bg-color);
+      color: var(--tg-theme-text-color);
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 24px;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+
+    .user-info h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .user-info p {
+      color: var(--tg-theme-hint-color);
+      font-size: 14px;
+    }
+
+    .wallet-section {
+      background: var(--secondary);
+      padding: 16px;
+      border-radius: var(--border-radius);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button.secondary {
+      background: var(--secondary);
+    }
+
+    button.success {
+      background: var(--success);
+    }
+
+    button.danger {
+      background: var(--danger);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 24px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--tg-theme-hint-color);
+    }
+
+    .error {
+      background: #ff4d4d20;
+      color: #ff6b6b;
+      padding: 16px;
+      border-radius: var(--border-radius);
+      margin: 16px 0;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 16px 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--tg-theme-hint-color);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: var(--tg-theme-bg-color);
+      width: 90%;
+      max-width: 450px;
+      border-radius: var(--border-radius);
+      padding: 24px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: var(--tg-theme-hint-color);
+      cursor: pointer;
+    }
+
+    .player-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .player-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 24px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .stat-item {
+      background: var(--secondary);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--tg-theme-hint-color);
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .tabs {
+      display: flex;
+      margin: 24px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .history-item {
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .nft-badge {
+      text-align: center;
+      padding: 24px;
+      border: 2px dashed var(--success);
+      border-radius: var(--border-radius);
+      margin: 16px 0;
+    }
+
+    .nft-badge img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 12px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --tg-theme-bg-color: #f5f5f5;
+        --tg-theme-text-color: #000000;
+        --tg-theme-hint-color: #757575;
+        --secondary: #e0e0e0;
+        --card-bg: #ffffff;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
+  <div class="container">
+    <!-- User Profile from Telegram -->
+    <header>
+      <img id="userAvatar" class="avatar" src="https://via.placeholder.com/56" alt="Profile" />
+      <div class="user-info">
+        <h1 id="userName">Loading...</h1>
+        <p id="userUsername">@loading</p>
+      </div>
+    </header>
 
-<header class="bg-blue-600 text-white p-4 text-center text-2xl font-bold">
-    FST - Fantasy Sport Token
-</header>
+    <!-- Web3 Wallet Connection -->
+    <div class="wallet-section">
+      <div id="walletStatus">Connect wallet to earn $FST & NFTs</div>
+      <button id="connectWallet">Connect Wallet</button>
+    </div>
 
-<main class="p-4 max-w-6xl mx-auto">
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="overview">Overview</div>
+      <div class="tab" data-tab="live">Live Scores</div>
+      <div class="tab" data-tab="league">League</div>
+      <div class="tab" data-tab="rewards">Rewards</div>
+    </div>
 
-<!-- Wallet Section -->
-<section id="wallet" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Connect Wallet</h2>
-    <button id="connectWallet" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-        Connect Wallet
-    </button>
-    <p id="walletAddress" class="mt-2 text-sm"></p>
-</section>
+    <!-- Tab Contents -->
+    <div id="overview" class="tab-content active">
+      <h2 class="section-title">FPL Core Data</h2>
+      <div id="fplDataContainer" class="loading">Fetching FPL data...</div>
+    </div>
 
-<!-- Players Section -->
-<section id="players" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Top Players</h2>
-    <div id="playersList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-</section>
+    <div id="live" class="tab-content">
+      <h2 class="section-title">Live Gameweek</h2>
+      <div id="liveScoresContainer" class="loading">Loading live scores...</div>
+    </div>
 
-<!-- Live Scores Section -->
-<section id="liveScores" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Live Scores</h2>
-    <div id="liveScoresList" class="space-y-2"></div>
-</section>
+    <div id="league" class="tab-content">
+      <h2 class="section-title">Classic League</h2>
+      <input type="text" id="leagueIdInput" placeholder="Enter League ID" style="width:100%; padding:12px; margin-bottom:12px; border-radius:8px; border:1px solid var(--tg-theme-hint-color); background:var(--card-bg); color:var(--tg-theme-text-color);" />
+      <button id="fetchLeagueBtn">Fetch League</button>
+      <div id="leagueContainer" style="margin-top:16px;"></div>
+    </div>
 
-<!-- Transfers Graph -->
-<section id="transfers" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">Gameweek Transfers</h2>
-    <canvas id="transfersChart" class="bg-white p-4 rounded shadow"></canvas>
-</section>
+    <div id="rewards" class="tab-content">
+      <h2 class="section-title">Your Rewards</h2>
+      <div id="rewardsContainer">
+        <div class="card">
+          <h3>$FST Tokens</h3>
+          <p id="fstBalance">0 $FST</p>
+          <button id="claimDaily" class="success">Claim Daily Reward (10 $FST)</button>
+        </div>
+        <div id="nftContainer"></div>
+      </div>
+    </div>
 
-<!-- League Table Section -->
-<section id="league" class="mb-6">
-    <h2 class="text-xl font-semibold mb-2">League Table</h2>
-    <div id="leagueTable" class="overflow-x-auto"></div>
-</section>
+    <!-- Error Display -->
+    <div id="errorMessage" style="display:none;" class="error"></div>
+  </div>
 
-</main>
+  <!-- Player Detail Modal -->
+  <div id="playerModal" class="modal">
+    <div class="modal-content">
+      <button class="close-modal">&times;</button>
+      <div id="playerModalContent"></div>
+    </div>
+  </div>
 
-<script>
-    // Telegram Web App setup
-    const tg = window.Telegram.WebApp;
-    tg.expand();
+  <footer>
+    FST — Fantasy Sport Token • Powered by FPL API & Web3
+  </footer>
 
-    // Web3 wallet connection (Metamask)
-    const connectWalletBtn = document.getElementById('connectWallet');
-    const walletAddressEl = document.getElementById('walletAddress');
+  <script>
+    // Initialize Telegram WebApp
+    const tgWebApp = window.Telegram.WebApp;
+    tgWebApp.ready();
+    tgWebApp.expand();
+    tgWebApp.BackButton.hide();
 
-    connectWalletBtn.addEventListener('click', async () => {
-        if (window.ethereum) {
-            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-            walletAddressEl.textContent = `Connected: ${accounts[0]}`;
-        } else {
-            alert('Please install Metamask!');
-        }
+    // Get user data from Telegram
+    const user = tgWebApp.initDataUnsafe?.user;
+    let currentGameweek = 1;
+    let players = [];
+    let teams = {};
+    let favorites = JSON.parse(localStorage.getItem('fst_favorites') || '[]');
+
+    if (user) {
+      document.getElementById('userName').innerText = user.first_name || 'Anonymous';
+      document.getElementById('userUsername').innerText = user.username ? `@${user.username}` : 'No username';
+      if (user.photo_url) {
+        document.getElementById('userAvatar').src = user.photo_url;
+      }
+    } else {
+      document.getElementById('userName').innerText = 'Guest User';
+      document.getElementById('userUsername').innerText = '@guest';
+    }
+
+    // Web3 Setup
+    let web3Modal, provider, signer, address;
+    const connectButton = document.getElementById('connectWallet');
+    const walletStatus = document.getElementById('walletStatus');
+    const fstBalance = document.getElementById('fstBalance');
+    let fstTokens = parseFloat(localStorage.getItem('fst_tokens') || '0');
+
+    async function initWeb3Modal() {
+      const providerOptions = {};
+      web3Modal = new Web3Modal({
+        network: "mainnet",
+        cacheProvider: true,
+        providerOptions
+      });
+    }
+
+    async function connectWallet() {
+      try {
+        provider = await web3Modal.connect();
+        const ethersProvider = new ethers.providers.Web3Provider(provider);
+        signer = ethersProvider.getSigner();
+        address = await signer.getAddress();
+
+        walletStatus.innerHTML = `<strong>Connected:</strong><br/>${address.slice(0,6)}...${address.slice(-4)}`;
+        connectButton.innerText = "Wallet Connected";
+        connectButton.disabled = true;
+
+        // Award tokens for connecting
+        fstTokens += 10;
+        localStorage.setItem('fst_tokens', fstTokens.toString());
+        fstBalance.innerText = `${fstTokens} $FST`;
+        showToast("🎉 Wallet connected! +10 $FST");
+
+        // Unlock NFT if eligible
+        checkAndUnlockNFT();
+
+      } catch (error) {
+        console.error("Web3 connection error:", error);
+        showError("Failed to connect wallet.");
+      }
+    }
+
+    connectButton.addEventListener('click', connectWallet);
+
+    // Tab Navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
     });
 
-    // FPL API base (CORS proxy recommended)
-    const FPL_BASE = 'https://cors-anywhere.herokuapp.com/https://fantasy.premierleague.com/api';
+    // FPL API Integration
+    const fplDataContainer = document.getElementById('fplDataContainer');
+    const liveScoresContainer = document.getElementById('liveScoresContainer');
+    const leagueContainer = document.getElementById('leagueContainer');
+    const fetchLeagueBtn = document.getElementById('fetchLeagueBtn');
+    const leagueIdInput = document.getElementById('leagueIdInput');
+    const nftContainer = document.getElementById('nftContainer');
+    const claimDailyBtn = document.getElementById('claimDaily');
+    const errorMessage = document.getElementById('errorMessage');
 
-    // Fetch top players
-    async function fetchPlayers() {
-        try {
-            const res = await axios.get(`${FPL_BASE}/bootstrap-static/`);
-            const players = res.data.elements.slice(0, 20); // top 20 for demo
-            const container = document.getElementById('playersList');
-            players.forEach(player => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-4 rounded shadow hover:shadow-lg transition';
-                card.innerHTML = `
-                    <h3 class="font-semibold">${player.web_name}</h3>
-                    <p>Team: ${res.data.teams.find(t => t.id === player.team).name}</p>
-                    <p>Position: ${res.data.element_types.find(e => e.id === player.element_type).singular_name}</p>
-                    <p>Price: £${player.now_cost / 10}</p>
-                    <p>Points: ${player.total_points}</p>
-                `;
-                container.appendChild(card);
-            });
-        } catch (err) {
-            console.error(err);
-        }
+    async function fetchFPLData() {
+      try {
+        fplDataContainer.innerHTML = '<div class="loading">Loading players and teams...</div>';
+        
+        const response = await fetch('https://fantasy.premierleague.com/api/bootstrap-static/');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        players = data.elements;
+        teams = Object.fromEntries(data.teams.map(t => [t.id, t]));
+
+        // Find current gameweek
+        const currentEvent = data.events.find(e => e.is_current);
+        currentGameweek = currentEvent ? currentEvent.id : 1;
+
+        // Display summary
+        fplDataContainer.innerHTML = `
+          <div class="card">
+            <h3>📊 Season Overview</h3>
+            <p><strong>Current GW:</strong> ${currentGameweek}</p>
+            <p><strong>Teams:</strong> ${data.teams.length}</p>
+            <p><strong>Players:</strong> ${players.length}</p>
+          </div>
+          <div class="card">
+            <h3>⚽ Top Players</h3>
+            <div style="max-height: 200px; overflow-y: auto;">
+              ${players
+                .sort((a, b) => b.total_points - a.total_points)
+                .slice(0, 10)
+                .map(p => `
+                  <div class="player-item" data-id="${p.id}" style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span>${p.web_name} (${teams[p.team]?.short_name || '?'})</span>
+                      <span>${p.total_points} pts</span>
+                    </div>
+                  </div>
+                `)
+                .join('')}
+            </div>
+          </div>
+        `;
+
+        // Add click handlers to players
+        document.querySelectorAll('.player-item').forEach(item => {
+          item.addEventListener('click', () => openPlayerModal(parseInt(item.dataset.id)));
+        });
+
+        // Load live scores for current GW
+        fetchLiveScores(currentGameweek);
+
+      } catch (error) {
+        console.error("FPL API Error:", error);
+        showError("Could not load FPL data.");
+        fplDataContainer.innerHTML = '<div class="error">Failed to load data.</div>';
+      }
     }
 
-    // Fetch live scores for current GW
-    async function fetchLiveScores() {
-        try {
-            const eventsRes = await axios.get(`${FPL_BASE}/events/`);
-            const currentGW = eventsRes.data.current;
-            const liveRes = await axios.get(`${FPL_BASE}/event/${currentGW}/live/`);
-            const container = document.getElementById('liveScoresList');
-            liveRes.data.picks.slice(0, 10).forEach(pick => {
-                const div = document.createElement('div');
-                div.className = 'bg-white p-2 rounded shadow';
-                div.textContent = `Player ID: ${pick.element}, Points: ${pick.stats.total_points}`;
-                container.appendChild(div);
-            });
-        } catch (err) {
-            console.error(err);
+    async function fetchLiveScores(gw) {
+      try {
+        liveScoresContainer.innerHTML = '<div class="loading">Loading live scores...</div>';
+        
+        const response = await fetch(`https://fantasy.premierleague.com/api/event/${gw}/live/`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const livePlayers = data.elements;
+
+        // Get top 5 performing players this gameweek
+        const topPerformers = livePlayers
+          .filter(p => p.stats.total_points > 0)
+          .sort((a, b) => b.stats.total_points - a.stats.total_points)
+          .slice(0, 5);
+
+        if (topPerformers.length === 0) {
+          liveScoresContainer.innerHTML = '<div class="card">No live data yet for this gameweek.</div>';
+          return;
         }
+
+        liveScoresContainer.innerHTML = `
+          <div class="card">
+            <h3>🔥 Live Top Performers (GW ${gw})</h3>
+            ${topPerformers.map(p => {
+              const player = players.find(pl => pl.id === p.id);
+              return `
+                <div class="player-item" data-id="${p.id}" style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${player?.web_name || 'Unknown'} (${player ? teams[player.team]?.short_name : '?'})</span>
+                    <span>+${p.stats.total_points} pts</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+
+        // Add click handlers
+        document.querySelectorAll('.player-item').forEach(item => {
+          item.addEventListener('click', () => openPlayerModal(parseInt(item.dataset.id)));
+        });
+
+      } catch (error) {
+        console.error("Live scores error:", error);
+        liveScoresContainer.innerHTML = '<div class="error">Could not load live scores.</div>';
+      }
     }
 
-    // Fetch transfers per GW and draw chart
-    async function fetchTransfers() {
-        try {
-            const GW = 1; // Example: GW1
-            const res = await axios.get(`${FPL_BASE}/game-week-transfers/${GW}/`);
-            const ctx = document.getElementById('transfersChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(res.data).slice(0, 10),
-                    datasets: [{
-                        label: 'Transfers In',
-                        data: Object.values(res.data).slice(0, 10).map(d => d.in),
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)'
-                    },{
-                        label: 'Transfers Out',
-                        data: Object.values(res.data).slice(0, 10).map(d => d.out),
-                        backgroundColor: 'rgba(255, 99, 132, 0.7)'
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'top' } } }
-            });
-        } catch (err) {
-            console.error(err);
+    async function fetchLeagueStandings(leagueId) {
+      try {
+        leagueContainer.innerHTML = '<div class="loading">Loading league...</div>';
+        
+        const response = await fetch(`https://fantasy.premierleague.com/api/leagues-classic/${leagueId}/standings/`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        const standings = data.standings.results;
+
+        if (standings.length === 0) {
+          leagueContainer.innerHTML = '<div class="error">No standings found or private league.</div>';
+          return;
         }
+
+        leagueContainer.innerHTML = `
+          <div class="card">
+            <h3>🏆 ${data.league.name}</h3>
+            <div style="max-height: 300px; overflow-y: auto;">
+              ${standings.slice(0, 10).map((team, index) => `
+                <div style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>${index + 1}.</strong> ${team.entry_name}</span>
+                    <span>${team.total} pts</span>
+                  </div>
+                  <div style="font-size: 12px; color: var(--tg-theme-hint-color);">by ${team.player_name}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+
+      } catch (error) {
+        console.error("League error:", error);
+        leagueContainer.innerHTML = '<div class="error">Could not load league. Check ID or try again.</div>';
+      }
     }
 
-    // Fetch league table
-    async function fetchLeague() {
-        try {
-            const LEAGUE_ID = 123456;
-            const res = await axios.get(`${FPL_BASE}/leagues-classic/${LEAGUE_ID}/standings/`);
-            const container = document.getElementById('leagueTable');
-            const table = document.createElement('table');
-            table.className = 'min-w-full bg-white';
-            table.innerHTML = `
-                <tr class="bg-gray-200">
-                    <th class="p-2">Rank</th>
-                    <th class="p-2">Manager</th>
-                    <th class="p-2">Points</th>
-                </tr>
-            `;
-            res.data.standings.results.slice(0, 10).forEach(m => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-2">${m.rank}</td>
-                    <td class="p-2">${m.entry_name}</td>
-                    <td class="p-2">${m.total}</td>
-                `;
-                table.appendChild(tr);
-            });
-            container.appendChild(table);
-        } catch (err) {
-            console.error(err);
-        }
+    fetchLeagueBtn.addEventListener('click', () => {
+      const leagueId = leagueIdInput.value.trim();
+      if (leagueId && /^\d+$/.test(leagueId)) {
+        fetchLeagueStandings(leagueId);
+      } else {
+        showError("Please enter a valid league ID (numbers only).");
+      }
+    });
+
+    // Player Detail Modal
+    const playerModal = document.getElementById('playerModal');
+    const playerModalContent = document.getElementById('playerModalContent');
+    const closeModalBtn = document.querySelector('.close-modal');
+
+    closeModalBtn.addEventListener('click', () => {
+      playerModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target === playerModal) {
+        playerModal.style.display = 'none';
+      }
+    });
+
+    async function openPlayerModal(playerId) {
+      try {
+        playerModalContent.innerHTML = '<div class="loading">Loading player details...</div>';
+        playerModal.style.display = 'flex';
+
+        const player = players.find(p => p.id === playerId);
+        if (!player) throw new Error("Player not found");
+
+        const team = teams[player.team];
+        const response = await fetch(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`);
+        const data = await response.json();
+
+        const history = data.history.slice(-5); // Last 5 matches
+
+        playerModalContent.innerHTML = `
+          <div class="player-header">
+            <div class="player-avatar" style="background: linear-gradient(45deg, ${team?.colour || '#555'}, ${team?.colour || '#777'})">
+              ${player.web_name.charAt(0)}
+            </div>
+            <div>
+              <h2>${player.web_name}</h2>
+              <p>${team?.name || 'Unknown Team'} • ${getPosition(player.element_type)}</p>
+              <p>⚽ ${player.total_points} total pts • 💰 ${player.now_cost / 10}m</p>
+            </div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-item">
+              <div class="stat-label">Form</div>
+              <div class="stat-value">${player.form}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Goals</div>
+              <div class="stat-value">${player.goals_scored}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Assists</div>
+              <div class="stat-value">${player.assists}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Clean Sheets</div>
+              <div class="stat-value">${player.clean_sheets}</div>
+            </div>
+          </div>
+
+          <h3>📈 Recent Performance</h3>
+          <div style="margin: 16px 0;">
+            ${history.map(h => `
+              <div class="history-item">
+                <div style="display: flex; justify-content: space-between;">
+                  <span>GW${h.round}: vs ${getOpponent(h.opponent_team)}</span>
+                  <span>+${h.total_points} pts</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <button id="toggleFavorite" class="secondary" style="margin-top: 16px;">
+            ${favorites.includes(playerId) ? 'Remove from Favorites' : 'Add to Favorites'}
+          </button>
+        `;
+
+        // Favorite toggle
+        const toggleFavoriteBtn = document.getElementById('toggleFavorite');
+        toggleFavoriteBtn.addEventListener('click', () => {
+          if (favorites.includes(playerId)) {
+            favorites = favorites.filter(id => id !== playerId);
+            toggleFavoriteBtn.innerText = 'Add to Favorites';
+          } else {
+            favorites.push(playerId);
+            toggleFavoriteBtn.innerText = 'Remove from Favorites';
+          }
+          localStorage.setItem('fst_favorites', JSON.stringify(favorites));
+          showToast(favorites.includes(playerId) ? 'Added to favorites!' : 'Removed from favorites');
+        });
+
+      } catch (error) {
+        console.error("Player modal error:", error);
+        playerModalContent.innerHTML = '<div class="error">Could not load player details.</div>';
+      }
     }
 
-    // Initialize dashboard
-    fetchPlayers();
-    fetchLiveScores();
-    fetchTransfers();
-    fetchLeague();
-</script>
+    function getPosition(elementType) {
+      const positions = {1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD'};
+      return positions[elementType] || 'Unknown';
+    }
 
+    function getOpponent(teamId) {
+      return teams[teamId]?.short_name || '?';
+    }
+
+    // Rewards System
+    claimDailyBtn.addEventListener('click', () => {
+      const lastClaim = localStorage.getItem('fst_last_claim');
+      const today = new Date().toDateString();
+      
+      if (lastClaim === today) {
+        showToast("You've already claimed today's reward!");
+        return;
+      }
+
+      fstTokens += 10;
+      localStorage.setItem('fst_tokens', fstTokens.toString());
+      localStorage.setItem('fst_last_claim', today);
+      fstBalance.innerText = `${fstTokens} $FST`;
+      showToast("🎉 +10 $FST claimed!");
+
+      checkAndUnlockNFT();
+    });
+
+    function checkAndUnlockNFT() {
+      const unlockedNFTs = JSON.parse(localStorage.getItem('fst_nfts') || '[]');
+      
+      // Unlock "Rookie" NFT for connecting wallet
+      if (address && !unlockedNFTs.includes('rookie')) {
+        unlockedNFTs.push('rookie');
+        localStorage.setItem('fst_nfts', JSON.stringify(unlockedNFTs));
+        displayNFTs();
+        showToast("🏆 Unlocked: Rookie NFT!");
+      }
+
+      // Unlock "Top Performer" NFT if user has > 50 $FST
+      if (fstTokens > 50 && !unlockedNFTs.includes('top_performer')) {
+        unlockedNFTs.push('top_performer');
+        localStorage.setItem('fst_nfts', JSON.stringify(unlockedNFTs));
+        displayNFTs();
+        showToast("🏆 Unlocked: Top Performer NFT!");
+      }
+
+      displayNFTs();
+    }
+
+    function displayNFTs() {
+      const unlockedNFTs = JSON.parse(localStorage.getItem('fst_nfts') || '[]');
+      
+      if (unlockedNFTs.length === 0) {
+        nftContainer.innerHTML = '<p style="text-align: center; color: var(--tg-theme-hint-color);">No NFTs unlocked yet. Keep playing!</p>';
+        return;
+      }
+
+      nftContainer.innerHTML = unlockedNFTs.map(nft => {
+        const nftInfo = {
+          rookie: {
+            name: "Rookie Badge",
+            image: "https://via.placeholder.com/80/ff8c00/ffffff?text=R",
+            description: "First steps in FST universe"
+          },
+          top_performer: {
+            name: "Top Performer",
+            image: "https://via.placeholder.com/80/36c97d/ffffff?text=T",
+            description: "Earned over 50 $FST tokens"
+          }
+        };
+
+        const info = nftInfo[nft] || {name: "Unknown", image: "https://via.placeholder.com/80", description: ""};
+        
+        return `
+          <div class="nft-badge">
+            <img src="${info.image}" alt="${info.name}" />
+            <h3>${info.name}</h3>
+            <p>${info.description}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Utility Functions
+    function showError(message) {
+      errorMessage.innerText = message;
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 5000);
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 30px;
+        z-index: 1000;
+        font-size: 14px;
+        text-align: center;
+      `;
+      toast.innerText = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initWeb3Modal();
+      fetchFPLData();
+      fstBalance.innerText = `${fstTokens} $FST`;
+      displayNFTs();
+    });
+  </script>
 </body>
 </html>
