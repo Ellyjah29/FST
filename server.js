@@ -1,4 +1,4 @@
-// server.js — RENDER-OPTIMIZED, CORRECT TEAM BADGES, PLAYER PHOTOS
+// server.js — RENDER-OPTIMIZED, PLAYER IMAGES, SEARCH, SORT
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -18,6 +18,30 @@ app.use(express.static('public', {
 let users = {};
 let globalEntries = 0;
 const FST_PER_ENTRY = 10;
+
+// Premier League badge map (FPL team.id → badge) — FIXED: NO TRAILING SPACES
+const badgeMap = {
+  1: "https://resources.premierleague.com/premierleague/badges/t3.png",   // Arsenal
+  2: "https://resources.premierleague.com/premierleague/badges/t8.png",   // Aston Villa
+  3: "https://resources.premierleague.com/premierleague/badges/t91.png",  // Bournemouth
+  4: "https://resources.premierleague.com/premierleague/badges/t36.png",  // Brentford
+  5: "https://resources.premierleague.com/premierleague/badges/t90.png",  // Brighton
+  6: "https://resources.premierleague.com/premierleague/badges/t2.png",   // Chelsea
+  7: "https://resources.premierleague.com/premierleague/badges/t31.png",  // Crystal Palace
+  8: "https://resources.premierleague.com/premierleague/badges/t11.png",  // Everton
+  9: "https://resources.premierleague.com/premierleague/badges/t54.png",  // Fulham
+  10: "https://resources.premierleague.com/premierleague/badges/t13.png", // Ipswich
+  11: "https://resources.premierleague.com/premierleague/badges/t43.png", // Man City
+  12: "https://resources.premierleague.com/premierleague/badges/t1.png",  // Man Utd
+  13: "https://resources.premierleague.com/premierleague/badges/t4.png",  // Newcastle
+  14: "https://resources.premierleague.com/premierleague/badges/t14.png", // Liverpool
+  15: "https://resources.premierleague.com/premierleague/badges/t49.png", // Nottingham Forest
+  16: "https://resources.premierleague.com/premierleague/badges/t20.png", // Southampton
+  17: "https://resources.premierleague.com/premierleague/badges/t6.png",  // Spurs
+  18: "https://resources.premierleague.com/premierleague/badges/t21.png", // West Ham
+  19: "https://resources.premierleague.com/premierleague/badges/t39.png", // Wolves
+  20: "https://resources.premierleague.com/premierleague/badges/t35.png", // Leicester
+};
 
 // Health check for Render
 app.get('/health', (req, res) => {
@@ -52,9 +76,10 @@ app.post('/connect-wallet', (req, res) => {
   }
 });
 
-// Enhanced players endpoint with CORRECT team badges
+// Enhanced players endpoint with images, logos, cost, points
 app.get('/players', async (req, res) => {
   try {
+    // ❌ Your URL had trailing space — FIXED
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
       timeout: 5000
     });
@@ -62,66 +87,45 @@ app.get('/players', async (req, res) => {
     const players = response.data.elements;
     const teams = response.data.teams;
 
-    // ✅ CORRECT BADGE MAPPING (2024/25 Season - Verified)
-    const TEAM_BADGE_MAP = {
-      1: 43,    // Arsenal
-      2: 1044,  // Aston Villa
-      3: 92,    // Bournemouth
-      4: 1045,  // Brentford
-      5: 94,    // Brighton
-      6: 1046,  // Chelsea
-      7: 96,    // Crystal Palace
-      8: 98,    // Everton
-      9: 100,   // Fulham
-      10: 102,  // Liverpool
-      11: 1047, // Man City
-      12: 108,  // Man Utd
-      13: 110,  // Newcastle
-      14: 14,   // Nott'm Forest
-      15: 112,  // Sheffield Utd
-      16: 114,  // Spurs
-      17: 116,  // West Ham
-      18: 118,  // Wolves
-      19: 120,  // Luton
-      20: 122   // Burnley
-    };
-
-    // Create team map with CORRECT logo URLs
+    // Map teams for logo and name
     const teamMap = {};
     teams.forEach(team => {
-      const badgeId = TEAM_BADGE_MAP[team.id] || team.id;
       teamMap[team.id] = {
         name: team.name,
         short_name: team.short_name,
-        logo: `https://resources.premierleague.com/premierleague/badges/t${badgeId}.png`
+        logo: badgeMap[team.id] || ""
       };
     });
 
-    const enhancedPlayers = players.map(p => ({
-      id: p.id,
-      web_name: p.web_name,
-      team: p.team,
-      team_name: teamMap[p.team]?.name || 'Unknown',
-      team_logo: teamMap[p.team]?.logo || '',
-      element_type: p.element_type,
-      position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
-      now_cost: (p.now_cost / 10).toFixed(1), // e.g., 125 → £12.5m
-      total_points: p.total_points || 0,
-      photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.replace('.jpg', '')}.png`
-    }));
+    const enhancedPlayers = players.map(p => {
+      const photoId = p.photo.split(".")[0]; // safer than .replace
+      // ❌ Your URL had space before ${photoId} — FIXED
+      return {
+        id: p.id,
+        web_name: p.web_name,
+        team: p.team,
+        team_name: teamMap[p.team]?.name || 'Unknown',
+        team_logo: teamMap[p.team]?.logo || '',
+        element_type: p.element_type,
+        position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
+        now_cost: (p.now_cost / 10).toFixed(1),
+        total_points: p.total_points || 0,
+        photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${photoId}.png`
+      };
+    });
 
     res.json(enhancedPlayers);
   } catch (error) {
     console.error('FPL API Error:', error.message);
 
-    // Fallback mock players with CORRECT logos
+    // Fallback mock players with images — FIXED URLs
     const mockPlayers = [
       {
         id: 1,
         web_name: "Mohamed Salah",
-        team: 10,
+        team: 14,
         team_name: "Liverpool",
-        team_logo: "https://resources.premierleague.com/premierleague/badges/t102.png",
+        team_logo: badgeMap[14],
         element_type: 4,
         position: "FWD",
         now_cost: "12.5",
@@ -132,8 +136,8 @@ app.get('/players', async (req, res) => {
         id: 2,
         web_name: "Erling Haaland",
         team: 11,
-        team_name: "Manchester City",
-        team_logo: "https://resources.premierleague.com/premierleague/badges/t1047.png",
+        team_name: "Man City",
+        team_logo: badgeMap[11],
         element_type: 4,
         position: "FWD",
         now_cost: "14.0",
@@ -142,39 +146,39 @@ app.get('/players', async (req, res) => {
       },
       {
         id: 3,
-        web_name: "Bukayo Saka",
-        team: 1,
-        team_name: "Arsenal",
-        team_logo: "https://resources.premierleague.com/premierleague/badges/t43.png",
+        web_name: "Kevin De Bruyne",
+        team: 11,
+        team_name: "Man City",
+        team_logo: badgeMap[11],
         element_type: 3,
         position: "MID",
-        now_cost: "9.5",
-        total_points: 210,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p401901.png"
+        now_cost: "11.5",
+        total_points: 220,
+        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p104499.png"
       },
       {
         id: 4,
-        web_name: "Bruno Fernandes",
-        team: 12,
-        team_name: "Manchester United",
-        team_logo: "https://resources.premierleague.com/premierleague/badges/t108.png",
-        element_type: 3,
-        position: "MID",
-        now_cost: "10.5",
-        total_points: 190,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p200427.png"
+        web_name: "Alisson",
+        team: 14,
+        team_name: "Liverpool",
+        team_logo: badgeMap[14],
+        element_type: 1,
+        position: "GK",
+        now_cost: "9.0",
+        total_points: 180,
+        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p200605.png"
       },
       {
         id: 5,
-        web_name: "Son Heung-min",
-        team: 16,
-        team_name: "Tottenham",
-        team_logo: "https://resources.premierleague.com/premierleague/badges/t114.png",
-        element_type: 4,
-        position: "FWD",
-        now_cost: "11.0",
+        web_name: "Trent Alexander-Arnold",
+        team: 14,
+        team_name: "Liverpool",
+        team_logo: badgeMap[14],
+        element_type: 2,
+        position: "DEF",
+        now_cost: "8.5",
         total_points: 200,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p193827.png"
+        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p200669.png"
       }
     ];
 
