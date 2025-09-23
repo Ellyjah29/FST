@@ -54,18 +54,61 @@
     .player-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      margin-top: 10px;
+      gap: 12px;
+      margin-top: 16px;
     }
     .player-card {
       background: #2a3a4a;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
     }
-    .selected {
+    .player-card.selected {
       background: #00c3ff;
       color: #000;
+    }
+    .player-photo {
+      width: 60px;
+      height: 75px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #000;
+      margin-bottom: 8px;
+      border: 2px solid transparent;
+    }
+    .player-card.selected .player-photo {
+      border-color: #000;
+    }
+    .team-logo {
+      width: 24px;
+      height: 24px;
+      margin-bottom: 6px;
+    }
+    .player-name {
+      font-weight: bold;
+      text-align: center;
+      margin: 4px 0;
+      font-size: 14px;
+    }
+    .player-meta {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 12px;
+      color: #ccc;
+      margin-top: 4px;
+    }
+    .price-tag {
+      color: #4ecdc4;
+      font-weight: bold;
+    }
+    .points-tag {
+      color: gold;
+      font-weight: bold;
     }
     #status {
       text-align: center;
@@ -80,6 +123,27 @@
     .leaderboard-item {
       padding: 8px;
       border-bottom: 1px solid #333;
+    }
+    input, select {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      background: #222;
+      color: white;
+      font-size: 14px;
+    }
+    .filter-btn {
+      padding: 6px 12px;
+      background: #333;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .filter-btn.active {
+      background: #00c3ff;
+      color: #000;
     }
 
     /* Tab Bar */
@@ -96,7 +160,6 @@
       z-index: 10000;
       pointer-events: auto;
     }
-
     .tab-btn {
       display: flex;
       flex-direction: column;
@@ -113,17 +176,14 @@
       pointer-events: auto;
       -webkit-tap-highlight-color: transparent;
     }
-
     .tab-btn.active {
       color: #00c3ff;
       text-shadow: 0 0 4px rgba(0, 195, 255, 0.7);
     }
-
     .tab-btn i {
       font-size: 18px;
       margin-bottom: 2px;
     }
-
     .tab-btn:active {
       transform: scale(0.95);
       opacity: 0.8;
@@ -141,7 +201,25 @@
     <div>Prize Pool: <strong id="prizeAmount">0 FST</strong> (<span id="entries">0</span> managers)</div>
   </div>
 
+  <!-- ===== PLAYER SELECTION SECTION ===== -->
   <div class="section">
+    <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+      <input type="text" id="searchInput" placeholder="🔍 Search player or team..." style="flex: 1;">
+      <select id="sortSelect">
+        <option value="name">Sort by Name</option>
+        <option value="cost">Sort by Cost</option>
+        <option value="points">Sort by Points</option>
+      </select>
+    </div>
+
+    <div style="display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap;">
+      <button class="filter-btn active" data-pos="all">All</button>
+      <button class="filter-btn" data-pos="1">GK</button>
+      <button class="filter-btn" data-pos="2">DEF</button>
+      <button class="filter-btn" data-pos="3">MID</button>
+      <button class="filter-btn" data-pos="4">FWD</button>
+    </div>
+
     <button id="loadPlayers">📥 Load EPL Players</button>
     <div class="player-grid" id="playerGrid"></div>
   </div>
@@ -192,6 +270,7 @@
     let selectedPlayers = [];
     const MAX_PLAYERS = 11;
 
+    // DOM Elements
     const connectWalletBtn = document.getElementById('connectWallet');
     const loadPlayersBtn = document.getElementById('loadPlayers');
     const joinContestBtn = document.getElementById('joinContest');
@@ -200,9 +279,18 @@
     const statusDiv = document.getElementById('status');
     const prizeAmountSpan = document.getElementById('prizeAmount');
     const entriesSpan = document.getElementById('entries');
+    const searchInput = document.getElementById('searchInput');
+    const sortSelect = document.getElementById('sortSelect');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    let allPlayers = [];
+    let currentFilter = 'all';
+    let currentSearch = '';
+    let currentSort = 'name';
 
     statusDiv.innerText = "Tap 'Connect Wallet' to begin";
 
+    // Connect Wallet
     connectWalletBtn.addEventListener('click', async () => {
       statusDiv.innerText = "Connecting wallet...";
       try {
@@ -227,13 +315,14 @@
       }
     });
 
+    // Load Players
     loadPlayersBtn.addEventListener('click', async () => {
       statusDiv.innerText = "Loading EPL players...";
       loadPlayersBtn.disabled = true;
       try {
         const response = await fetch('/players');
         const players = await response.json();
-        renderPlayers(players.slice(0, 50));
+        renderPlayers(players);
         statusDiv.innerText = "Pick 11 players to join!";
       } catch (e) {
         statusDiv.innerText = "❌ Failed to load players";
@@ -241,22 +330,54 @@
       }
     });
 
+    // Render Players (store all, then filter/sort)
     function renderPlayers(players) {
-      playerGrid.innerHTML = '';
-      players.forEach(player => {
-        const card = document.createElement('div');
-        card.className = 'player-card';
-        card.innerHTML = `
-          <strong>${player.web_name}</strong><br>
-          Team: ${player.team}<br>
-          Position: ${getPosition(player.element_type)}
-        `;
-        card.dataset.id = player.id;
-        card.dataset.name = player.web_name;
+      allPlayers = players;
+      renderFilteredPlayers();
+    }
 
-        if (selectedPlayers.find(p => p.id == player.id)) {
-          card.classList.add('selected');
+    // Filter & Sort & Render
+    function renderFilteredPlayers() {
+      let filtered = allPlayers.filter(player => {
+        const matchesSearch = 
+          player.web_name.toLowerCase().includes(currentSearch) ||
+          player.team_name.toLowerCase().includes(currentSearch);
+        const matchesFilter = 
+          currentFilter === 'all' || 
+          player.element_type == parseInt(currentFilter);
+        return matchesSearch && matchesFilter;
+      });
+
+      // Sort
+      filtered.sort((a, b) => {
+        if (currentSort === 'cost') {
+          return parseFloat(b.now_cost) - parseFloat(a.now_cost);
+        } else if (currentSort === 'points') {
+          return b.total_points - a.total_points;
+        } else {
+          return a.web_name.localeCompare(b.web_name);
         }
+      });
+
+      // Render
+      playerGrid.innerHTML = '';
+      filtered.forEach(player => {
+        const isSelected = selectedPlayers.some(p => p.id === player.id);
+        const card = document.createElement('div');
+        card.className = `player-card ${isSelected ? 'selected' : ''}`;
+        card.innerHTML = `
+          <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
+          <img src="${player.team_logo}" class="team-logo" onerror="this.style.display='none'">
+          <div class="player-name">${player.web_name}</div>
+          <div class="player-meta">
+            <span>${player.position}</span>
+            <span class="price-tag">£${player.now_cost}m</span>
+          </div>
+          <div class="player-meta">
+            <span>${player.team_name}</span>
+            <span class="points-tag">${player.total_points} pts</span>
+          </div>
+        `;
 
         card.addEventListener('click', () => {
           togglePlayerSelection(player);
@@ -268,10 +389,7 @@
       });
     }
 
-    function getPosition(type) {
-      return ["GK", "DEF", "MID", "FWD"][type - 1] || "UNK";
-    }
-
+    // Toggle player selection
     function togglePlayerSelection(player) {
       const index = selectedPlayers.findIndex(p => p.id === player.id);
       if (index > -1) {
@@ -279,27 +397,26 @@
       } else if (selectedPlayers.length < MAX_PLAYERS) {
         selectedPlayers.push(player);
       }
-      document.querySelectorAll('.player-card').forEach(card => {
-        if (card.dataset.id == player.id) {
-          card.classList.toggle('selected', selectedPlayers.some(p => p.id == player.id));
-        }
-      });
+      renderFilteredPlayers(); // Re-render to update "selected" state
     }
 
+    // Update team display
     function updateTeamDisplay() {
       teamContainer.innerHTML = '';
       selectedPlayers.forEach(player => {
         const div = document.createElement('div');
-        div.innerText = `${player.web_name} (${getPosition(player.element_type)})`;
+        div.innerText = `${player.web_name} (${player.position}) - £${player.now_cost}m`;
         teamContainer.appendChild(div);
       });
       teamContainer.parentElement.querySelector('h3').innerText = `✅ Your Team (${selectedPlayers.length}/11)`;
     }
 
+    // Check join button
     function checkJoinButton() {
       joinContestBtn.disabled = selectedPlayers.length !== MAX_PLAYERS;
     }
 
+    // Join Contest
     joinContestBtn.addEventListener('click', async () => {
       if (selectedPlayers.length !== MAX_PLAYERS) return;
 
@@ -333,6 +450,7 @@
       }
     });
 
+    // Update Prize Pool
     async function updatePrizePool() {
       try {
         const response = await fetch('/prize-pool');
@@ -344,6 +462,7 @@
       }
     }
 
+    // Load Leaderboard
     async function loadLeaderboard() {
       try {
         const response = await fetch('/leaderboard');
@@ -353,7 +472,7 @@
         data.forEach((entry, i) => {
           const div = document.createElement('div');
           div.className = 'leaderboard-item';
-          div.innerHTML = `<strong>#${i+1}</strong> User: ${entry.userId.slice(0,6)}... Points: ${entry.points}`;
+          div.innerHTML = `<strong>#${i+1}</strong> User: ${entry.userId} Points: ${entry.points}`;
           lbDiv.appendChild(div);
         });
       } catch (e) {
@@ -361,6 +480,27 @@
       }
     }
 
+    // Search, Sort, Filter Events
+    searchInput.addEventListener('input', (e) => {
+      currentSearch = e.target.value.toLowerCase();
+      renderFilteredPlayers();
+    });
+
+    sortSelect.addEventListener('change', (e) => {
+      currentSort = e.target.value;
+      renderFilteredPlayers();
+    });
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.pos;
+        renderFilteredPlayers();
+      });
+    });
+
+    // Tab Bar
     document.addEventListener('DOMContentLoaded', function() {
       const tabBar = document.getElementById('tabBar');
       const tabButtons = tabBar.querySelectorAll('.tab-btn');
