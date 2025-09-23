@@ -1,499 +1,226 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fantasy Sport Token (FST) — Dashboard</title>
-
-  <!-- Fav & theme -->
-  <meta name="theme-color" content="#071226" />
-  <style>
-    /* -------------------------
-       CLEAN & PROFESSIONAL STYLING
-    --------------------------*/
-    :root{
-      --bg:#071226;
-      --card:#0f1724;
-      --muted:#9aa6b2;
-      --accent:#00d1a1;
-      --glass: rgba(255,255,255,0.03);
-      --glass-2: rgba(255,255,255,0.02);
-      --danger: #ff6b6b;
-      --radius:14px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
-    html,body{height:100%;margin:0;background:linear-gradient(180deg,#051026 0%, #071226 100%);color:#e6eef3}
-    .wrap{max-width:1200px;margin:28px auto;padding:20px;}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{
-      width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#3dd7b6);display:flex;align-items:center;justify-content:center;font-weight:700;color:#022;box-shadow:0 8px 28px rgba(2,28,40,0.45)
-    }
-    .title{font-size:1.15rem;font-weight:700;line-height:1}
-    .subtitle{font-size:0.85rem;color:var(--muted);margin-top:2px}
-    .controls{display:flex;gap:8px;align-items:center}
-    .chip{background:var(--glass);padding:8px 12px;border-radius:10px;font-size:0.9rem;color:var(--muted);display:flex;gap:8px;align-items:center}
-    .btn{
-      background:linear-gradient(90deg,var(--accent),#23caa0);border:none;padding:10px 14px;border-radius:10px;color:#022;font-weight:700;cursor:pointer;box-shadow:0 8px 24px rgba(3,27,33,0.35);
-    }
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:8px 10px;border-radius:10px;cursor:pointer}
-    main{display:grid;grid-template-columns: 360px 1fr;gap:20px}
-    /* sidebar */
-    .panel{background:var(--card);border-radius:var(--radius);padding:16px;box-shadow: 0 6px 22px rgba(2,14,20,0.6);}
-    .small{font-size:0.85rem;color:var(--muted)}
-    .time-box{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-    .big-time{font-weight:700;font-size:1.3rem;color:#dffbf0}
-    .toggle{display:flex;gap:8px;align-items:center;margin-top:8px}
-    .stat{display:flex;justify-content:space-between;align-items:center;padding:10px 6px;border-radius:10px;background:var(--glass-2);margin-bottom:8px}
-    .search{display:flex;gap:8px;margin:12px 0}
-    .search input{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
-    .filter{display:flex;gap:8px;flex-wrap:wrap}
-    .chip-filter{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:10px;color:var(--muted);cursor:pointer}
-    /* content */
-    .content-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-    .player-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;display:flex;gap:12px;align-items:center;box-shadow:0 6px 28px rgba(2,8,12,0.5);}
-    .player-photo{width:76px;height:76px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.03)}
-    .player-meta{flex:1}
-    .player-name{font-weight:700}
-    .player-team{font-size:0.85rem;color:var(--muted);margin-top:4px}
-    .points{font-weight:800;color:var(--accent);font-size:1.05rem}
-    .badge{width:38px;height:38px;border-radius:8px;object-fit:contain}
-    .empty{color:var(--muted);padding:26px;border-radius:10px;background:var(--glass);text-align:center}
-    footer{margin-top:22px;color:var(--muted);font-size:0.85rem;text-align:center}
-    /* responsive */
-    @media (max-width:980px){
-      main{grid-template-columns:1fr; }
-      .logo{width:48px;height:48px}
-    }
-    /* loader */
-    .loader{width:28px;height:28px;border-radius:50%;border:4px solid rgba(255,255,255,0.06);border-top-color:var(--accent);animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FST - Fantasy Sport Token</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.3/dist/tailwind.min.css" rel="stylesheet">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
-<body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">FST</div>
-        <div>
-          <div class="title">Fantasy Sport Token <span style="color:var(--muted)"> (FST)</span></div>
-          <div class="subtitle">EPL live data · demo · Telegram Mini App</div>
-        </div>
-      </div>
+<body class="bg-gray-100 text-gray-800">
 
-      <div class="controls">
-        <div id="statusChip" class="chip"><span id="statusDot">●</span><span id="statusText"> Offline</span></div>
-        <button id="refreshBtn" class="btn-ghost">🔁 Refresh</button>
-        <button id="openBotBtn" class="btn">Open in Telegram</button>
-      </div>
-    </header>
+<header class="bg-blue-600 text-white p-4 text-center text-2xl font-bold">
+    FST - Fantasy Sport Token
+</header>
 
-    <main>
-      <!-- LEFT SIDEBAR -->
-      <aside class="panel">
-        <div class="time-box">
-          <div class="small">Local Time</div>
-          <div id="localTime" class="big-time">--:--</div>
-          <div class="small">Nigeria (Lagos)</div>
-          <div id="naijaTime" class="big-time">--:--</div>
+<main class="p-4 max-w-6xl mx-auto">
 
-          <div class="toggle">
-            <div class="small">Show:</div>
-            <div id="toggleLive" class="chip-filter">Live GW</div>
-            <div id="toggleTop" class="chip-filter">Top Players</div>
-          </div>
-        </div>
+<!-- Telegram User Info -->
+<section id="telegramUser" class="mb-4 p-3 bg-gray-200 rounded">
+    <h2 class="text-lg font-semibold">Hello, <span id="tgName">Guest</span></h2>
+    <p id="tgUsername"></p>
+</section>
 
-        <div style="height:12px"></div>
+<!-- User Local Time -->
+<section id="localTime" class="mb-4 p-2 bg-gray-200 rounded">
+    <p>Your local time: <span id="userTime"></span></p>
+</section>
 
-        <div class="small">Search players</div>
-        <div class="search">
-          <input id="searchInput" placeholder="Search by name (e.g. Haaland)"/>
-          <button id="clearSearch" class="btn-ghost">Clear</button>
-        </div>
+<!-- Wallet Section -->
+<section id="wallet" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Connect Wallet</h2>
+    <button id="connectWallet" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+        Connect Wallet
+    </button>
+    <p id="walletAddress" class="mt-2 text-sm"></p>
+</section>
 
-        <div class="small">Filter by team</div>
-        <div id="teamFilter" class="filter" style="margin-top:8px"></div>
+<!-- Top Players Section -->
+<section id="players" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Top Players</h2>
+    <div id="playersList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+</section>
 
-        <div style="height:10px"></div>
+<!-- Search Section -->
+<section id="search" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Search Players</h2>
+    <input type="text" id="playerSearch" placeholder="Search by name, team, or position..." 
+        class="w-full p-2 border rounded shadow mb-2">
+    <div id="searchResults" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+</section>
 
-        <div class="small" style="margin-top:10px">Live Gameweek</div>
-        <div id="liveBox" class="stat" style="margin-top:8px">
-          <div>
-            <div style="font-weight:700" id="liveGW">GW —</div>
-            <div class="small" id="gwStatus">—</div>
-          </div>
-          <div id="liveLoader" style="display:none" class="loader"></div>
-        </div>
+<!-- Favorites Section -->
+<section id="favoritesLive" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Favorite Players Live Points</h2>
+    <div id="favoritesLiveList" class="space-y-2"></div>
+</section>
 
-        <div style="height:12px"></div>
-        <div class="small">Info</div>
-        <div class="small" style="margin-top:8px;color:var(--muted)">This frontend uses the public FPL endpoints. For private/protected APIs, configure a backend and set BACKEND_API_BASE.</div>
-      </aside>
+<!-- Transfers Chart Section -->
+<section id="transfers" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">Gameweek Transfers</h2>
+    <canvas id="transfersChart" class="bg-white p-4 rounded shadow"></canvas>
+</section>
 
-      <!-- RIGHT CONTENT -->
-      <section>
-        <div class="content-top">
-          <div>
-            <h2 style="margin:0">Top Players</h2>
-            <div class="small" id="subtext">Based on total points (auto-updates)</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <div id="playersCount" class="chip">— players</div>
-            <div class="small" id="lastUpdated">Last update: —</div>
-          </div>
-        </div>
+<!-- League Table Section -->
+<section id="league" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">League Table</h2>
+    <div id="leagueTable" class="overflow-x-auto"></div>
+</section>
 
-        <div id="contentArea">
-          <div id="playersGrid" class="cards">
-            <!-- player cards injected here -->
-          </div>
+<!-- Leaderboard Section -->
+<section id="leaderboard" class="mb-6">
+    <h2 class="text-xl font-semibold mb-2">FST Token Leaderboard</h2>
+    <div id="leaderboardList" class="overflow-x-auto bg-white p-4 rounded shadow"></div>
+</section>
 
-          <div id="emptyState" class="empty" style="display:none">No players to show</div>
-        </div>
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-        <footer>
-          Built for FST · Demo · Data from Fantasy Premier League · Deploy to Render or Vercel
-        </footer>
-      </section>
-    </main>
-  </div>
+// Telegram user info
+const tgUser = tg.initDataUnsafe?.user;
+if(tgUser){
+    document.getElementById('tgName').textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+    document.getElementById('tgUsername').textContent = tgUser.username ? '@' + tgUser.username : '';
+}
 
-  <script>
-  /************************************************************************
-   * Professional single-file FPL frontend
-   * - Configure BACKEND_API_BASE to proxy calls to your Ubuntu server if you have one.
-   * - Otherwise it will attempt to fetch public FPL endpoints directly (may run into CORS,
-   *   so backend proxy is recommended for production).
-   *
-   * How to configure:
-   *  - If you have a backend: set BACKEND_API_BASE = "https://your-domain.com"
-   *  - The frontend will call /api/fpl/bootstrap-static, /api/fpl/fixtures, /api/fpl/event/{gw}/live
-   *
-   ************************************************************************/
-
-  const BACKEND_API_BASE = ""; // <-- if you have a backend, set your URL here (no trailing slash). Leave empty to use public endpoints.
-  const USE_BACKEND = Boolean(BACKEND_API_BASE && BACKEND_API_BASE.length);
-
-  // Helper endpoints (frontend chooses)
-  const endpoints = {
-    bootstrap: USE_BACKEND ? `${BACKEND_API_BASE}/api/fpl/bootstrap-static` : "https://fantasy.premierleague.com/api/bootstrap-static/",
-    fixtures: USE_BACKEND ? `${BACKEND_API_BASE}/api/fpl/fixtures` : "https://fantasy.premierleague.com/api/fixtures/",
-    liveEvent: (gw) => USE_BACKEND ? `${BACKEND_API_BASE}/api/fpl/event/${gw}/live` : `https://fantasy.premierleague.com/api/event/${gw}/live/`
-  };
-
-  // UI nodes
-  const localTimeEl = document.getElementById('localTime');
-  const naijaTimeEl = document.getElementById('naijaTime');
-  const statusChip = document.getElementById('statusChip');
-  const statusDot = document.getElementById('statusDot');
-  const statusText = document.getElementById('statusText');
-  const playersGrid = document.getElementById('playersGrid');
-  const playersCount = document.getElementById('playersCount');
-  const lastUpdated = document.getElementById('lastUpdated');
-  const refreshBtn = document.getElementById('refreshBtn');
-  const openBotBtn = document.getElementById('openBotBtn');
-  const searchInput = document.getElementById('searchInput');
-  const clearSearch = document.getElementById('clearSearch');
-  const teamFilter = document.getElementById('teamFilter');
-  const toggleLive = document.getElementById('toggleLive');
-  const toggleTop = document.getElementById('toggleTop');
-  const liveGW = document.getElementById('liveGW');
-  const gwStatus = document.getElementById('gwStatus');
-  const liveLoader = document.getElementById('liveLoader');
-  const emptyState = document.getElementById('emptyState');
-  const subtext = document.getElementById('subtext');
-
-  // App state
-  let app = {
-    bootstrap: null,
-    players: [],
-    teams: [],
-    fixtures: [],
-    currentGW: null,
-    liveData: null,
-    filteredPlayers: [],
-    filters: {
-      team: null,
-      query: ""
-    }
-  };
-
-  // Auto clock updater
-  function updateClocks() {
+// Auto-detect user local time
+function updateLocalTime(){
     const now = new Date();
-    localTimeEl.textContent = now.toLocaleTimeString();
-    // Always show Lagos as requested (auto convert)
-    try {
-      const naija = now.toLocaleString('en-GB', { timeZone: 'Africa/Lagos' });
-      naijaTimeEl.textContent = new Date(naija).toLocaleTimeString('en-GB');
-    } catch(e) {
-      // fallback: compute offset Lagos = UTC+1 or UTC+2 (DST not used)
-      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const lagos = new Date(utc + (3600000)); // Lagos UTC+1
-      naijaTimeEl.textContent = lagos.toLocaleTimeString();
-    }
-  }
-  setInterval(updateClocks, 1000);
-  updateClocks();
+    const timeStr = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('userTime').textContent = timeStr;
+}
+setInterval(updateLocalTime,1000);
+updateLocalTime();
 
-  // Small helper
-  function fmtPrice(cost) {
-    return (cost/10).toFixed(1) + 'm';
-  }
-
-  function setStatus(online, text) {
-    statusDot.style.color = online ? '#00d1a1' : '#ff6b6b';
-    statusText.textContent = ` ${text}`;
-  }
-
-  // Fetch helper with timeout & nice error logging
-  async function fetchJSON(url, opts = {}) {
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 15000);
-    try {
-      const r = await fetch(url, { signal: controller.signal, ...opts });
-      clearTimeout(id);
-      if (!r.ok) {
-        const ct = r.headers.get('content-type') || '';
-        const body = await (ct.includes('application/json') ? r.json() : r.text());
-        console.error('Fetch error', url, r.status, body);
-        throw new Error(`HTTP ${r.status}`);
-      }
-      return await r.json();
-    } catch (err) {
-      clearTimeout(id);
-      console.error('Fetch failed', url, err);
-      throw err;
-    }
-  }
-
-  // Load bootstrap (players + teams)
-  async function loadBootstrap() {
-    setStatus(false, 'Loading bootstrap...');
-    try {
-      const data = await fetchJSON(endpoints.bootstrap);
-      app.bootstrap = data;
-      app.players = data.elements || [];
-      app.teams = data.teams || [];
-      playersCount.textContent = `${app.players.length} players`;
-      lastUpdated.textContent = `Last update: ${new Date().toLocaleString()}`;
-      setStatus(true, 'Live');
-      buildTeamFilter();
-      applyFiltersAndRender();
-      // detect current GW from bootstrap
-      const events = data.events || [];
-      const current = events.find(e => e.is_current) || events.find(e => e.is_next) || events[0];
-      if (current) {
-        app.currentGW = current.id;
-        liveGW.textContent = `GW ${app.currentGW}`;
-        gwStatus.textContent = current.name || 'Gameweek';
-      }
-      return data;
-    } catch (err) {
-      setStatus(false, 'Offline (could not load)');
-      playersGrid.innerHTML = '';
-      emptyState.style.display = 'block';
-      emptyState.textContent = 'Failed to load FPL data. If deploying from a browser you may need a backend proxy (CORS).';
-      throw err;
-    }
-  }
-
-  async function loadFixtures() {
-    try {
-      const fx = await fetchJSON(endpoints.fixtures);
-      app.fixtures = fx;
-      return fx;
-    } catch (err) {
-      console.warn('fixtures failed', err);
-      return [];
-    }
-  }
-
-  async function loadLiveGW() {
-    if (!app.currentGW) return null;
-    liveLoader.style.display = 'inline-block';
-    try {
-      const data = await fetchJSON(endpoints.liveEvent(app.currentGW));
-      app.liveData = data;
-      liveLoader.style.display = 'none';
-      return data;
-    } catch (err) {
-      liveLoader.style.display = 'none';
-      console.warn('live gw failed', err);
-      return null;
-    }
-  }
-
-  function buildTeamFilter() {
-    teamFilter.innerHTML = '';
-    const allBtn = document.createElement('button');
-    allBtn.className='chip-filter';
-    allBtn.textContent='All';
-    allBtn.onclick = () => { app.filters.team = null; applyFiltersAndRender(); };
-    teamFilter.appendChild(allBtn);
-
-    app.teams.forEach(t => {
-      const b = document.createElement('button');
-      b.className = 'chip-filter';
-      b.textContent = t.name;
-      b.onclick = () => { app.filters.team = t.id; applyFiltersAndRender(); };
-      teamFilter.appendChild(b);
-    });
-  }
-
-  function getPlayerPhoto(player) {
-    // player.photo is like "12345.jpg"
-    const id = (player.photo || '').replace('.jpg','').replace('.png','');
-    return `https://resources.premierleague.com/premierleague/photos/players/250x250/p${id}.png`;
-  }
-
-  function getTeamBadge(team) {
-    // team.code is numeric code but better use team.id
-    return `https://resources.premierleague.com/premierleague/badges/70/t${team.code}.png`;
-  }
-
-  function applyFiltersAndRender() {
-    const q = app.filters.query.trim().toLowerCase();
-    let list = app.players.slice();
-
-    if (app.filters.team) {
-      list = list.filter(p => p.team === app.filters.team);
-    }
-    if (q) {
-      list = list.filter(p => (p.web_name || '').toLowerCase().includes(q) || (p.first_name || '').toLowerCase().includes(q));
-    }
-
-    // sort by total points
-    list.sort((a,b) => b.total_points - a.total_points);
-    app.filteredPlayers = list;
-    renderPlayers(list.slice(0, 40)); // limit to 40
-  }
-
-  function renderPlayers(list) {
-    playersGrid.innerHTML = '';
-    emptyState.style.display = list.length ? 'none' : 'block';
-    if (!list.length) {
-      emptyState.textContent = 'No players match your filters.';
-      return;
-    }
-
-    list.forEach(p => {
-      const team = app.teams.find(t => t.id === p.team) || {};
-      const card = document.createElement('div');
-      card.className = 'player-card';
-      card.innerHTML = `
-        <img src="${getPlayerPhoto(p)}" class="player-photo" onerror="this.onerror=null;this.src='https://via.placeholder.com/120x120?text=No+Img'"/>
-        <div class="player-meta">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <div>
-              <div class="player-name">${p.web_name}</div>
-              <div class="player-team">${team.name || 'Unknown'} · ${p.element_type ? p.element_type : ''}</div>
-            </div>
-            <div style="text-align:right">
-              <div class="points">${p.total_points}</div>
-              <div class="small" style="color:var(--muted)">${fmtPrice(p.now_cost)}</div>
-            </div>
-          </div>
-          <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between">
-            <div style="display:flex;gap:8px;align-items:center">
-              <img class="badge" src="${getTeamBadge(team)}" onerror="this.onerror=null;this.src='https://via.placeholder.com/38'"/>
-            </div>
-            <div>
-              <button class="btn-ghost" onclick="copyToClipboard('${team.name} - ${p.web_name}');">Copy</button>
-            </div>
-          </div>
-        </div>
-      `;
-      playersGrid.appendChild(card);
-    });
-  }
-
-  function copyToClipboard(text) {
-    navigator.clipboard?.writeText(text).then(() => {
-      alert('Copied: ' + text);
-    }).catch(() => { prompt('Copy manually:', text); });
-  }
-
-  // UI wiring
-  searchInput.addEventListener('input', e => {
-    app.filters.query = e.target.value;
-    applyFiltersAndRender();
-  });
-  clearSearch.addEventListener('click', () => {
-    searchInput.value = '';
-    app.filters.query = '';
-    applyFiltersAndRender();
-  });
-  refreshBtn.addEventListener('click', async () => {
-    await bootAndRender(true);
-  });
-
-  toggleLive.addEventListener('click', async () => {
-    toggleLive.classList.toggle('active');
-    // toggle live panel: load live gw
-    await loadLiveGW();
-    alert('Live GW refresh triggered (check console for details).');
-  });
-
-  toggleTop.addEventListener('click', () => {
-    toggleTop.classList.toggle('active');
-    // just visual for now
-    alert('Top players view (already active).');
-  });
-
-  openBotBtn.addEventListener('click', () => {
-    // open Telegram if inside UA or suggest copy
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.openTelegram();
+// Web3 Wallet
+const connectWalletBtn = document.getElementById('connectWallet');
+const walletAddressEl = document.getElementById('walletAddress');
+connectWalletBtn.addEventListener('click', async () => {
+    if(window.ethereum){
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        walletAddressEl.textContent = `Connected: ${accounts[0]}`;
     } else {
-      const botLink = 'https://t.me/your_bot_username';
-      window.open(botLink, '_blank');
+        alert('Please install Metamask!');
     }
-  });
+});
 
-  // Boot sequence
-  async function bootAndRender(force=false) {
+// FPL API base (CORS proxy)
+const FPL_BASE = 'https://cors-anywhere.herokuapp.com/https://fantasy.premierleague.com/api';
+
+// Data stores
+let allPlayers = [];
+let favorites = {}; // keyed by Telegram user id
+let fstTokens = {}; // FST tokens per Telegram user
+let currentGW = 1;
+
+// Initialize for current user
+if(tgUser){
+    favorites[tgUser.id] = [];
+    fstTokens[tgUser.id] = 0;
+}
+
+// Fetch top players
+async function fetchPlayers() {
     try {
-      setStatus(false, 'Booting...');
-      await loadBootstrap();
-      await loadFixtures();
-      await loadLiveGW();
-      setStatus(true, 'Live');
-      console.log('Bootstrap loaded, players:', app.players.length, 'teams:', app.teams.length);
-    } catch (err) {
-      console.error('Boot failed', err);
-    }
-  }
+        const res = await axios.get(`${FPL_BASE}/bootstrap-static/`);
+        allPlayers = res.data.elements;
+        displayPlayers(allPlayers.slice(0,20));
+    } catch(err){ console.error(err); }
+}
 
-  // Telegram WebApp integration (optional)
-  function initTelegramWebApp() {
-    try {
-      if (window.Telegram && window.Telegram.WebApp) {
-        const tg = window.Telegram.WebApp;
-        console.log('Telegram WebApp initDataUnsafe:', tg.initDataUnsafe);
-        // optionally expand
-        try { tg.expand(); } catch(e){}
-        // show a small greeting
-        const name = tg.initDataUnsafe.user?.first_name || 'Guest';
-        statusChip.innerHTML = `<span id="statusDot" style="color:#00d1a1">●</span> <span id="statusText"> Connected: ${name}</span>`;
-        // If you need to send data back to bot:
-        // tg.sendData(JSON.stringify({event:'app_opened', user: tg.initDataUnsafe.user}));
-      }
-    } catch(e){
-      console.warn('Telegram WebApp not available', e);
-    }
-  }
+// Display players
+function displayPlayers(players){
+    const container = document.getElementById('searchResults');
+    container.innerHTML='';
+    players.forEach(player=>{
+        const card = document.createElement('div');
+        card.className='bg-white p-4 rounded shadow hover:shadow-lg transition cursor-pointer';
+        card.innerHTML=`
+            <h3 class="font-semibold">${player.web_name}</h3>
+            <p>Team: ${player.team}</p>
+            <p>Position: ${player.element_type}</p>
+            <p>Price: £${player.now_cost/10}</p>
+            <p>Points: ${player.total_points}</p>
+            <button class="addFav bg-yellow-400 px-2 py-1 rounded mt-2">☆ Favorite</button>
+            <div class="playerDetails mt-2 hidden"></div>
+        `;
+        // Player details on click
+        card.addEventListener('click', async e=>{
+            if(e.target.classList.contains('addFav')) return;
+            const detailsDiv = card.querySelector('.playerDetails');
+            if(detailsDiv.innerHTML===''){
+                const detailRes = await axios.get(`${FPL_BASE}/element-summary/${player.id}/`);
+                detailsDiv.innerHTML=`
+                    <p>Goals: ${detailRes.data.history.reduce((a,b)=>a+b.goals_scored,0)}</p>
+                    <p>Assists: ${detailRes.data.history.reduce((a,b)=>a+b.assists,0)}</p>
+                    <p>Minutes Played: ${detailRes.data.history.reduce((a,b)=>a+b.minutes,0)}</p>
+                `;
+            }
+            detailsDiv.classList.toggle('hidden');
+        });
+        // Favorite button
+        const favBtn = card.querySelector('.addFav');
+        favBtn.addEventListener('click', e=>{
+            e.stopPropagation();
+            if(tgUser){
+                const userFavs = favorites[tgUser.id];
+                if(!userFavs.includes(player.id)){
+                    userFavs.push(player.id);
+                    favBtn.textContent='★ Favorited';
+                    favBtn.classList.add('bg-yellow-600');
+                } else {
+                    favorites[tgUser.id] = userFavs.filter(id=>id!==player.id);
+                    favBtn.textContent='☆ Favorite';
+                    favBtn.classList.remove('bg-yellow-600');
+                }
+                updateFavoritesLive();
+            }
+        });
+        container.appendChild(card);
+    });
+}
 
-  // run
-  (async function(){
-    initTelegramWebApp();
-    await bootAndRender();
-  })();
+// Search players
+document.getElementById('playerSearch').addEventListener('input', e=>{
+    const query = e.target.value.toLowerCase();
+    const filtered = allPlayers.filter(p=>{
+        const team = p.team.toString();
+        const pos = p.element_type.toString();
+        return p.web_name.toLowerCase().includes(query) || team.includes(query) || pos.includes(query);
+    });
+    displayPlayers(filtered);
+});
 
-  </script>
-</body>
-</html>
+// Fetch current GW
+async function fetchCurrentGW(){
+    try{
+        const res = await axios.get(`${FPL_BASE}/events/`);
+        currentGW = res.data.current;
+    } catch(err){ console.error(err); }
+}
+
+// Update live points and FST tokens
+async function updateFavoritesLive(){
+    try{
+        if(!tgUser || favorites[tgUser.id].length===0) return;
+        const res = await axios.get(`${FPL_BASE}/event/${currentGW}/live/`);
+        const picks = res.data.elements;
+        const container = document.getElementById('favoritesLiveList');
+        container.innerHTML='';
+
+        favorites[tgUser.id].forEach(favId=>{
+            const playerLive = picks.find(p=>p.id===favId);
+            if(playerLive){
+                const points = playerLive.stats.total_points;
+                fstTokens[tgUser.id] += points;
+
+                const div = document.createElement('div');
+                div.className='bg-white p-3 rounded shadow';
+                div.innerHTML=`
+                    <strong>${allPlayers.find(p=>p.id===favId).web_name}</strong>
+                    <p>Live Points: ${points}</p>
+                    <p>Goals: ${playerLive.stats.goals_scored||0}</p>
+                    <p>Assists: ${playerLive.stats.assists||0}</
