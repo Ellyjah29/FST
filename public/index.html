@@ -83,12 +83,6 @@
     .player-card.selected .player-photo {
       border-color: #000;
     }
-    .team-logo {
-      width: 24px;
-      height: 24px;
-      margin-bottom: 6px;
-      border-radius: 4px;
-    }
     .player-name {
       font-weight: bold;
       text-align: center;
@@ -101,7 +95,8 @@
       width: 100%;
       font-size: 12px;
       color: #ccc;
-      margin-top: 4px;
+      margin: 2px 0;
+      align-items: center;
     }
     .price-tag {
       color: #4ecdc4;
@@ -331,7 +326,7 @@
       }
     });
 
-    // Render Players (store all, then filter/sort)
+    // Render Players
     function renderPlayers(players) {
       allPlayers = players;
       renderFilteredPlayers();
@@ -367,17 +362,14 @@
         const card = document.createElement('div');
         card.className = `player-card ${isSelected ? 'selected' : ''}`;
         card.innerHTML = `
-          <img src="${player.photo_url}" class="player-photo" 
-               onerror="this.onerror=null; this.src='https://via.placeholder.com/60x75/333/fff?text=NO+IMG'">
-          <img src="${player.team_logo}" class="team-logo" 
-               onerror="this.onerror=null; this.style.display='none'">
+          <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
           <div class="player-name">${player.web_name}</div>
           <div class="player-meta">
-            <span>${player.position}</span>
+            <span>${player.position} • ${player.team_name}</span>
             <span class="price-tag">£${player.now_cost}m</span>
           </div>
           <div class="player-meta">
-            <span>${player.team_name}</span>
+            <span></span>
             <span class="points-tag">${player.total_points} pts</span>
           </div>
         `;
@@ -400,7 +392,7 @@
       } else if (selectedPlayers.length < MAX_PLAYERS) {
         selectedPlayers.push(player);
       }
-      renderFilteredPlayers(); // Re-render to update "selected" state
+      renderFilteredPlayers();
     }
 
     // Update team display
