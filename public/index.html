@@ -13,7 +13,7 @@
       background: #0f1923;
       color: white;
       margin: 0;
-      padding: 16px 16px 80px 16px; /* space for tab bar */
+      padding: 16px 16px 80px 16px;
       font-size: 16px;
       position: relative;
     }
@@ -82,7 +82,7 @@
       border-bottom: 1px solid #333;
     }
 
-    /* === FIXED TAB BAR STYLES === */
+    /* Tab Bar */
     .tab-bar {
       position: fixed;
       bottom: 0;
@@ -93,7 +93,7 @@
       background: #15202b;
       padding: 10px 0;
       border-top: 1px solid #333;
-      z-index: 10000; /* on top of everything */
+      z-index: 10000;
       pointer-events: auto;
     }
 
@@ -184,14 +184,11 @@
     tg.expand();
     tg.ready();
 
-    // Adjust body height for Telegram viewport
     tg.onEvent('viewportChanged', () => {
       document.body.style.height = window.innerHeight + 'px';
     });
 
-    // Simulate user ID
     const userId = 'user_' + Math.random().toString(36).substr(2, 9);
-
     let selectedPlayers = [];
     const MAX_PLAYERS = 11;
 
@@ -204,10 +201,8 @@
     const prizeAmountSpan = document.getElementById('prizeAmount');
     const entriesSpan = document.getElementById('entries');
 
-    // Initialize
     statusDiv.innerText = "Tap 'Connect Wallet' to begin";
 
-    // Connect Wallet
     connectWalletBtn.addEventListener('click', async () => {
       statusDiv.innerText = "Connecting wallet...";
       try {
@@ -232,14 +227,13 @@
       }
     });
 
-    // Load Players (EPL only for MVP)
     loadPlayersBtn.addEventListener('click', async () => {
       statusDiv.innerText = "Loading EPL players...";
       loadPlayersBtn.disabled = true;
       try {
         const response = await fetch('/players');
         const players = await response.json();
-        renderPlayers(players.slice(0, 50)); // top 50 for MVP
+        renderPlayers(players.slice(0, 50));
         statusDiv.innerText = "Pick 11 players to join!";
       } catch (e) {
         statusDiv.innerText = "❌ Failed to load players";
@@ -247,7 +241,6 @@
       }
     });
 
-    // Render Players
     function renderPlayers(players) {
       playerGrid.innerHTML = '';
       players.forEach(player => {
@@ -286,7 +279,6 @@
       } else if (selectedPlayers.length < MAX_PLAYERS) {
         selectedPlayers.push(player);
       }
-      // Update UI
       document.querySelectorAll('.player-card').forEach(card => {
         if (card.dataset.id == player.id) {
           card.classList.toggle('selected', selectedPlayers.some(p => p.id == player.id));
@@ -308,7 +300,6 @@
       joinContestBtn.disabled = selectedPlayers.length !== MAX_PLAYERS;
     }
 
-    // Join Contest (FREE for MVP)
     joinContestBtn.addEventListener('click', async () => {
       if (selectedPlayers.length !== MAX_PLAYERS) return;
 
@@ -342,20 +333,17 @@
       }
     });
 
-    // Update Prize Pool (simulated FST)
     async function updatePrizePool() {
       try {
         const response = await fetch('/prize-pool');
         const data = await response.json();
-        const simulatedFST = data.entries * 10; // 10 FST per entrant
-        prizeAmountSpan.innerText = `${simulatedFST} FST`;
+        prizeAmountSpan.innerText = `${data.fst} FST`;
         entriesSpan.innerText = data.entries;
       } catch (e) {
         console.log("Could not fetch prize pool");
       }
     }
 
-    // Load Leaderboard
     async function loadLeaderboard() {
       try {
         const response = await fetch('/leaderboard');
@@ -373,7 +361,6 @@
       }
     }
 
-    // === TAB BAR CLICK HANDLER ===
     document.addEventListener('DOMContentLoaded', function() {
       const tabBar = document.getElementById('tabBar');
       const tabButtons = tabBar.querySelectorAll('.tab-btn');
@@ -384,13 +371,10 @@
           e.stopPropagation();
 
           const league = this.dataset.league;
-
-          // Visual feedback
           tabButtons.forEach(b => b.classList.remove('active'));
           this.classList.add('active');
 
           if (league !== 'epl') {
-            // Use Telegram native popup (better UX)
             if (tg.showPopup) {
               tg.showPopup({
                 title: "🚧 Coming Soon",
@@ -402,7 +386,6 @@
             }
             return;
           }
-          // EPL is default — no reload needed for MVP
         });
       });
     });
