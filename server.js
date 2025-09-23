@@ -1,4 +1,4 @@
-// server.js — RENDER-OPTIMIZED, PLAYER IMAGES, SEARCH, SORT
+// server.js — RENDER-OPTIMIZED, PLAYER IMAGES, NO TEAM LOGOS
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -18,30 +18,6 @@ app.use(express.static('public', {
 let users = {};
 let globalEntries = 0;
 const FST_PER_ENTRY = 10;
-
-// Premier League badge map (FPL team.id → badge) — FIXED: NO TRAILING SPACES
-const badgeMap = {
-  1: "https://resources.premierleague.com/premierleague/badges/t3.png",   // Arsenal
-  2: "https://resources.premierleague.com/premierleague/badges/t8.png",   // Aston Villa
-  3: "https://resources.premierleague.com/premierleague/badges/t91.png",  // Bournemouth
-  4: "https://resources.premierleague.com/premierleague/badges/t36.png",  // Brentford
-  5: "https://resources.premierleague.com/premierleague/badges/t90.png",  // Brighton
-  6: "https://resources.premierleague.com/premierleague/badges/t2.png",   // Chelsea
-  7: "https://resources.premierleague.com/premierleague/badges/t31.png",  // Crystal Palace
-  8: "https://resources.premierleague.com/premierleague/badges/t11.png",  // Everton
-  9: "https://resources.premierleague.com/premierleague/badges/t54.png",  // Fulham
-  10: "https://resources.premierleague.com/premierleague/badges/t13.png", // Ipswich
-  11: "https://resources.premierleague.com/premierleague/badges/t43.png", // Man City
-  12: "https://resources.premierleague.com/premierleague/badges/t1.png",  // Man Utd
-  13: "https://resources.premierleague.com/premierleague/badges/t4.png",  // Newcastle
-  14: "https://resources.premierleague.com/premierleague/badges/t14.png", // Liverpool
-  15: "https://resources.premierleague.com/premierleague/badges/t49.png", // Nottingham Forest
-  16: "https://resources.premierleague.com/premierleague/badges/t20.png", // Southampton
-  17: "https://resources.premierleague.com/premierleague/badges/t6.png",  // Spurs
-  18: "https://resources.premierleague.com/premierleague/badges/t21.png", // West Ham
-  19: "https://resources.premierleague.com/premierleague/badges/t39.png", // Wolves
-  20: "https://resources.premierleague.com/premierleague/badges/t35.png", // Leicester
-};
 
 // Health check for Render
 app.get('/health', (req, res) => {
@@ -76,10 +52,9 @@ app.post('/connect-wallet', (req, res) => {
   }
 });
 
-// Enhanced players endpoint with images, logos, cost, points
+// Enhanced players endpoint — NO team_logo
 app.get('/players', async (req, res) => {
   try {
-    // ❌ Your URL had trailing space — FIXED
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
       timeout: 5000
     });
@@ -87,25 +62,23 @@ app.get('/players', async (req, res) => {
     const players = response.data.elements;
     const teams = response.data.teams;
 
-    // Map teams for logo and name
+    // Map teams for name only
     const teamMap = {};
     teams.forEach(team => {
       teamMap[team.id] = {
         name: team.name,
-        short_name: team.short_name,
-        logo: badgeMap[team.id] || ""
+        short_name: team.short_name
+        // 🔥 team_logo REMOVED
       };
     });
 
     const enhancedPlayers = players.map(p => {
-      const photoId = p.photo.split(".")[0]; // safer than .replace
-      // ❌ Your URL had space before ${photoId} — FIXED
+      const photoId = p.photo.split(".")[0];
       return {
         id: p.id,
         web_name: p.web_name,
         team: p.team,
         team_name: teamMap[p.team]?.name || 'Unknown',
-        team_logo: teamMap[p.team]?.logo || '',
         element_type: p.element_type,
         position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
         now_cost: (p.now_cost / 10).toFixed(1),
@@ -118,14 +91,13 @@ app.get('/players', async (req, res) => {
   } catch (error) {
     console.error('FPL API Error:', error.message);
 
-    // Fallback mock players with images — FIXED URLs
+    // Fallback mock players — NO team_logo
     const mockPlayers = [
       {
         id: 1,
         web_name: "Mohamed Salah",
         team: 14,
         team_name: "Liverpool",
-        team_logo: badgeMap[14],
         element_type: 4,
         position: "FWD",
         now_cost: "12.5",
@@ -137,7 +109,6 @@ app.get('/players', async (req, res) => {
         web_name: "Erling Haaland",
         team: 11,
         team_name: "Man City",
-        team_logo: badgeMap[11],
         element_type: 4,
         position: "FWD",
         now_cost: "14.0",
@@ -149,7 +120,6 @@ app.get('/players', async (req, res) => {
         web_name: "Kevin De Bruyne",
         team: 11,
         team_name: "Man City",
-        team_logo: badgeMap[11],
         element_type: 3,
         position: "MID",
         now_cost: "11.5",
@@ -161,7 +131,6 @@ app.get('/players', async (req, res) => {
         web_name: "Alisson",
         team: 14,
         team_name: "Liverpool",
-        team_logo: badgeMap[14],
         element_type: 1,
         position: "GK",
         now_cost: "9.0",
@@ -173,7 +142,6 @@ app.get('/players', async (req, res) => {
         web_name: "Trent Alexander-Arnold",
         team: 14,
         team_name: "Liverpool",
-        team_logo: badgeMap[14],
         element_type: 2,
         position: "DEF",
         now_cost: "8.5",
