@@ -466,7 +466,7 @@
       try {
         fplDataContainer.innerHTML = '<div class="loading">Loading players and teams...</div>';
         
-        // ✅ USING YOUR LIVE PROXY
+        // ✅ USING YOUR LIVE PROXY — NO PLACEHOLDERS!
         const response = await fetch('https://backend-server-w753.onrender.com/api/fpl?path=/bootstrap-static/');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
