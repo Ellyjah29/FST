@@ -120,6 +120,12 @@
       padding: 8px;
       border-bottom: 1px solid #333;
     }
+    .leaderboard-item img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
     input, select {
       padding: 8px;
       border-radius: 6px;
@@ -140,6 +146,21 @@
     .filter-btn.active {
       background: #00c3ff;
       color: #000;
+    }
+
+    /* Profile Section */
+    #profileSection {
+      display: none;
+      background: #1a2a3a;
+      padding: 16px;
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+    #userProfilePic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
     }
 
     /* Tab Bar */
@@ -190,6 +211,17 @@
   <h1>⚽ FST Fantasy</h1>
 
   <div id="status">Initializing...</div>
+
+  <!-- USER PROFILE SECTION -->
+  <div class="section" id="profileSection">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <img id="userProfilePic" src="https://via.placeholder.com/50x50?text=👤" alt="Profile">
+      <div>
+        <div><strong id="userDisplayName">FST Manager</strong></div>
+        <div>Entries: <span id="userEntries">0</span> | Points: <span id="userPoints">0</span></div>
+      </div>
+    </div>
+  </div>
 
   <div class="section">
     <button id="connectWallet">🔐 Connect Wallet</button>
@@ -262,7 +294,14 @@
       document.body.style.height = window.innerHeight + 'px';
     });
 
-    const userId = 'user_' + Math.random().toString(36).substr(2, 9);
+    // Get real Telegram user data if available
+    let telegramUser = null;
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      telegramUser = tg.initDataUnsafe.user;
+    }
+
+    // Use real Telegram ID or fallback
+    const userId = telegramUser ? telegramUser.id.toString() : 'user_' + Math.random().toString(36).substr(2, 9);
     let selectedPlayers = [];
     const MAX_PLAYERS = 11;
 
@@ -279,6 +318,13 @@
     const sortSelect = document.getElementById('sortSelect');
     const filterButtons = document.querySelectorAll('.filter-btn');
 
+    // Profile elements
+    const profileSection = document.getElementById('profileSection');
+    const userProfilePic = document.getElementById('userProfilePic');
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userEntries = document.getElementById('userEntries');
+    const userPoints = document.getElementById('userPoints');
+
     let allPlayers = [];
     let currentFilter = 'all';
     let currentSearch = '';
@@ -293,15 +339,26 @@
         const response = await fetch('/connect-wallet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
+          body: JSON.stringify({
+            userId: userId,
+            displayName: telegramUser?.first_name || "FST Manager",
+            profilePic: telegramUser?.photo_url || null
+          })
         });
         const data = await response.json();
         if (data.address) {
-          statusDiv.innerText = `✅ Connected: ${data.address.slice(0, 6)}...${data.address.slice(-4)}`;
+          statusDiv.innerText = `✅ Welcome back, ${data.displayName}!`;
           connectWalletBtn.disabled = true;
           connectWalletBtn.innerText = "Wallet Connected";
           loadPlayersBtn.disabled = false;
+          
+          // Show and populate profile
+          profileSection.style.display = 'block';
+          userProfilePic.src = data.profilePic;
+          userDisplayName.innerText = data.displayName;
+          
           updatePrizePool();
+          loadUserProfile();
         } else {
           throw new Error('Connection failed');
         }
@@ -436,6 +493,7 @@
           loadPlayersBtn.style.display = 'none';
           updatePrizePool();
           loadLeaderboard();
+          loadUserProfile(); // refresh profile
         } else {
           throw new Error('Failed to join');
         }
@@ -444,6 +502,26 @@
         joinContestBtn.disabled = false;
       }
     });
+
+    // Load User Profile (from MongoDB)
+    async function loadUserProfile() {
+      try {
+        const response = await fetch(`/user-profile?userId=${userId}`);
+        const profile = await response.json();
+        
+        userDisplayName.innerText = profile.displayName;
+        userProfilePic.src = profile.profilePic;
+        userEntries.innerText = profile.entries;
+        userPoints.innerText = profile.points;
+        
+        // Restore team selection
+        selectedPlayers = profile.team || [];
+        updateTeamDisplay();
+        checkJoinButton();
+      } catch (e) {
+        console.log("Could not load user profile");
+      }
+    }
 
     // Update Prize Pool
     async function updatePrizePool() {
@@ -457,7 +535,7 @@
       }
     }
 
-    // Load Leaderboard
+    // Load Leaderboard (with profile pics)
     async function loadLeaderboard() {
       try {
         const response = await fetch('/leaderboard');
@@ -467,7 +545,13 @@
         data.forEach((entry, i) => {
           const div = document.createElement('div');
           div.className = 'leaderboard-item';
-          div.innerHTML = `<strong>#${i+1}</strong> User: ${entry.userId} Points: ${entry.points}`;
+          div.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <img src="${entry.profilePic}" onerror="this.src='https://via.placeholder.com/24x24?text=👤'">
+              <strong>#${i+1}</strong> ${entry.displayName}
+              <span style="margin-left: auto; color: gold;">${entry.points} pts</span>
+            </div>
+          `;
           lbDiv.appendChild(div);
         });
       } catch (e) {
