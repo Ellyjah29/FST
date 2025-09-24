@@ -137,11 +137,6 @@
       opacity: 0.6;
     }
 
-    #goToTeamBtn {
-      background: linear-gradient(135deg, var(--primary), #00a8e8);
-      color: #000;
-    }
-
     /* FORMATION GRID */
     .formation-selector {
       display: flex;
@@ -352,25 +347,6 @@
       </div>
     </div>
 
-    <!-- ALREADY JOINED VIEW -->
-    <div id="joinedView" class="view" style="display:none;">
-      <div class="section">
-        <div style="text-align: center; padding: 20px 0;">
-          <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
-          <h2 style="font-weight: 700; margin: 0 0 12px; color: var(--success);">
-            Already Joined!
-          </h2>
-          <p style="color: var(--text-secondary); margin: 0;">
-            Your team is ready to build.<br>
-            Go to the team builder to pick your 11 players.
-          </p>
-        </div>
-        <button id="goToTeamBtn">
-          🏗️ Build Your Team
-        </button>
-      </div>
-    </div>
-
     <!-- TEAM VIEW -->
     <div id="teamView" class="view" style="display:none;">
       <div class="section">
@@ -390,11 +366,60 @@
     </div>
   </div>
 
+  <!-- PLAYER MODAL WITH ADVANCED FILTERS -->
   <div class="player-modal" id="playerModal">
     <div class="modal-header">
       <div class="modal-title">Select <span id="modalPosition">Player</span></div>
       <button class="close-modal" id="closeModal">&times;</button>
     </div>
+    
+    <!-- SEARCH & FILTERS -->
+    <div style="padding: 0 20px 15px;">
+      <!-- Search -->
+      <input type="text" 
+             id="playerSearch" 
+             placeholder="🔍 Search player or team..."
+             style="width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 12px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 14px;">
+      
+      <!-- Price Range -->
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <input type="number" 
+               id="minPrice" 
+               placeholder="Min £" 
+               min="0" 
+               max="20"
+               step="0.1"
+               style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+        <input type="number" 
+               id="maxPrice" 
+               placeholder="Max £" 
+               min="0" 
+               max="20"
+               step="0.1"
+               style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+      </div>
+      
+      <!-- Points Range -->
+      <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+        <input type="number" 
+               id="minPoints" 
+               placeholder="Min Points" 
+               min="0" 
+               style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+        <input type="number" 
+               id="maxPoints" 
+               placeholder="Max Points" 
+               min="0" 
+               style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+      </div>
+      
+      <!-- Reset Filters Button -->
+      <button id="resetFilters" 
+              style="width: 100%; padding: 8px; background: rgba(255,255,255,0.1); color: var(--text-secondary); border: none; border-radius: 10px; font-size: 13px;">
+        🔄 Reset Filters
+      </button>
+    </div>
+    
     <div class="modal-content" id="playerList"></div>
   </div>
 
@@ -410,10 +435,8 @@
     const topUserAvatar = document.getElementById('topUserAvatar');
     const topUserName = document.getElementById('topUserName');
     const joinView = document.getElementById('joinView');
-    const joinedView = document.getElementById('joinedView');
     const teamView = document.getElementById('teamView');
     const joinContestBtn = document.getElementById('joinContest');
-    const goToTeamBtn = document.getElementById('goToTeamBtn');
     const submitTeamBtn = document.getElementById('submitTeam');
     const playerModal = document.getElementById('playerModal');
     const closeModal = document.getElementById('closeModal');
@@ -449,20 +472,47 @@
         
         if (profile.managerName && profile.joined) {
           topUserName.innerText = profile.managerName;
-          joinView.style.display = 'none';
-          joinedView.style.display = 'block';
           
-          // If team is already built, go straight to team view
-          if (profile.team && profile.team.length > 0) {
-            joinedView.style.display = 'none';
+          // If team is LOCKED (submitted), show read-only view
+          if (profile.locked) {
+            joinView.style.display = 'none';
             teamView.style.display = 'block';
             loadPlayers().then(() => {
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               renderTeamGrid();
+              // Disable all slots (read-only)
+              document.querySelectorAll('.slot').forEach(slot => {
+                slot.style.opacity = '0.7';
+                slot.style.pointerEvents = 'none';
+              });
+              submitTeamBtn.style.display = 'none';
+              
+              // Show "Already Submitted" banner
+              const banner = document.createElement('div');
+              banner.innerHTML = `
+                <div style="text-align:center; padding:15px; background:rgba(78,205,196,0.15); border-radius:14px; margin-bottom:20px; border:1px solid rgba(78,205,196,0.3);">
+                  <div style="font-weight:700; color:var(--accent); font-size:16px;">✅ Team Submitted!</div>
+                  <div style="color:var(--text-secondary); margin-top:6px;">Your team is locked for this contest.</div>
+                </div>
+              `;
+              const firstSection = document.querySelector('.section');
+              firstSection.insertBefore(banner, firstSection.firstChild);
             });
+            return;
           }
+          
+          // If joined but not submitted, show team builder
+          joinView.style.display = 'none';
+          teamView.style.display = 'block';
+          loadPlayers();
+          if (profile.team && profile.team.length > 0) {
+            selectedTeam = profile.team.map(id => 
+              allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+            );
+          }
+          renderTeamGrid();
           return;
         }
       } catch (e) {
@@ -492,23 +542,15 @@
         if (data.success) {
           topUserName.innerText = data.managerName;
           joinView.style.display = 'none';
-          joinedView.style.display = 'block';
+          teamView.style.display = 'block'; // Go straight to team builder
+          loadPlayers();
+          renderTeamGrid();
         } else {
           throw new Error(data.error || 'Failed to join');
         }
       } catch (e) {
         alert("Error: " + (e.message || "Failed to join contest"));
       }
-    });
-
-    // Go to team builder
-    goToTeamBtn.addEventListener('click', () => {
-      joinedView.style.display = 'none';
-      teamView.style.display = 'block';
-      if (allPlayers.length === 0) {
-        loadPlayers();
-      }
-      renderTeamGrid();
     });
 
     async function loadPlayers() {
@@ -602,12 +644,87 @@
           .map(p => p.id)
       );
 
-      const filtered = allPlayers
+      // Get all available players for this position
+      let availablePlayers = allPlayers
         .filter(p => p.element_type === fplType)
         .filter(p => !selectedIds.has(p.id));
 
+      // Store original list for filtering
+      const originalPlayers = [...availablePlayers];
+      
+      // Render initial list
+      renderPlayerList(availablePlayers, slotIndex);
+
+      // Setup filter event listeners
+      setupFilters(originalPlayers, slotIndex);
+
+      playerModal.style.display = 'flex';
+    }
+
+    function setupFilters(originalPlayers, slotIndex) {
+      const searchInput = document.getElementById('playerSearch');
+      const minPriceInput = document.getElementById('minPrice');
+      const maxPriceInput = document.getElementById('maxPrice');
+      const minPointsInput = document.getElementById('minPoints');
+      const maxPointsInput = document.getElementById('maxPoints');
+      const resetBtn = document.getElementById('resetFilters');
+
+      // Apply filters function
+      const applyFilters = () => {
+        let filtered = [...originalPlayers];
+        
+        // Search filter
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+          filtered = filtered.filter(player => 
+            player.web_name.toLowerCase().includes(searchTerm) ||
+            player.team_name.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        // Price filters
+        const minPrice = parseFloat(minPriceInput.value);
+        const maxPrice = parseFloat(maxPriceInput.value);
+        if (!isNaN(minPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) >= minPrice);
+        }
+        if (!isNaN(maxPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
+        }
+        
+        // Points filters
+        const minPoints = parseInt(minPointsInput.value);
+        const maxPoints = parseInt(maxPointsInput.value);
+        if (!isNaN(minPoints)) {
+          filtered = filtered.filter(player => player.total_points >= minPoints);
+        }
+        if (!isNaN(maxPoints)) {
+          filtered = filtered.filter(player => player.total_points <= maxPoints);
+        }
+        
+        renderPlayerList(filtered, slotIndex);
+      };
+
+      // Add event listeners
+      searchInput.addEventListener('input', applyFilters);
+      minPriceInput.addEventListener('input', applyFilters);
+      maxPriceInput.addEventListener('input', applyFilters);
+      minPointsInput.addEventListener('input', applyFilters);
+      maxPointsInput.addEventListener('input', applyFilters);
+      
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        minPriceInput.value = '';
+        maxPriceInput.value = '';
+        minPointsInput.value = '';
+        maxPointsInput.value = '';
+        renderPlayerList(originalPlayers, slotIndex);
+      });
+    }
+
+    function renderPlayerList(players, slotIndex) {
       let html = '';
-      filtered.forEach(player => {
+      players.forEach(player => {
         html += `
           <div class="player-card" data-id="${player.id}">
             <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
@@ -623,12 +740,11 @@
         `;
       });
 
-      if (filtered.length === 0) {
-        html = '<div style="text-align:center;padding:30px;color:#a0b3c6;">No available players for this position</div>';
+      if (players.length === 0) {
+        html = '<div style="text-align:center;padding:30px;color:#a0b3c6;">No players match your filters</div>';
       }
 
       playerList.innerHTML = html;
-      playerModal.style.display = 'flex';
 
       document.querySelectorAll('.player-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -677,7 +793,39 @@
         });
         const data = await response.json();
         if (data.success) {
+          // Show success message
           alert("✅ Team submitted! Good luck!");
+          
+          // Reload profile to get locked status
+          const response = await fetch(`/user-profile?userId=${userId}`);
+          const profile = await response.json();
+          
+          // Update UI to read-only
+          selectedTeam = profile.team.map(id => 
+            allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+          );
+          renderTeamGrid();
+          
+          // Disable editing
+          document.querySelectorAll('.slot').forEach(slot => {
+            slot.style.opacity = '0.7';
+            slot.style.pointerEvents = 'none';
+          });
+          submitTeamBtn.style.display = 'none';
+          
+          // Show "Already Submitted" banner
+          const banner = document.createElement('div');
+          banner.innerHTML = `
+            <div style="text-align:center; padding:15px; background:rgba(78,205,196,0.15); border-radius:14px; margin-bottom:20px; border:1px solid rgba(78,205,196,0.3);">
+              <div style="font-weight:700; color:var(--accent); font-size:16px;">✅ Team Submitted!</div>
+              <div style="color:var(--text-secondary); margin-top:6px;">Your team is locked for this contest.</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          if (!document.querySelector('.submission-banner')) {
+            banner.className = 'submission-banner';
+            firstSection.insertBefore(banner, firstSection.firstChild);
+          }
         }
       } catch (e) {
         alert("Failed to submit team: " + (e.message || ""));
