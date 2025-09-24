@@ -36,18 +36,45 @@
       flex-direction: column;
     }
 
-    .header {
-      text-align: center;
-      padding: 16px 0 12px;
-      background: var(--bg);
+    /* ALWAYS-SHOW HEADER WITH USER INFO */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: var(--card-bg);
       border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
 
-    .header h1 {
+    .app-title {
       color: var(--primary);
-      margin: 0;
       font-weight: 700;
-      font-size: 22px;
+      font-size: 18px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 15px;
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .main-content {
@@ -72,35 +99,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .profile-pic {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary);
-    }
-
-    .profile-info h2 {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 4px;
-    }
-
-    .profile-stats {
-      font-size: 14px;
-      color: var(--text-secondary);
-      display: flex;
-      gap: 12px;
-    }
-
     button {
       width: 100%;
       padding: 14px;
@@ -117,10 +115,6 @@
     #connectWallet {
       background: var(--primary);
       color: #000;
-    }
-
-    #connectWallet:hover {
-      background: #00a8e8;
     }
 
     #joinContest {
@@ -267,10 +261,6 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .leaderboard-item:last-child {
-      border-bottom: none;
-    }
-
     .lb-rank {
       width: 28px;
       height: 28px;
@@ -345,27 +335,22 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="header">
-    <h1>⚽ FST Fantasy</h1>
+  <!-- ALWAYS-SHOW TOP BAR -->
+  <div class="top-bar">
+    <div class="app-title">⚽ FST Fantasy</div>
+    <div class="user-info">
+      <img id="topUserAvatar" 
+           src="https://via.placeholder.com/36x36?text=👤" 
+           class="user-avatar" 
+           onerror="this.src='https://via.placeholder.com/36x36?text=👤'">
+      <div class="user-name" id="topUserName">FST Manager</div>
+    </div>
   </div>
 
   <div class="main-content">
     <!-- HOME VIEW -->
     <div id="homeView" class="view active">
       <div id="status">Tap 'Connect Wallet' to begin</div>
-
-      <div class="section" id="profileSection" style="display:none;">
-        <div class="profile-header">
-          <img id="userProfilePic" src="https://via.placeholder.com/56x56?text=👤" class="profile-pic" alt="Profile">
-          <div class="profile-info">
-            <h2 id="userDisplayName">FST Manager</h2>
-            <div class="profile-stats">
-              <span>Entries: <strong id="userEntries">0</strong></span>
-              <span>Points: <strong id="userPoints">0</strong></span>
-            </div>
-          </div>
-        </div>
-      </div>
 
       <div class="section">
         <button id="connectWallet">🔐 Connect Wallet</button>
@@ -446,10 +431,24 @@
     tg.expand();
     tg.ready();
 
-    // Get Telegram user data
+    // Get Telegram user data IMMEDIATELY
     const initData = tg.initDataUnsafe;
     const telegramUser = initData?.user;
-    const userId = telegramUser ? telegramUser.id.toString() : 'user_' + Math.random().toString(36).substr(2, 9);
+    const userId = telegramUser ? telegramUser.id.toString() : 'guest_' + Date.now();
+
+    // Set user info in top bar RIGHT AWAY
+    const topUserAvatar = document.getElementById('topUserAvatar');
+    const topUserName = document.getElementById('topUserName');
+
+    if (telegramUser) {
+      topUserName.innerText = telegramUser.first_name || "FST Manager";
+      if (telegramUser.photo_url) {
+        topUserAvatar.src = telegramUser.photo_url;
+      }
+    } else {
+      // Fallback for non-Telegram or missing data
+      topUserName.innerText = "FST Manager";
+    }
 
     let selectedPlayers = [];
     const MAX_PLAYERS = 11;
@@ -467,13 +466,6 @@
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     const filterButtons = document.querySelectorAll('.filter-btn');
-
-    // Profile elements
-    const profileSection = document.getElementById('profileSection');
-    const userProfilePic = document.getElementById('userProfilePic');
-    const userDisplayName = document.getElementById('userDisplayName');
-    const userEntries = document.getElementById('userEntries');
-    const userPoints = document.getElementById('userPoints');
 
     let allPlayers = [];
     let currentFilter = 'all';
@@ -503,13 +495,11 @@
         }
       });
 
-      // Load leaderboard when switching to it
       if (viewName === 'leaderboard') {
         loadLeaderboard();
       }
     }
 
-    // Nav click handlers
     navItems.forEach(item => {
       item.addEventListener('click', () => {
         switchView(item.dataset.view);
@@ -526,7 +516,7 @@
           body: JSON.stringify({
             userId,
             displayName: telegramUser?.first_name || "FST Manager",
-            profilePic: telegramUser?.photo_url || null
+            profilePic: telegramUser?.photo_url || topUserAvatar.src
           })
         });
         const data = await response.json();
@@ -534,9 +524,11 @@
           statusDiv.innerText = `✅ Welcome, ${data.displayName}!`;
           connectWalletBtn.style.display = 'none';
           
-          profileSection.style.display = 'block';
-          userProfilePic.src = data.profilePic;
-          userDisplayName.innerText = data.displayName;
+          // Update top bar just in case
+          topUserName.innerText = data.displayName;
+          if (data.profilePic && data.profilePic !== topUserAvatar.src) {
+            topUserAvatar.src = data.profilePic;
+          }
           
           updatePrizePool();
           loadUserProfile();
@@ -662,7 +654,6 @@
           updatePrizePool();
           loadLeaderboard();
           loadUserProfile();
-          // Switch to leaderboard to show result
           switchView('leaderboard');
         } else {
           throw new Error('Failed');
@@ -679,10 +670,11 @@
         const response = await fetch(`/user-profile?userId=${userId}`);
         const profile = await response.json();
         
-        userDisplayName.innerText = profile.displayName;
-        userProfilePic.src = profile.profilePic;
-        userEntries.innerText = profile.entries;
-        userPoints.innerText = profile.points;
+        // Update top bar
+        topUserName.innerText = profile.displayName;
+        if (profile.profilePic) {
+          topUserAvatar.src = profile.profilePic;
+        }
         
         selectedPlayers = profile.team || [];
         updateTeamDisplay();
@@ -748,6 +740,11 @@
         renderFilteredPlayers();
       });
     });
+
+    // Initial load
+    if (telegramUser) {
+      statusDiv.innerText = "Tap 'Connect Wallet' to continue";
+    }
   </script>
 </body>
 </html>
