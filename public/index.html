@@ -395,16 +395,6 @@
     </div>
 
     <div class="section">
-      <div style="display: flex; align-items: center; justify-content: space-between;">
-        <span>🌍 Draft Mode:</span>
-        <div style="display: flex; gap: 8px;">
-          <button id="leagueModeBtn" class="mode-btn active">League-Specific</button>
-          <button id="globalModeBtn" class="mode-btn">Global Draft</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
       <h3>🏆 Leaderboard</h3>
       <div style="display: flex; gap: 6px; margin-bottom: 10px;">
         <button id="leagueLbBtn" class="lb-mode-btn active">League</button>
@@ -449,7 +439,7 @@
         <button class="filter-btn" data-pos="4">FWD</button>
       </div>
 
-      <button id="loadPlayers">📥 Load Players</button>
+      <button id="loadPlayers">📥 Load EPL Players</button>
       <div class="player-grid" id="playerGrid"></div>
     </div>
 
@@ -521,7 +511,7 @@
     // State
     let selectedPlayers = [];
     const MAX_PLAYERS = 11;
-    let draftMode = 'league';
+    let draftMode = 'league'; // Only EPL for now
     let currentLeague = 'epl';
     let leaderboardMode = 'league';
 
@@ -583,26 +573,24 @@
 
     // === Load Players ===
     loadPlayersBtn.addEventListener('click', async () => {
-      statusDiv.innerText = "Loading players...";
+      statusDiv.innerText = "Loading EPL players...";
       loadPlayersBtn.disabled = true;
       try {
-        const url = `/players?league=${draftMode === 'global' ? 'epl' : currentLeague}`;
-        const response = await apiCall(url);
+        const response = await apiCall('/players?league=epl');
         const players = await response.json();
         
-        if (draftMode === 'global') {
-          // Load all leagues
-          const leagues = ['epl', 'seriea', 'laliga', 'bundesliga', 'wsl', 'euro'];
-          const allPromises = leagues.map(lg => apiCall(`/players?league=${lg}`).then(r => r.json()));
-          const allLeaguePlayers = await Promise.all(allPromises);
-          renderPlayers(allLeaguePlayers.flat());
-          statusDiv.innerText = "Pick 11 players from any league!";
-        } else {
-          renderPlayers(players);
-          statusDiv.innerText = `Pick 11 ${currentLeague.toUpperCase()} players!`;
+        // If there's an error, show it
+        if (players.error) {
+          statusDiv.innerText = `❌ ${players.message}`;
+          console.error('API Error:', players);
+          return;
         }
+        
+        renderPlayers(players);
+        statusDiv.innerText = "Pick 11 players to join!";
       } catch (e) {
         statusDiv.innerText = "❌ Failed to load players";
+        console.error('Load players error:', e);
         loadPlayersBtn.disabled = false;
       }
     });
@@ -647,17 +635,17 @@
             <span class="price-tag">£${player.now_cost}m</span>
           </div>
           <div class="player-stats">
-            <div><small>⚽ ${player.goals || 0}</small></div>
-            <div><small>🅰️ ${player.assists || 0}</small></div>
-            <div><small>🛡️ ${player.clean_sheets || 0}</small></div>
+            <div><small>⚽ ${player.goals_scored}</small></div>
+            <div><small>🅰️ ${player.assists}</small></div>
+            <div><small>🛡️ ${player.clean_sheets}</small></div>
             <div><small>⭐ ${player.total_points}</small></div>
           </div>
           <div class="player-meta">
-            <span>${draftMode === 'global' ? player.league?.toUpperCase() || 'EPL' : ''}</span>
+            <span></span>
             <span class="points-tag">${player.total_points} pts</span>
           </div>
           <div class="player-form">
-            ${(player.form || '').split('').map(f => `<span class="form-${f}">${f}</span>`).join('')}
+            ${player.form ? player.form.split('').map(f => `<span class="form-${f}">${f}</span>`).join('') : ''}
           </div>
         `;
 
@@ -723,9 +711,7 @@
         const response = await apiCall('/save-team', {
           method: 'POST',
           body: JSON.stringify({
-            team: selectedPlayers.map(p => p.id),
-            mode: draftMode,
-            league: draftMode === 'league' ? currentLeague : null
+            team: selectedPlayers.map(p => p.id)
           })
         });
 
@@ -766,6 +752,13 @@
           : `/leaderboard?league=${currentLeague}`;
         const response = await apiCall(url);
         const data = await response.json();
+        
+        // If there's an error, show it
+        if (data.error) {
+          document.getElementById(containerId).innerHTML = `<div class="error">${data.message}</div>`;
+          return;
+        }
+        
         const lbDiv = document.getElementById(containerId);
         lbDiv.innerHTML = '';
         if (data.length === 0) {
@@ -789,6 +782,7 @@
         });
       } catch (e) {
         console.log("Could not load leaderboard");
+        document.getElementById(containerId).innerHTML = '<div class="error">Failed to load leaderboard</div>';
       }
     }
 
@@ -796,9 +790,16 @@
     async function loadLiveScores() {
       try {
         const response = await apiCall('/api/live');
-        const matches = await response.json();
+        const data = await response.json();
+        
+        // If there's an error, show it
+        if (data.error) {
+          document.getElementById('liveMatches').innerHTML = `<div class="error">${data.message}</div>`;
+          return;
+        }
+        
         const container = document.getElementById('liveMatches');
-        container.innerHTML = matches.map(m => `
+        container.innerHTML = data.map(m => `
           <div class="match-card ${m.live ? 'live' : ''}">
             <div class="match-team">${m.home}</div>
             <div class="match-score">${m.homeScore} - ${m.awayScore}</div>
@@ -815,12 +816,19 @@
     async function loadLeagueTable() {
       try {
         const response = await apiCall('/api/table');
-        const table = await response.json();
+        const data = await response.json();
+        
+        // If there's an error, show it
+        if (data.error) {
+          document.getElementById('leagueTable').innerHTML = `<div class="error">${data.message}</div>`;
+          return;
+        }
+        
         document.getElementById('leagueTable').innerHTML = `
           <div class="table-header">
             <div>#</div><div>Team</div><div>P</div><div>GD</div><div>Pts</div><div>Form</div>
           </div>
-          ${table.map(t => `
+          ${data.map(t => `
             <div class="table-row">
               <div>${t.pos}</div>
               <div>${t.team}</div>
@@ -906,9 +914,7 @@
       updateTeamDisplay();
       checkJoinButton();
       playerGrid.innerHTML = '';
-      statusDiv.innerText = draftMode === 'global' 
-        ? "Tap 'Load Players' to see all leagues" 
-        : `Switched to ${currentLeague.toUpperCase()}. Tap 'Load Players'.`;
+      statusDiv.innerText = "Tap 'Load Players' to see EPL players";
     }
 
     // === View Navigation ===
