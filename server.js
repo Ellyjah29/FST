@@ -1,4 +1,4 @@
-// server.js — LOCKED MANAGER NAME, NO SOL REQUIRED, OPTIMIZED
+// server.js — NO MOCK PLAYERS, SOL WALLET OPTIONAL, URLS FIXED
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public', {
@@ -14,13 +15,17 @@ app.use(express.static('public', {
   etag: true
 }));
 
-// MongoDB
+// ========================
+// MONGODB CONNECTION
+// ========================
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fst_fantasy';
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema
+// ========================
+// USER SCHEMA — SOL WALLET OPTIONAL
+// ========================
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -30,8 +35,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     maxlength: 20
   },
-  nameLocked: { type: Boolean, default: false },
-  solWallet: { type: String },
+  solWallet: { type: String }, // Optional - no validation
   team: [{ type: Number }],
   points: { type: Number, default: 0 },
   entries: { type: Number, default: 0 },
@@ -42,7 +46,9 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Health check
+// ========================
+// HEALTH CHECK
+// ========================
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -51,42 +57,48 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Connect Wallet (LOCK NAME ON FIRST USE)
+// ========================
+// CONNECT WALLET — SOL WALLET OPTIONAL
+// ========================
 app.post('/connect-wallet', async (req, res) => {
   try {
-    const { userId, managerName = "FST Manager" } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
+    const { userId, managerName = "FST Manager", solWallet } = req.body;
 
+    if (!userId) return res.status(400).json({ error: 'Telegram ID required' });
+
+    // Prevent re-join if already locked
     const existingUser = await User.findOne({ telegramId: userId });
-    
-    const updateData = { joined: true };
-    
-    if (!existingUser || !existingUser.nameLocked) {
-      updateData.managerName = managerName.trim().substring(0, 20) || "FST Manager";
-      updateData.nameLocked = true;
+    if (existingUser && existingUser.locked) {
+      return res.status(400).json({ error: 'Already joined. Team is locked.' });
     }
 
     const user = await User.findOneAndUpdate(
       { telegramId: userId },
-      updateData,
+      { 
+        managerName: managerName.trim().substring(0, 20) || "FST Manager",
+        solWallet: solWallet || undefined, // Only save if provided
+        joined: true
+      },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
 
     res.json({
       success: true,
       userId: user.telegramId,
-      managerName: user.managerName,
-      nameLocked: user.nameLocked
+      managerName: user.managerName
     });
   } catch (error) {
-    console.error('Connect error:', error.message);
-    res.status(500).json({ error: 'Failed to join' });
+    console.error('Connect wallet error:', error.message);
+    res.status(500).json({ error: 'Failed to join contest' });
   }
 });
 
-// Get Players
+// ========================
+// GET PLAYERS — LIVE FROM FPL API (NO MOCK PLAYERS)
+// ========================
 app.get('/players', async (req, res) => {
   try {
+    // 🔥 FIXED: No trailing spaces in URL
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
       timeout: 5000
     });
@@ -107,27 +119,39 @@ app.get('/players', async (req, res) => {
       position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
       now_cost: (p.now_cost / 10).toFixed(1),
       total_points: p.total_points || 0,
+      // 🔥 FIXED: No space in photo URL
       photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
     }));
 
     res.json(formatted);
   } catch (error) {
-    console.error('FPL error:', error.message);
-    res.status(500).json({ error: 'Failed to load players' });
+    console.error('FPL API error:', error.message);
+    // ✅ NO MOCK PLAYERS — clean error
+    res.status(500).json({ 
+      error: 'Failed to load players. Please try again later.' 
+    });
   }
 });
 
-// Save Team
+// ========================
+// SAVE TEAM — LOCK ON SUBMIT
+// ========================
 app.post('/save-team', async (req, res) => {
   try {
     const { userId, team } = req.body;
+
     if (!userId || !Array.isArray(team) || team.length !== 11) {
-      return res.status(400).json({ error: 'Team must have 11 players' });
+      return res.status(400).json({ error: 'Team must have exactly 11 players' });
     }
 
     const user = await User.findOne({ telegramId: userId });
-    if (!user) return res.status(404).json({ error: 'Join contest first' });
-    if (user.locked) return res.status(400).json({ error: 'Team already submitted' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found. Join contest first.' });
+    }
+
+    if (user.locked) {
+      return res.status(400).json({ error: 'Team already submitted. Cannot change.' });
+    }
 
     user.team = team;
     user.locked = true;
@@ -137,12 +161,14 @@ app.post('/save-team', async (req, res) => {
 
     res.json({ success: true, message: '✅ Team locked in!' });
   } catch (error) {
-    console.error('Save error:', error.message);
+    console.error('Save team error:', error.message);
     res.status(500).json({ error: 'Failed to save team' });
   }
 });
 
-// Get User Profile
+// ========================
+// GET USER PROFILE
+// ========================
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -153,7 +179,6 @@ app.get('/user-profile', async (req, res) => {
 
     res.json({
       managerName: user.managerName,
-      nameLocked: user.nameLocked,
       solWallet: user.solWallet,
       team: user.team,
       points: user.points,
@@ -166,7 +191,9 @@ app.get('/user-profile', async (req, res) => {
   }
 });
 
-// Leaderboard
+// ========================
+// LEADERBOARD — COMPUTED
+// ========================
 app.get('/leaderboard', async (req, res) => {
   try {
     const users = await User.find({ locked: true })
@@ -187,22 +214,32 @@ app.get('/leaderboard', async (req, res) => {
   }
 });
 
-// Prize Pool
+// ========================
+// PRIZE POOL
+// ========================
 app.get('/prize-pool', async (req, res) => {
   try {
     const totalEntries = await User.countDocuments({ locked: true });
-    res.json({ fst: totalEntries * 10, entries: totalEntries });
+    res.json({ 
+      fst: totalEntries * 10, 
+      entries: totalEntries 
+    });
   } catch (error) {
-    console.error('Prize error:', error.message);
+    console.error('Prize pool error:', error.message);
     res.status(500).json({ error: 'Failed to calculate prize pool' });
   }
 });
 
-// Catch-all
+// ========================
+// CATCH-ALL
+// ========================
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
+// ========================
+// START SERVER
+// ========================
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ FST Fantasy running on port ${PORT}`);
