@@ -265,6 +265,11 @@
       background: rgba(255, 255, 255, 0.1);
     }
 
+    .player-card.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
     .player-photo {
       width: 60px;
       height: 75px;
@@ -436,7 +441,6 @@
       }
     });
 
-    // ✅ ERROR-HANDLING OPTIMIZED LOAD PLAYERS
     async function loadPlayers() {
       const statusDiv = document.getElementById('status') || document.createElement('div');
       if (!document.getElementById('status')) {
@@ -446,7 +450,6 @@
       }
 
       statusDiv.innerText = "Loading players...";
-      const loadPlayersBtn = document.getElementById('loadPlayersBtn') || { disabled: false };
       
       try {
         const response = await fetch('/players');
@@ -458,7 +461,6 @@
         allPlayers = players;
         statusDiv.innerText = "";
       } catch (e) {
-        // ✅ SHOW RETRY OPTION
         statusDiv.innerHTML = `
           ❌ ${e.message}<br>
           <button class="retry-btn" id="retryBtn">🔄 Retry</button>
@@ -517,6 +519,7 @@
       checkSubmitButton();
     }
 
+    // ✅ DUPLICATE PREVENTION
     function openPlayerModal(positionType, slotIndex) {
       const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
       const fplType = positionMap[positionType];
@@ -524,7 +527,18 @@
 
       document.getElementById('modalPosition').innerText = positionName;
 
-      const filtered = allPlayers.filter(p => p.element_type === fplType);
+      // ✅ GET SELECTED PLAYER IDs
+      const selectedIds = new Set(
+        selectedTeam
+          .filter(p => p !== null)
+          .map(p => p.id)
+      );
+
+      // ✅ FILTER OUT SELECTED PLAYERS
+      const filtered = allPlayers
+        .filter(p => p.element_type === fplType)
+        .filter(p => !selectedIds.has(p.id));
+
       let html = '';
       filtered.forEach(player => {
         html += `
@@ -542,6 +556,11 @@
         `;
       });
 
+      // Show message if no players available
+      if (filtered.length === 0) {
+        html = '<div style="text-align:center;padding:30px;color:#a0b3c6;">No available players for this position</div>';
+      }
+
       playerList.innerHTML = html;
       playerModal.style.display = 'flex';
 
@@ -549,6 +568,14 @@
         card.addEventListener('click', () => {
           const playerId = parseInt(card.dataset.id);
           const player = allPlayers.find(p => p.id === playerId);
+          
+          // ✅ CLEAR PLAYER FROM ANY OTHER SLOT
+          for (let i = 0; i < selectedTeam.length; i++) {
+            if (selectedTeam[i] && selectedTeam[i].id === playerId) {
+              selectedTeam[i] = null;
+            }
+          }
+          
           selectedTeam[slotIndex] = player;
           renderTeamGrid();
           playerModal.style.display = 'none';
