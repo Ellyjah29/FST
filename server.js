@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
   walletAddress: String,
   team: [String],
   league: { type: String, default: 'epl' },
-  mode: { type: String, default: 'league' }, // 'league' or 'global'
+  mode: { type: String, default: 'league' },
   points: { type: Number, default: 0 },
   joined: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
@@ -123,24 +123,104 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// === PLAYERS ENDPOINT (SUPPORTS ALL LEAGUES) ===
+// === PLAYERS ENDPOINT (LIVE EPL DATA ONLY) ===
 app.get('/players', async (req, res) => {
   const league = req.query.league || 'epl';
-  const validLeagues = ['epl', 'seriea', 'laliga', 'bundesliga', 'wsl', 'euro'];
-
-  if (!validLeagues.includes(league)) {
-    return res.status(400).json({ error: 'Invalid league' });
+  
+  // Only support EPL for live data
+  if (league !== 'epl') {
+    return res.status(400).json({ error: 'Only EPL data is available' });
   }
 
-  // Mock players for all leagues (replace with real API later)
-  const mockPlayers = [
-    { id: `${league}_1`, web_name: "Star Player", team_name: "Top FC", element_type: 4, position: "FWD", now_cost: "12.0", total_points: 200, photo_url: "https://via.placeholder.com/60x75?text=SP", league, goals: 18, assists: 8, clean_sheets: 0, form: "WWDLW" },
-    { id: `${league}_2`, web_name: "Midfield Maestro", team_name: "United", element_type: 3, position: "MID", now_cost: "10.5", total_points: 180, photo_url: "https://via.placeholder.com/60x75?text=MM", league, goals: 10, assists: 12, clean_sheets: 0, form: "WDWLW" },
-    { id: `${league}_3`, web_name: "Defensive Wall", team_name: "City", element_type: 2, position: "DEF", now_cost: "8.5", total_points: 160, photo_url: "https://via.placeholder.com/60x75?text=DW", league, goals: 2, assists: 5, clean_sheets: 14, form: "LWWWD" },
-    { id: `${league}_4`, web_name: "Safe Hands", team_name: "Athletic", element_type: 1, position: "GK", now_cost: "7.0", total_points: 140, photo_url: "https://via.placeholder.com/60x75?text=SH", league, goals: 0, assists: 1, clean_sheets: 16, form: "WWLWW" }
-  ];
+  try {
+    // Add proper headers to avoid FPL API blocking
+    const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json',
+        'Referer': 'https://fantasy.premierleague.com/'
+      }
+    });
 
-  res.json(mockPlayers);
+    const data = response.data;
+    
+    // Map teams for easy lookup
+    const teamMap = {};
+    data.teams.forEach(team => {
+      teamMap[team.id] = {
+        id: team.id,
+        name: team.name,
+        short_name: team.short_name,
+        code: team.code
+      };
+    });
+
+    // Process players
+    const players = data.elements.map(player => {
+      const position = ["GK", "DEF", "MID", "FWD"][player.element_type - 1] || "UNK";
+      
+      // Format photo URL correctly (no space after p)
+      const photoId = player.photo.replace('.jpg', '');
+      const photoUrl = `https://resources.premierleague.com/premierleague/photos/players/110x140/p${photoId}.png`;
+      
+      return {
+        id: player.id,
+        web_name: player.web_name,
+        team: player.team,
+        team_id: player.team,
+        team_name: teamMap[player.team]?.name || 'Unknown',
+        team_short: teamMap[player.team]?.short_name || 'UNK',
+        element_type: player.element_type,
+        position: position,
+        now_cost: (player.now_cost / 10).toFixed(1),
+        total_points: player.total_points,
+        points_per_game: player.points_per_game,
+        form: player.form,
+        selected_by_percent: player.selected_by_percent,
+        goals_scored: player.goals_scored,
+        assists: player.assists,
+        clean_sheets: player.clean_sheets,
+        saves: player.saves,
+        bonus: player.bonus,
+        bps: player.bps,
+        influence: player.influence,
+        creativity: player.creativity,
+        threat: player.threat,
+        ict_index: player.ict_index,
+        starts: player.starts,
+        expected_goal_involvements: player.expected_goal_involvements,
+        expected_goals: player.expected_goals,
+        expected_assists: player.expected_assists,
+        expected_goal_conceded: player.expected_goal_conceded,
+        chance_of_playing_this_round: player.chance_of_playing_this_round,
+        chance_of_playing_next_round: player.chance_of_playing_next_round,
+        news: player.news,
+        status: player.status,
+        photo_url: photoUrl,
+        league: 'epl'
+      };
+    });
+
+    res.json(players);
+  } catch (error) {
+    console.error('FPL API Error:', error.message);
+    console.error('Error details:', error.response ? error.response.data : 'No response data');
+    
+    // Return detailed error for debugging
+    if (error.response) {
+      res.status(error.response.status).json({
+        error: `FPL API error: ${error.response.status}`,
+        details: error.response.data,
+        message: "Could not fetch EPL data from FPL API."
+      });
+    } else {
+      res.status(500).json({
+        error: "Network error",
+        message: "Could not connect to FPL API. Check your internet connection."
+      });
+    }
+  }
 });
 
 // === SAVE TEAM (WITH VERIFICATION) ===
@@ -151,7 +231,7 @@ app.post('/save-team', async (req, res) => {
       return res.status(401).json({ error: 'Invalid Telegram data' });
     }
 
-    const { team, mode = 'league', league = 'epl' } = req.body;
+    const { team } = req.body;
     if (!team || !Array.isArray(team) || team.length !== 11) {
       return res.status(400).json({ error: 'Team must contain exactly 11 player IDs' });
     }
@@ -167,7 +247,7 @@ app.post('/save-team', async (req, res) => {
     // Save team
     await User.findOneAndUpdate(
       { userId },
-      { team, mode, league, points, joined: true },
+      { team, points, joined: true },
       { new: true }
     );
 
@@ -242,22 +322,61 @@ app.get('/leaderboard/global', async (req, res) => {
   }
 });
 
-// === LIVE SCORES (MOCK) ===
-app.get('/api/live', (req, res) => {
-  const matches = [
-    { id: 1, home: "Arsenal", away: "Man City", homeScore: 2, awayScore: 1, status: "75'", live: true },
-    { id: 2, home: "Liverpool", away: "Chelsea", homeScore: 0, awayScore: 0, status: "HT", live: true }
-  ];
-  res.json(matches);
+// === LIVE SCORES (LIVE FROM FPL) ===
+app.get('/api/live', async (req, res) => {
+  try {
+    const response = await axios.get('https://fantasy.premierleague.com/api/fixtures/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
+    
+    const matches = response.data
+      .filter(match => match.status === 'n' || match.status === '1h' || match.status === 'ht' || match.status === '2h')
+      .map(match => ({
+        id: match.id,
+        home: match.team_h_name,
+        away: match.team_a_name,
+        homeScore: match.team_h_score || 0,
+        awayScore: match.team_a_score || 0,
+        status: match.status,
+        live: ['1h', 'ht', '2h'].includes(match.status)
+      }));
+    
+    res.json(matches);
+  } catch (error) {
+    console.error('Live scores error:', error);
+    res.status(500).json({ error: 'Could not fetch live scores' });
+  }
 });
 
-// === LEAGUE TABLE (MOCK) ===
-app.get('/api/table', (req, res) => {
-  const table = [
-    { pos: 1, team: "Arsenal", played: 38, gd: 62, points: 89, form: "WWWDW" },
-    { pos: 2, team: "Man City", played: 38, gd: 61, points: 88, form: "WWWWW" }
-  ];
-  res.json(table);
+// === LEAGUE TABLE (LIVE FROM FPL) ===
+app.get('/api/table', async (req, res) => {
+  try {
+    const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json'
+      }
+    });
+    
+    const standings = response.data.teams
+      .map(team => ({
+        pos: team.position,
+        team: team.name,
+        played: team.played,
+        gd: team.form,
+        points: team.points,
+        form: team.form
+      }))
+      .sort((a, b) => a.pos - b.pos);
+    
+    res.json(standings);
+  } catch (error) {
+    console.error('Table error:', error);
+    res.status(500).json({ error: 'Could not fetch league table' });
+  }
 });
 
 // === CATCH-ALL FOR SPA ===
