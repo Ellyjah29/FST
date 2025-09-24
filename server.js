@@ -1,8 +1,9 @@
-// server.js — RENDER-OPTIMIZED, PLAYER IMAGES, NO TEAM LOGOS
+// server.js — WITH MONGODB PERSISTENCE
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -14,161 +15,189 @@ app.use(express.static('public', {
   etag: true
 }));
 
-// In-memory storage
-let users = {};
-let globalEntries = 0;
-const FST_PER_ENTRY = 10;
+// ========================
+// MONGODB CONNECTION
+// ========================
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fst_fantasy';
 
-// Health check for Render
-app.get('/health', (req, res) => {
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ========================
+// SCHEMAS
+// ========================
+
+const userSchema = new mongoose.Schema({
+  telegramId: { type: String, required: true, unique: true },
+  walletAddress: { type: String, required: true },
+  displayName: { type: String, default: "FST Manager" },
+  profilePic: { 
+    type: String, 
+    default: "https://via.placeholder.com/50x50?text=👤" 
+  },
+  team: [{ type: Number }], // array of FPL player IDs
+  points: { type: Number, default: 0 },
+  joined: { type: Boolean, default: false },
+  entries: { type: Number, default: 0 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const playerSchema = new mongoose.Schema({
+  fplId: { type: Number, required: true, unique: true },
+  webName: String,
+  team: Number,
+  teamName: String,
+  elementType: Number,
+  position: String,
+  nowCost: Number, // in £ (e.g., 12.5)
+  totalPoints: Number,
+  photoUrl: String,
+  lastUpdated: { type: Date, default: Date.now }
+});
+
+// Models
+const User = mongoose.model('User', userSchema);
+const Player = mongoose.model('Player', playerSchema);
+
+// ========================
+// HEALTH CHECK
+// ========================
+app.get('/health', async (req, res) => {
+  const dbState = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
   res.status(200).json({
     status: 'OK',
+    db: dbState,
     uptime: process.uptime(),
-    entries: globalEntries,
     timestamp: new Date().toISOString()
   });
 });
 
-// Connect wallet (simulated)
-app.post('/connect-wallet', (req, res) => {
+// ========================
+// CONNECT WALLET + CREATE/UPDATE USER
+// ========================
+app.post('/connect-wallet', async (req, res) => {
   try {
-    const { userId } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
+    const { userId, displayName = "FST Manager", profilePic } = req.body;
 
-    const simulatedAddress = '0x' + userId.padEnd(40, 'a').slice(0, 40);
-    if (!users[userId]) {
-      users[userId] = {
-        address: simulatedAddress,
-        team: null,
-        points: 0,
-        joined: false
-      };
+    if (!userId) {
+      return res.status(400).json({ error: 'Telegram user ID required' });
     }
 
-    res.json({ success: true, address: simulatedAddress, userId });
+    const simulatedAddress = '0x' + userId.padEnd(40, 'a').slice(0, 40);
+
+    // Upsert user
+    let user = await User.findOne({ telegramId: userId });
+    if (!user) {
+      user = new User({
+        telegramId: userId,
+        walletAddress: simulatedAddress,
+        displayName,
+        profilePic: profilePic || "https://via.placeholder.com/50x50?text=👤"
+      });
+    } else {
+      // Update profile if new data provided
+      if (displayName) user.displayName = displayName;
+      if (profilePic) user.profilePic = profilePic;
+    }
+
+    await user.save();
+
+    res.json({
+      success: true,
+      address: user.walletAddress,
+      userId: user.telegramId,
+      displayName: user.displayName,
+      profilePic: user.profilePic
+    });
   } catch (error) {
     console.error('Connect wallet error:', error.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Enhanced players endpoint — NO team_logo
+// ========================
+// LOAD PLAYERS (FROM DB OR FPL API)
+// ========================
 app.get('/players', async (req, res) => {
   try {
-    const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
-      timeout: 5000
-    });
+    // Try to load from DB first
+    let players = await Player.find().limit(200);
+    
+    if (players.length === 0) {
+      // Fetch from FPL API if DB is empty
+      const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
+        timeout: 5000
+      });
 
-    const players = response.data.elements;
-    const teams = response.data.teams;
+      const fplPlayers = response.data.elements;
+      const teams = response.data.teams;
+      const teamMap = {};
+      teams.forEach(team => {
+        teamMap[team.id] = team.name;
+      });
 
-    // Map teams for name only
-    const teamMap = {};
-    teams.forEach(team => {
-      teamMap[team.id] = {
-        name: team.name,
-        short_name: team.short_name
-        // 🔥 team_logo REMOVED
-      };
-    });
-
-    const enhancedPlayers = players.map(p => {
-      const photoId = p.photo.split(".")[0];
-      return {
-        id: p.id,
-        web_name: p.web_name,
+      const playerDocs = fplPlayers.map(p => ({
+        fplId: p.id,
+        webName: p.web_name,
         team: p.team,
-        team_name: teamMap[p.team]?.name || 'Unknown',
-        element_type: p.element_type,
+        teamName: teamMap[p.team] || 'Unknown',
+        elementType: p.element_type,
         position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
-        now_cost: (p.now_cost / 10).toFixed(1),
-        total_points: p.total_points || 0,
-        photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${photoId}.png`
-      };
-    });
+        nowCost: p.now_cost / 10,
+        totalPoints: p.total_points || 0,
+        photoUrl: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
+      }));
 
-    res.json(enhancedPlayers);
+      await Player.insertMany(playerDocs);
+      players = playerDocs;
+    }
+
+    // Format for frontend
+    const formatted = players.map(p => ({
+      id: p.fplId,
+      web_name: p.webName,
+      team: p.team,
+      team_name: p.teamName,
+      element_type: p.elementType,
+      position: p.position,
+      now_cost: p.nowCost.toFixed(1),
+      total_points: p.totalPoints,
+      photo_url: p.photoUrl
+    }));
+
+    res.json(formatted);
   } catch (error) {
-    console.error('FPL API Error:', error.message);
-
-    // Fallback mock players — NO team_logo
-    const mockPlayers = [
-      {
-        id: 1,
-        web_name: "Mohamed Salah",
-        team: 14,
-        team_name: "Liverpool",
-        element_type: 4,
-        position: "FWD",
-        now_cost: "12.5",
-        total_points: 250,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p109368.png"
-      },
-      {
-        id: 2,
-        web_name: "Erling Haaland",
-        team: 11,
-        team_name: "Man City",
-        element_type: 4,
-        position: "FWD",
-        now_cost: "14.0",
-        total_points: 240,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p409430.png"
-      },
-      {
-        id: 3,
-        web_name: "Kevin De Bruyne",
-        team: 11,
-        team_name: "Man City",
-        element_type: 3,
-        position: "MID",
-        now_cost: "11.5",
-        total_points: 220,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p104499.png"
-      },
-      {
-        id: 4,
-        web_name: "Alisson",
-        team: 14,
-        team_name: "Liverpool",
-        element_type: 1,
-        position: "GK",
-        now_cost: "9.0",
-        total_points: 180,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p200605.png"
-      },
-      {
-        id: 5,
-        web_name: "Trent Alexander-Arnold",
-        team: 14,
-        team_name: "Liverpool",
-        element_type: 2,
-        position: "DEF",
-        now_cost: "8.5",
-        total_points: 200,
-        photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p200669.png"
-      }
-    ];
-
-    res.json(mockPlayers);
+    console.error('Players error:', error.message);
+    
+    // Fallback mock
+    res.json([
+      { id: 1, web_name: "Salah", team: 14, team_name: "Liverpool", element_type: 4, position: "FWD", now_cost: "12.5", total_points: 250, photo_url: "https://resources.premierleague.com/premierleague/photos/players/110x140/p109368.png" }
+    ]);
   }
 });
 
-// Save team
-app.post('/save-team', (req, res) => {
+// ========================
+// SAVE TEAM
+// ========================
+app.post('/save-team', async (req, res) => {
   try {
     const { userId, team } = req.body;
+
     if (!userId || !team || !Array.isArray(team) || team.length !== 11) {
       return res.status(400).json({ error: 'Invalid team data. Must be 11 players.' });
     }
-    if (!users[userId]) {
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) {
       return res.status(404).json({ error: 'User not found. Connect wallet first.' });
     }
 
-    users[userId].team = team;
-    users[userId].joined = true;
-    globalEntries += 1;
-    users[userId].points = Math.floor(Math.random() * 150) + 20;
+    user.team = team;
+    user.joined = true;
+    user.entries += 1;
+    user.points = Math.floor(Math.random() * 150) + 20; // simulate for MVP
+    await user.save();
 
     res.json({ success: true, message: '✅ Team saved. Contest joined for free!' });
   } catch (error) {
@@ -177,60 +206,103 @@ app.post('/save-team', (req, res) => {
   }
 });
 
-// Get user team
-app.get('/get-team', (req, res) => {
+// ========================
+// GET USER PROFILE + TEAM
+// ========================
+app.get('/user-profile', async (req, res) => {
   try {
-    const userId = Object.keys(users)[0] || 'demo_user';
-    const user = users[userId];
-    res.json(user?.team || []);
+    // In real app, get userId from Telegram initData
+    const userId = req.query.userId || Object.values(req.headers)[0]?.split?.('user=')?.[1] || 'demo_user';
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Get player details for team
+    let teamPlayers = [];
+    if (user.team && user.team.length > 0) {
+      teamPlayers = await Player.find({ fplId: { $in: user.team } });
+    }
+
+    const formattedTeam = teamPlayers.map(p => ({
+      id: p.fplId,
+      web_name: p.webName,
+      position: p.position,
+      now_cost: p.nowCost.toFixed(1)
+    }));
+
+    res.json({
+      displayName: user.displayName,
+      profilePic: user.profilePic,
+      team: formattedTeam,
+      points: user.points,
+      entries: user.entries
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to load team' });
+    console.error('Profile error:', error.message);
+    res.status(500).json({ error: 'Failed to load profile' });
   }
 });
 
-// Leaderboard
-app.get('/leaderboard', (req, res) => {
+// ========================
+// LEADERBOARD
+// ========================
+app.get('/leaderboard', async (req, res) => {
   try {
-    const leaderboard = Object.entries(users)
-      .filter(([_, user]) => user.joined)
-      .map(([userId, user]) => ({
-        userId: userId.slice(0, 8) + '...',
-        points: user.points || 0
-      }))
-      .sort((a, b) => b.points - a.points)
-      .slice(0, 10);
+    const users = await User.find({ joined: true })
+      .sort({ points: -1 })
+      .limit(10)
+      .select('displayName profilePic points telegramId');
+
+    const leaderboard = users.map(user => ({
+      userId: user.telegramId.slice(0, 8) + '...',
+      displayName: user.displayName,
+      profilePic: user.profilePic,
+      points: user.points
+    }));
 
     res.json(leaderboard);
   } catch (error) {
+    console.error('Leaderboard error:', error.message);
     res.status(500).json({ error: 'Failed to load leaderboard' });
   }
 });
 
-// Prize pool
-app.get('/prize-pool', (req, res) => {
+// ========================
+// PRIZE POOL
+// ========================
+app.get('/prize-pool', async (req, res) => {
   try {
-    const totalFST = globalEntries * FST_PER_ENTRY;
-    res.json({ fst: totalFST, entries: globalEntries });
+    const totalEntries = await User.countDocuments({ joined: true });
+    const totalFST = totalEntries * 10; // 10 FST per entry
+    res.json({ fst: totalFST, entries: totalEntries });
   } catch (error) {
+    console.error('Prize pool error:', error.message);
     res.status(500).json({ error: 'Failed to calculate prize pool' });
   }
 });
 
-// Catch-all for SPA
+// ========================
+// CATCH-ALL
+// ========================
 app.get('*', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
-// Global error handler
+// ========================
+// ERROR HANDLER
+// ========================
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.stack);
   res.status(500).json({ error: 'Something broke!' });
 });
 
-// Start server
+// ========================
+// START SERVER
+// ========================
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ FST Fantasy Server running on port ${PORT}`);
   console.log(`🌐 Visit: http://localhost:${PORT}`);
-  console.log(`🩺 Health check: http://localhost:${PORT}/health`);
 });
