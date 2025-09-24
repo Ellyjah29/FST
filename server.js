@@ -1,4 +1,4 @@
-// server.js — NO MOCK PLAYERS, SOL WALLET OPTIONAL, DUPLICATE PREVENTION
+// server.js — FINAL: NO MOCK PLAYERS, SOL WALLET OPTIONAL, DUPLICATE PREVENTION
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -85,7 +85,6 @@ app.post('/connect-wallet', async (req, res) => {
 // Get Players
 app.get('/players', async (req, res) => {
   try {
-    // 🔥 FIXED: No trailing spaces
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
       timeout: 5000
     });
@@ -106,14 +105,12 @@ app.get('/players', async (req, res) => {
       position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
       now_cost: (p.now_cost / 10).toFixed(1),
       total_points: p.total_points || 0,
-      // 🔥 FIXED: No space in photo URL
       photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
     }));
 
     res.json(formatted);
   } catch (error) {
     console.error('FPL error:', error.message);
-    // ✅ NO MOCK PLAYERS
     res.status(500).json({ error: 'Failed to load players. Please try again later.' });
   }
 });
@@ -126,7 +123,6 @@ app.post('/save-team', async (req, res) => {
       return res.status(400).json({ error: 'Team must have 11 players' });
     }
 
-    // ✅ SERVER-SIDE DUPLICATE CHECK
     const uniquePlayers = new Set(team);
     if (uniquePlayers.size !== team.length) {
       return res.status(400).json({ error: 'Duplicate players not allowed' });
@@ -164,7 +160,8 @@ app.get('/user-profile', async (req, res) => {
       team: user.team,
       points: user.points,
       entries: user.entries,
-      locked: user.locked
+      locked: user.locked,
+      joined: user.joined
     });
   } catch (error) {
     console.error('Profile error:', error.message);
