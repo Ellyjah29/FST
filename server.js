@@ -1,4 +1,4 @@
-// server.js — FINAL: NO MOCK PLAYERS, SOL WALLET OPTIONAL, DUPLICATE PREVENTION
+// server.js — FINAL: ADVANCED FILTERING READY, NO MOCK PLAYERS
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
