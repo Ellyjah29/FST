@@ -137,6 +137,11 @@
       opacity: 0.6;
     }
 
+    #goToTeamBtn {
+      background: linear-gradient(135deg, var(--primary), #00a8e8);
+      color: #000;
+    }
+
     /* FORMATION GRID */
     .formation-selector {
       display: flex;
@@ -329,6 +334,7 @@
   </div>
 
   <div class="main-content">
+    <!-- JOIN VIEW -->
     <div id="joinView" class="view">
       <div class="section">
         <h2 class="section-title">🔐 Join Free Contest</h2>
@@ -346,6 +352,26 @@
       </div>
     </div>
 
+    <!-- ALREADY JOINED VIEW -->
+    <div id="joinedView" class="view" style="display:none;">
+      <div class="section">
+        <div style="text-align: center; padding: 20px 0;">
+          <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+          <h2 style="font-weight: 700; margin: 0 0 12px; color: var(--success);">
+            Already Joined!
+          </h2>
+          <p style="color: var(--text-secondary); margin: 0;">
+            Your team is ready to build.<br>
+            Go to the team builder to pick your 11 players.
+          </p>
+        </div>
+        <button id="goToTeamBtn">
+          🏗️ Build Your Team
+        </button>
+      </div>
+    </div>
+
+    <!-- TEAM VIEW -->
     <div id="teamView" class="view" style="display:none;">
       <div class="section">
         <h2 class="section-title">⚽ Build Your Team</h2>
@@ -384,8 +410,10 @@
     const topUserAvatar = document.getElementById('topUserAvatar');
     const topUserName = document.getElementById('topUserName');
     const joinView = document.getElementById('joinView');
+    const joinedView = document.getElementById('joinedView');
     const teamView = document.getElementById('teamView');
     const joinContestBtn = document.getElementById('joinContest');
+    const goToTeamBtn = document.getElementById('goToTeamBtn');
     const submitTeamBtn = document.getElementById('submitTeam');
     const playerModal = document.getElementById('playerModal');
     const closeModal = document.getElementById('closeModal');
@@ -413,6 +441,40 @@
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
+    // Check existing user on load
+    async function checkExistingUser() {
+      try {
+        const response = await fetch(`/user-profile?userId=${userId}`);
+        const profile = await response.json();
+        
+        if (profile.managerName && profile.joined) {
+          topUserName.innerText = profile.managerName;
+          joinView.style.display = 'none';
+          joinedView.style.display = 'block';
+          
+          // If team is already built, go straight to team view
+          if (profile.team && profile.team.length > 0) {
+            joinedView.style.display = 'none';
+            teamView.style.display = 'block';
+            loadPlayers().then(() => {
+              selectedTeam = profile.team.map(id => 
+                allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+              );
+              renderTeamGrid();
+            });
+          }
+          return;
+        }
+      } catch (e) {
+        // Continue to join view
+      }
+      
+      managerNameInput.value = telegramUser?.first_name || "FST Manager";
+    }
+
+    // Initialize
+    checkExistingUser();
+
     joinContestBtn.addEventListener('click', async () => {
       const managerName = managerNameInput.value.trim() || "FST Manager";
       if (managerName.length < 2) {
@@ -430,15 +492,23 @@
         if (data.success) {
           topUserName.innerText = data.managerName;
           joinView.style.display = 'none';
-          teamView.style.display = 'block';
-          loadPlayers();
-          renderTeamGrid();
+          joinedView.style.display = 'block';
         } else {
           throw new Error(data.error || 'Failed to join');
         }
       } catch (e) {
         alert("Error: " + (e.message || "Failed to join contest"));
       }
+    });
+
+    // Go to team builder
+    goToTeamBtn.addEventListener('click', () => {
+      joinedView.style.display = 'none';
+      teamView.style.display = 'block';
+      if (allPlayers.length === 0) {
+        loadPlayers();
+      }
+      renderTeamGrid();
     });
 
     async function loadPlayers() {
@@ -519,7 +589,6 @@
       checkSubmitButton();
     }
 
-    // ✅ DUPLICATE PREVENTION
     function openPlayerModal(positionType, slotIndex) {
       const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
       const fplType = positionMap[positionType];
@@ -527,14 +596,12 @@
 
       document.getElementById('modalPosition').innerText = positionName;
 
-      // ✅ GET SELECTED PLAYER IDs
       const selectedIds = new Set(
         selectedTeam
           .filter(p => p !== null)
           .map(p => p.id)
       );
 
-      // ✅ FILTER OUT SELECTED PLAYERS
       const filtered = allPlayers
         .filter(p => p.element_type === fplType)
         .filter(p => !selectedIds.has(p.id));
@@ -556,7 +623,6 @@
         `;
       });
 
-      // Show message if no players available
       if (filtered.length === 0) {
         html = '<div style="text-align:center;padding:30px;color:#a0b3c6;">No available players for this position</div>';
       }
@@ -569,7 +635,6 @@
           const playerId = parseInt(card.dataset.id);
           const player = allPlayers.find(p => p.id === playerId);
           
-          // ✅ CLEAR PLAYER FROM ANY OTHER SLOT
           for (let i = 0; i < selectedTeam.length; i++) {
             if (selectedTeam[i] && selectedTeam[i].id === playerId) {
               selectedTeam[i] = null;
