@@ -561,7 +561,8 @@
           <i class="fas fa-users"></i> Build Your Dream Team
         </h2>
         
-        <div class="input-group">
+        <!-- FORMATION CONTAINER -->
+        <div id="formationSelectorContainer" class="input-group">
           <label class="input-label">Choose Formation</label>
           <div class="formation-selector">
             <button class="formation-btn active" data-formation="4-3-3">4-3-3</button>
@@ -687,8 +688,6 @@
   </div>
 
   <script>
-    // [Your existing JavaScript code remains exactly the same]
-    // Only the HTML/CSS has been updated for better UX
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
@@ -753,6 +752,7 @@
                 slot.style.opacity = '0.7';
               });
               submitTeamBtn.style.display = 'none';
+              document.getElementById('formationSelectorContainer').style.display = 'none';
               
               // Show "Already Submitted" banner
               const banner = document.createElement('div');
@@ -916,6 +916,13 @@
       const progressPercent = (filledCount / 11) * 100;
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
+      
+      // ✅ HIDE FORMATION FOR SUBMITTED TEAMS
+      const isSubmitted = submitTeamBtn.style.display === 'none';
+      const formationContainer = document.getElementById('formationSelectorContainer');
+      if (formationContainer) {
+        formationContainer.style.display = isSubmitted ? 'none' : 'block';
+      }
     }
 
     function openPlayerModal(positionType, slotIndex) {
@@ -1160,11 +1167,12 @@
           );
           renderTeamGrid();
           calculateTeamStats();
-          // ✅ FIXED: ONLY REDUCE OPACITY, DON'T DISABLE CLICKS
+          // ✅ HIDE FORMATION AND SUBMIT BUTTON
           document.querySelectorAll('.slot').forEach(slot => {
             slot.style.opacity = '0.7';
           });
           submitTeamBtn.style.display = 'none';
+          document.getElementById('formationSelectorContainer').style.display = 'none';
           const banner = document.createElement('div');
           banner.innerHTML = `
             <div class="submission-banner">
