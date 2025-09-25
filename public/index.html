@@ -584,6 +584,104 @@
     .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
     .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
     .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    /* REAL-TIME INDICATORS */
+    .live-indicator {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--success);
+      border: 1px solid var(--bg);
+      box-shadow: 0 0 0 1px var(--text);
+    }
+    
+    .player-card.live .player-name {
+      color: var(--success);
+      font-weight: 700;
+    }
+    
+    .player-card.injured .player-name {
+      color: var(--error);
+      text-decoration: line-through;
+    }
+    
+    .player-card.suspended .player-name {
+      color: var(--warning);
+    }
+    
+    /* GAMEMODE STATUS BAR */
+    .gamemode-bar {
+      height: 4px;
+      background: var(--surface);
+      border-radius: 2px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+    
+    .gamemode-progress {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+    
+    .gamemode-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+    
+    .deadline-container {
+      position: absolute;
+      right: 16px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-align: right;
+    }
+    
+    .deadline-label {
+      font-weight: 500;
+    }
+    
+    .deadline-timer {
+      color: var(--warning);
+      font-weight: 600;
+    }
+    
+    .deadline-live {
+      color: var(--error);
+      font-weight: 600;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .match-status {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--success);
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 8px;
+      padding: 2px 6px;
+      min-width: 24px;
+      text-align: center;
+    }
+    
+    .match-status.live {
+      color: var(--error);
+      animation: pulse 1.5s infinite;
+    }
+    
+    .match-status.finished {
+      color: var(--text-tertiary);
+      background: rgba(0, 0, 0, 0.3);
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -596,6 +694,10 @@
            class="user-avatar" 
            onerror="this.src='https://via.placeholder.com/40x40?text=👤'">
       <div class="user-name" id="topUserName">FST Manager</div>
+    </div>
+    <div class="deadline-container">
+      <div id="deadline-label">Next Deadline:</div>
+      <div id="deadline-timer" class="deadline-timer">24h 05m</div>
     </div>
   </div>
 
@@ -636,6 +738,15 @@
         <h2 class="section-title">
           <i class="fas fa-users"></i> Build Your Dream Team
         </h2>
+        
+        <div class="gamemode-bar">
+          <div class="gamemode-progress" id="gamemodeProgress"></div>
+        </div>
+        <div class="gamemode-labels">
+          <span>GW 4</span>
+          <span>GW 5</span>
+          <span>GW 6</span>
+        </div>
         
         <!-- FORMATION CONTAINER -->
         <div id="formationSelectorContainer" class="input-group">
@@ -801,8 +912,156 @@
     let currentFormation = "4-3-3";
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
+    let gameweekData = {
+      current: null,
+      next: null,
+      matches: []
+    };
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
+
+    // REAL-TIME FPL DATA
+    async function fetchFplData() {
+      try {
+        const response = await fetch('/players');
+        const data = await response.json();
+        gameweekData = data.gameweek;
+        
+        // Update deadline countdown
+        if (gameweekData.next && gameweekData.next.deadline_time) {
+          updateDeadlineCountdown(gameweekData.next.deadline_time);
+        }
+        
+        // Update gamemode progress
+        if (gameweekData.current && gameweekData.next) {
+          const currentGw = gameweekData.current.id;
+          const nextGw = gameweekData.next.id;
+          const totalGws = 38;
+          
+          // Calculate progress (simplified)
+          const progress = ((currentGw - 1) / totalGws) * 100;
+          document.getElementById('gamemodeProgress').style.width = `${progress}%`;
+        }
+        
+        // Update player statuses
+        if (allPlayers.length > 0 && gameweekData.matches) {
+          updatePlayerStatuses();
+        }
+        
+        return data.players;
+      } catch (e) {
+        console.error("Failed to fetch FPL data:", e);
+        return [];
+      }
+    }
+
+    function updateDeadlineCountdown(deadlineTime) {
+      const deadline = new Date(deadlineTime);
+      
+      function updateTimer() {
+        const now = new Date();
+        const diff = deadline - now;
+        
+        if (diff <= 0) {
+          document.getElementById('deadline-timer').innerText = "LIVE";
+          document.getElementById('deadline-timer').classList.add('deadline-live');
+          return;
+        }
+        
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        document.getElementById('deadline-timer').innerText = `${hours}h ${minutes}m`;
+        
+        // Change color when < 2 hours
+        const timerElement = document.getElementById('deadline-timer');
+        timerElement.classList.remove('deadline-live');
+        
+        if (diff < 2 * 60 * 60 * 1000) {
+          timerElement.style.color = 'var(--error)';
+        } else if (diff < 12 * 60 * 60 * 1000) {
+          timerElement.style.color = 'var(--warning)';
+        } else {
+          timerElement.style.color = 'var(--accent)';
+        }
+        
+        setTimeout(updateTimer, 60000); // Update every minute
+      }
+      
+      updateTimer();
+    }
+
+    function updatePlayerStatuses() {
+      const now = new Date();
+      
+      document.querySelectorAll('.player-card').forEach(card => {
+        const playerId = parseInt(card.dataset.id);
+        const player = allPlayers.find(p => p.id === playerId);
+        
+        if (!player) return;
+        
+        // Reset status
+        card.classList.remove('live', 'injured', 'suspended');
+        
+        // Add status indicators
+        if (player.status === 'i') {
+          card.classList.add('injured');
+        } else if (player.status === 's') {
+          card.classList.add('suspended');
+        }
+        
+        // Check if player is in an active match
+        const activeMatch = gameweekData.matches.some(match => 
+          match.event === gameweekData.current?.id && 
+          match.started === true &&
+          (match.team_h === player.team || match.team_a === player.team)
+        );
+        
+        if (activeMatch) {
+          card.classList.add('live');
+          card.querySelector('.player-name').style.color = 'var(--success)';
+        }
+      });
+    }
+
+    function calculateTacticalAnalysis() {
+      if (selectedTeam.some(p => p === null)) {
+        document.getElementById('tacticalAnalysis').style.display = 'none';
+        return;
+      }
+
+      // Calculate team strength (simplified version)
+      const validPlayers = selectedTeam.filter(p => p !== null);
+      const teamValue = validPlayers.reduce((sum, p) => sum + parseFloat(p.now_cost || 0), 0);
+      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
+      const totalPoints = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
+      
+      // Real-world formula would be more complex
+      const teamStrength = Math.min(100, Math.floor(
+        (avgForm * 10) + 
+        (totalPoints / 11) + 
+        (teamValue > 95 ? 5 : 0)
+      ));
+
+      // Calculate position balance
+      const positionCounts = { gk: 0, def: 0, mid: 0, fwd: 0 };
+      validPlayers.forEach(player => {
+        if (player.element_type === 1) positionCounts.gk++;
+        if (player.element_type === 2) positionCounts.def++;
+        if (player.element_type === 3) positionCounts.mid++;
+        if (player.element_type === 4) positionCounts.fwd++;
+      });
+
+      // Display results
+      document.getElementById('teamStrength').innerText = `${teamStrength}/100`;
+      
+      // Best substitutes (simplified)
+      const bestSubs = Math.min(3, 11 - validPlayers.length);
+      document.getElementById('bestSubs').innerText = `${bestSubs} player${bestSubs !== 1 ? 's' : ''}`;
+      
+      // Position balance is handled in the UI
+      document.getElementById('tacticalAnalysis').style.display = 'block';
+    }
 
     // CONFETTI FUNCTION
     function createConfetti() {
@@ -946,12 +1205,7 @@
       `;
 
       try {
-        const response = await fetch('/players');
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to load players');
-        }
-        const players = await response.json();
+        const players = await fetchFplData();
         allPlayers = players;
         statusDiv.innerText = "";
         renderTeamGrid(); // This will replace skeleton with real data
@@ -1128,11 +1382,34 @@
     function renderPlayerList(players, slotIndex) {
       let html = '';
       players.forEach(player => {
+        // Determine status
+        let statusIndicator = '';
+        if (player.status === 'i') {
+          statusIndicator = `<span class="player-status" style="color:var(--error); font-weight:600;">(Injured)</span>`;
+        } else if (player.status === 's') {
+          statusIndicator = `<span class="player-status" style="color:var(--warning); font-weight:600;">(Suspended)</span>`;
+        }
+        
+        // Check if player is in live match
+        let liveIndicator = '';
+        if (gameweekData.matches) {
+          const isLive = gameweekData.matches.some(match => 
+            match.event === gameweekData.current?.id && 
+            match.started === true &&
+            (match.team_h === player.team || match.team_a === player.team)
+          );
+          
+          if (isLive) {
+            liveIndicator = `<span class="live-indicator"></span>`;
+          }
+        }
+        
         html += `
-          <div class="player-card" data-id="${player.id}">
+          <div class="player-card ${player.status === 'i' ? 'injured' : ''} ${player.status === 's' ? 'suspended' : ''}">
+            ${liveIndicator}
             <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
             <div class="player-info">
-              <div class="player-name">${player.web_name}</div>
+              <div class="player-name">${player.web_name} ${statusIndicator}</div>
               <div class="player-meta">
                 <span>${player.team_name}</span>
                 <span class="price-tag">£${player.now_cost}m</span>
@@ -1181,10 +1458,30 @@
         `;
       }
       
+      // Check match status
+      let matchStatus = '';
+      if (gameweekData.matches) {
+        const match = gameweekData.matches.find(m => 
+          (m.team_h === player.team || m.team_a === player.team) && 
+          m.event === gameweekData.current?.id
+        );
+        
+        if (match) {
+          if (match.finished) {
+            matchStatus = `<span class="match-status finished">FT</span>`;
+          } else if (match.started) {
+            matchStatus = `<span class="match-status live">${match.minutes}'</span>`;
+          } else {
+            const date = new Date(match.kickoff_time);
+            matchStatus = `<span class="match-status">${date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>`;
+          }
+        }
+      }
+      
       statsContent.innerHTML = `
         <div style="text-align:center; margin-bottom:20px;">
           <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
-          <h3 style="margin:10px 0; color: var(--text);">${player.web_name}</h3>
+          <h3 style="margin:10px 0; color: var(--text);">${player.web_name} ${matchStatus}</h3>
           <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
           <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
         </div>
@@ -1356,6 +1653,9 @@
       const isComplete = !selectedTeam.some(p => p === null);
       submitTeamBtn.disabled = !isComplete;
     }
+
+    // Initialize real-time data
+    loadPlayers();
   </script>
 </body>
 </html>
