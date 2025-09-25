@@ -314,6 +314,50 @@
       cursor: pointer;
       margin-top: 10px;
     }
+
+    /* STATS MODAL STYLES */
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .form-point {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .fixture-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+    }
+    .fixture-team {
+      font-weight: 600;
+    }
+    .fixture-difficulty {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-left: 6px;
+    }
   </style>
 </head>
 <body>
@@ -421,6 +465,53 @@
     </div>
     
     <div class="modal-content" id="playerList"></div>
+  </div>
+
+  <!-- PLAYER STATS MODAL -->
+  <div class="player-modal" id="statsModal" style="display:none;">
+    <div class="modal-header">
+      <div class="modal-title">📊 <span id="statsPlayerName">Player</span></div>
+      <button class="close-modal" id="closeStatsModal">&times;</button>
+    </div>
+    <div class="modal-content" id="statsContent" style="padding: 20px;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <img id="statsPlayerPhoto" src="" style="width:80px; height:100px; border-radius:10px; object-fit:cover; margin-bottom:10px;">
+        <div><strong id="statsTeamName"></strong> • <span id="statsPosition"></span></div>
+        <div style="color:var(--accent); font-weight:700; margin-top:4px;">£<span id="statsPrice"></span>m • <span id="statsTotalPoints"></span> pts</div>
+      </div>
+      
+      <div class="section" style="margin-bottom:20px;">
+        <h3 style="margin:0 0 12px; font-weight:700; color:var(--primary);">Season Stats</h3>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;">
+          <div class="stat-card">
+            <div class="stat-value" id="goalsScored">0</div>
+            <div class="stat-label">Goals</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="assists">0</div>
+            <div class="stat-label">Assists</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="cleanSheets">0</div>
+            <div class="stat-label">Clean Sheets</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="minutes">0</div>
+            <div class="stat-label">Minutes</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h3 style="margin:0 0 12px; font-weight:700; color:var(--primary);">Recent Form</h3>
+        <div id="recentForm" style="display:flex; gap:8px; justify-content:center;"></div>
+      </div>
+      
+      <div class="section">
+        <h3 style="margin:0 0 12px; font-weight:700; color:var(--primary);">Next Fixtures</h3>
+        <div id="upcomingFixtures"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -542,7 +633,7 @@
         if (data.success) {
           topUserName.innerText = data.managerName;
           joinView.style.display = 'none';
-          teamView.style.display = 'block'; // Go straight to team builder
+          teamView.style.display = 'block';
           loadPlayers();
           renderTeamGrid();
         } else {
@@ -620,11 +711,25 @@
 
       teamGrid.innerHTML = html;
 
+      // Slot click handler - DIFFERENT BEHAVIOR FOR READ-ONLY MODE
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
-          const type = slot.dataset.type;
-          openPlayerModal(type, index);
+          const player = selectedTeam[index];
+          
+          if (!player) return;
+          
+          // Check if team is locked (read-only mode)
+          const isLocked = document.querySelector('.submission-banner') !== null;
+          
+          if (isLocked) {
+            // Show stats modal
+            showPlayerStats(player.id);
+          } else {
+            // Show selection modal
+            const type = slot.dataset.type;
+            openPlayerModal(type, index);
+          }
         });
       });
 
@@ -644,18 +749,12 @@
           .map(p => p.id)
       );
 
-      // Get all available players for this position
       let availablePlayers = allPlayers
         .filter(p => p.element_type === fplType)
         .filter(p => !selectedIds.has(p.id));
 
-      // Store original list for filtering
       const originalPlayers = [...availablePlayers];
-      
-      // Render initial list
       renderPlayerList(availablePlayers, slotIndex);
-
-      // Setup filter event listeners
       setupFilters(originalPlayers, slotIndex);
 
       playerModal.style.display = 'flex';
@@ -669,11 +768,9 @@
       const maxPointsInput = document.getElementById('maxPoints');
       const resetBtn = document.getElementById('resetFilters');
 
-      // Apply filters function
       const applyFilters = () => {
         let filtered = [...originalPlayers];
         
-        // Search filter
         const searchTerm = searchInput.value.toLowerCase();
         if (searchTerm) {
           filtered = filtered.filter(player => 
@@ -682,7 +779,6 @@
           );
         }
         
-        // Price filters
         const minPrice = parseFloat(minPriceInput.value);
         const maxPrice = parseFloat(maxPriceInput.value);
         if (!isNaN(minPrice)) {
@@ -692,7 +788,6 @@
           filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
         }
         
-        // Points filters
         const minPoints = parseInt(minPointsInput.value);
         const maxPoints = parseInt(maxPointsInput.value);
         if (!isNaN(minPoints)) {
@@ -705,7 +800,6 @@
         renderPlayerList(filtered, slotIndex);
       };
 
-      // Add event listeners
       searchInput.addEventListener('input', applyFilters);
       minPriceInput.addEventListener('input', applyFilters);
       maxPriceInput.addEventListener('input', applyFilters);
@@ -764,8 +858,83 @@
       });
     }
 
+    // PLAYER STATS MODAL
+    function showPlayerStats(playerId) {
+      const statsModal = document.getElementById('statsModal');
+      const statsContent = document.getElementById('statsContent');
+      
+      statsContent.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary);">Loading player stats...</div>';
+      statsModal.style.display = 'flex';
+      
+      fetch(`/player-stats/${playerId}`)
+        .then(response => response.json())
+        .then(data => {
+          const p = data.player;
+          const history = data.stats.history.slice(-5);
+          
+          document.getElementById('statsPlayerName').innerText = p.name; // FULL NAME
+          document.getElementById('statsPlayerPhoto').src = `https://resources.premierleague.com/premierleague/photos/players/110x140/p${playerId}.png`;
+          document.getElementById('statsTeamName').innerText = p.team;
+          document.getElementById('statsPosition').innerText = p.position;
+          document.getElementById('statsPrice').innerText = p.now_cost;
+          document.getElementById('statsTotalPoints').innerText = p.total_points;
+          
+          const fullPlayer = allPlayers.find(pl => pl.id == playerId);
+          if (fullPlayer) {
+            document.getElementById('goalsScored').innerText = fullPlayer.goals_scored || 0;
+            document.getElementById('assists').innerText = fullPlayer.assists || 0;
+            document.getElementById('cleanSheets').innerText = fullPlayer.clean_sheets || 0;
+            document.getElementById('minutes').innerText = fullPlayer.minutes || 0;
+          }
+          
+          const formContainer = document.getElementById('recentForm');
+          formContainer.innerHTML = '';
+          history.forEach(week => {
+            const color = week.total_points >= 6 ? '#4ade80' : week.total_points >= 3 ? '#ffd166' : '#ff6b6b';
+            const pointEl = document.createElement('div');
+            pointEl.className = 'form-point';
+            pointEl.style.backgroundColor = color;
+            pointEl.innerText = week.total_points;
+            pointEl.title = `GW${week.gameweek}: ${week.total_points} pts`;
+            formContainer.appendChild(pointEl);
+          });
+          
+          const fixturesContainer = document.getElementById('upcomingFixtures');
+          if (data.stats.fixtures && data.stats.fixtures.length > 0) {
+            let fixtureHtml = '';
+            data.stats.fixtures.slice(0, 3).forEach(fixture => {
+              const isHome = fixture.is_home;
+              const opponent = isHome ? `vs ${fixture.team_h_name}` : `@ ${fixture.team_a_name}`;
+              const difficulty = isHome ? fixture.team_h_difficulty : fixture.team_a_difficulty;
+              const diffColor = difficulty === 5 ? '#ff6b6b' : difficulty === 4 ? '#ff9e6d' : difficulty === 3 ? '#ffd166' : difficulty === 2 ? '#4ecdc4' : '#4ade80';
+              
+              fixtureHtml += `
+                <div class="fixture-item">
+                  <span class="fixture-team">${opponent}</span>
+                  <span title="Difficulty: ${difficulty}">
+                    <span class="fixture-difficulty" style="background-color:${diffColor}"></span>
+                  </span>
+                </div>
+              `;
+            });
+            fixturesContainer.innerHTML = fixtureHtml;
+          } else {
+            fixturesContainer.innerHTML = '<div style="text-align:center; color:var(--text-secondary);">No upcoming fixtures</div>';
+          }
+        })
+        .catch(error => {
+          statsContent.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-secondary);">Failed to load stats</div>';
+          console.error('Stats error:', error);
+        });
+    }
+
+    // Close modals
     closeModal.addEventListener('click', () => {
       playerModal.style.display = 'none';
+    });
+    
+    document.getElementById('closeStatsModal').addEventListener('click', () => {
+      document.getElementById('statsModal').style.display = 'none';
     });
 
     document.querySelectorAll('.formation-btn').forEach(btn => {
@@ -793,27 +962,22 @@
         });
         const data = await response.json();
         if (data.success) {
-          // Show success message
           alert("✅ Team submitted! Good luck!");
           
-          // Reload profile to get locked status
           const response = await fetch(`/user-profile?userId=${userId}`);
           const profile = await response.json();
           
-          // Update UI to read-only
           selectedTeam = profile.team.map(id => 
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           renderTeamGrid();
           
-          // Disable editing
           document.querySelectorAll('.slot').forEach(slot => {
             slot.style.opacity = '0.7';
             slot.style.pointerEvents = 'none';
           });
           submitTeamBtn.style.display = 'none';
           
-          // Show "Already Submitted" banner
           const banner = document.createElement('div');
           banner.innerHTML = `
             <div style="text-align:center; padding:15px; background:rgba(78,205,196,0.15); border-radius:14px; margin-bottom:20px; border:1px solid rgba(78,205,196,0.3);">
