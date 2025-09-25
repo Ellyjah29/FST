@@ -26,6 +26,10 @@
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       --radius: 16px;
       --transition: all 0.2s ease;
+      --gk: #ff6b6b;
+      --def: #4ecdc4;
+      --mid: #ffd166;
+      --fwd: #06d6a0;
     }
 
     * {
@@ -85,6 +89,23 @@
       font-weight: 700;
       font-size: 20px;
       letter-spacing: -0.3px;
+    }
+
+    .deadline-container {
+      position: absolute;
+      right: 16px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-align: right;
+    }
+
+    .deadline-label {
+      font-weight: 500;
+    }
+
+    .deadline-timer {
+      color: var(--accent);
+      font-weight: 600;
     }
 
     .main-content {
@@ -446,6 +467,55 @@
     .stat-avg-form { color: var(--primary); }
     .stat-avg-ppg { color: var(--warning); }
 
+    /* TACTICAL ANALYSIS */
+    .tactical-analysis {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .tactical-header {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tactical-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .tactical-label {
+      color: var(--text-tertiary);
+      font-size: 14px;
+    }
+
+    .tactical-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .strength-meter {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin: 8px 0;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--warning));
+      width: 86%;
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
     /* SUBMISSION BANNER */
     .submission-banner {
       text-align: center;
@@ -498,20 +568,56 @@
       color: var(--primary);
     }
 
-    /* PROGRESS BAR */
-    .progress-container {
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      margin: 12px 0;
-      overflow: hidden;
+    /* PRO MODE TOGGLE */
+    .pro-mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .progress-bar {
-      height: 100%;
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--text-tertiary);
+      transition: .4s;
+      border-radius: 10px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background: var(--text);
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
       background: var(--primary);
-      width: 0%;
-      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
     }
 
     /* ANIMATIONS */
@@ -584,6 +690,325 @@
     .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
     .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
     .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* PRO MODE */
+    .pro-mode {
+      display: none;
+    }
+
+    .pro-mode.active {
+      display: block;
+    }
+
+    /* SHARE TEAM */
+    .share-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .share-button {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .share-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 195, 255, 0.3);
+    }
+
+    .share-options {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .share-option {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      border: none;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .share-option:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* PLAYER COMPARISON */
+    .comparison-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .comparison-header {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .comparison-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .comparison-label {
+      color: var(--text-tertiary);
+      font-size: 14px;
+    }
+
+    .comparison-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* SOL WALLET */
+    .sol-wallet-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .sol-wallet-header {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sol-balance {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 16px;
+    }
+
+    .connect-wallet {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .connect-wallet:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 195, 255, 0.3);
+    }
+
+    /* NFT PLAYER CARD */
+    .nft-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+      border: 2px solid transparent;
+      transition: var(--transition);
+    }
+
+    .nft-card:hover {
+      border-color: var(--primary);
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 195, 255, 0.3);
+    }
+
+    .nft-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .nft-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .nft-status {
+      color: var(--success);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .nft-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .nft-action {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      border: none;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .nft-action:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* PROFESSIONAL TOUCHES */
+    .pro-tip {
+      background: rgba(78, 205, 196, 0.1);
+      border-radius: 14px;
+      padding: 12px;
+      margin: 16px 0;
+      border: 1px solid rgba(78, 205, 196, 0.3);
+    }
+
+    .pro-tip-icon {
+      color: var(--accent);
+      font-size: 20px;
+      margin-right: 8px;
+    }
+
+    .pro-tip-text {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    /* HAPTIC FEEDBACK */
+    .haptic {
+      animation: pulse 0.3s ease-in-out;
+    }
+
+    /* PROGRESS BAR */
+    .progress-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    /* GAMEWEEK STATUS */
+    .gameweek-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .gameweek-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .gameweek-dot.live {
+      background: var(--warning);
+      animation: pulse 1s infinite;
+    }
+
+    .gameweek-text {
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
+
+    /* MATCH STATUS */
+    .match-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .match-team {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .match-score {
+      font-weight: 600;
+      color: var(--text);
+      margin: 0 4px;
+    }
+
+    .match-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* PLAYER NEWS */
+    .player-news {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .player-news-header {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .news-item {
+      display: flex;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .news-icon {
+      color: var(--text-tertiary);
+      font-size: 16px;
+    }
+
+    .news-content {
+      flex: 1;
+    }
+
+    .news-title {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .news-subtitle {
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -596,6 +1021,10 @@
            class="user-avatar" 
            onerror="this.src='https://via.placeholder.com/40x40?text=👤'">
       <div class="user-name" id="topUserName">FST Manager</div>
+    </div>
+    <div class="deadline-container">
+      <div class="deadline-label">Next Deadline:</div>
+      <div id="deadline-timer" class="deadline-timer">24h 05m</div>
     </div>
   </div>
 
@@ -633,9 +1062,18 @@
     <!-- TEAM VIEW -->
     <div id="teamView" class="view" style="display:none;">
       <div class="section">
-        <h2 class="section-title">
-          <i class="fas fa-users"></i> Build Your Dream Team
-        </h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h2 class="section-title">
+            <i class="fas fa-users"></i> Build Your Dream Team
+          </h2>
+          <div class="pro-mode-toggle">
+            <label class="switch">
+              <input type="checkbox" id="proModeToggle">
+              <span class="slider"></span>
+            </label>
+            <span style="font-size: 12px; color: var(--text-tertiary); margin-left: 8px;">Pro Mode</span>
+          </div>
+        </div>
         
         <!-- FORMATION CONTAINER -->
         <div id="formationSelectorContainer" class="input-group">
@@ -683,6 +1121,143 @@
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Pts/Game</div>
             <div id="avgPPG" class="team-stat-value stat-avg-ppg">0.0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TACTICAL ANALYSIS -->
+      <div id="tacticalAnalysis" class="section" style="display:none; margin-top: 16px;">
+        <h3 class="section-title">🔍 Tactical Analysis</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px;">
+          <div class="team-stat-card">
+            <div class="team-stat-label">Team Strength</div>
+            <div id="teamStrength" class="team-stat-value" style="color: var(--success);">86/100</div>
+          </div>
+          <div class="team-stat-card">
+            <div class="team-stat-label">Best Subs</div>
+            <div id="bestSubs" class="team-stat-value" style="color: var(--primary);">3 players</div>
+          </div>
+        </div>
+        
+        <div class="team-stats-grid">
+          <div class="team-stat-card" style="grid-column: span 2;">
+            <div class="team-stat-label">Position Balance</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;">
+              <div style="text-align: center;">
+                <div style="font-weight: 700; color: var(--gk);">GK</div>
+                <div style="font-size: 14px;">1/1</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 700; color: var(--def);">DEF</div>
+                <div style="font-size: 14px;">4/5</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 700; color: var(--mid);">MID</div>
+                <div style="font-size: 14px;">3/3</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-weight: 700; color: var(--fwd);">FWD</div>
+                <div style="font-size: 14px;">2/2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRO MODE FEATURES -->
+      <div id="proModeSection" class="pro-mode" style="display:none;">
+        <!-- PLAYER NEWS -->
+        <div class="player-news">
+          <div class="player-news-header">📰 Player News</div>
+          <div class="news-item">
+            <div class="news-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="news-content">
+              <div class="news-title">Salah out for 2 weeks</div>
+              <div class="news-subtitle">Liverpool star injured in training</div>
+            </div>
+          </div>
+          <div class="news-item">
+            <div class="news-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="news-content">
+              <div class="news-title">Haaland in form</div>
+              <div class="news-subtitle">Scored in last 5 games</div>
+            </div>
+          </div>
+          <div class="news-item">
+            <div class="news-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="news-content">
+              <div class="news-title">Man City defense solid</div>
+              <div class="news-subtitle">Clean sheets in 3 of last 5</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MATCH STATUS -->
+        <div class="match-status">
+          <div class="match-team">Man Utd</div>
+          <div class="match-score">2-1</div>
+          <div class="match-team">Chelsea</div>
+          <div class="match-time">FT</div>
+        </div>
+        <div class="match-status">
+          <div class="match-team">Arsenal</div>
+          <div class="match-score">0-0</div>
+          <div class="match-team">Spurs</div>
+          <div class="match-time">HT</div>
+        </div>
+
+        <!-- PLAYER COMPARISON -->
+        <div class="comparison-section">
+          <div class="comparison-header">📈 Player Comparison</div>
+          <div class="comparison-row">
+            <div class="comparison-label">Goals</div>
+            <div class="comparison-value">Salah: 12 | Haaland: 15</div>
+          </div>
+          <div class="comparison-row">
+            <div class="comparison-label">Assists</div>
+            <div class="comparison-value">De Bruyne: 8 | Bruno: 6</div>
+          </div>
+          <div class="comparison-row">
+            <div class="comparison-label">Minutes</div>
+            <div class="comparison-value">Kane: 900 | Son: 850</div>
+          </div>
+        </div>
+
+        <!-- SHARE TEAM -->
+        <div class="share-section">
+          <div class="share-button">
+            <i class="fas fa-share-alt"></i> Share Team
+          </div>
+          <div class="share-options">
+            <div class="share-option"><i class="fab fa-telegram"></i></div>
+            <div class="share-option"><i class="fab fa-twitter"></i></div>
+            <div class="share-option"><i class="fas fa-link"></i></div>
+          </div>
+        </div>
+
+        <!-- SOL WALLET -->
+        <div class="sol-wallet-section">
+          <div class="sol-wallet-header">
+            <div>SOL Wallet</div>
+            <div class="sol-balance">0.00 SOL</div>
+          </div>
+          <button class="connect-wallet">Connect Wallet</button>
+        </div>
+
+        <!-- NFT PLAYER CARD -->
+        <div class="nft-card">
+          <div class="nft-header">
+            <div class="nft-label">Mohamed Salah</div>
+            <div class="nft-status">Minted</div>
+          </div>
+          <div style="text-align: center; margin: 12px 0;">
+            <img src="https://resources.premierleague.com/premierleague/photos/players/110x140/p109368.png" style="width: 80px; height: 100px; border-radius: 10px; object-fit:cover;">
+          </div>
+          <div class="nft-actions">
+            <div class="nft-action">View</div>
+            <div class="nft-action">Sell</div>
+            <div class="nft-action">Trade</div>
           </div>
         </div>
       </div>
@@ -856,6 +1431,7 @@
               );
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
+              calculateTacticalAnalysis(); // Show tactical analysis
               // Only reduce opacity (don't disable pointer events)
               document.querySelectorAll('.slot').forEach(slot => {
                 slot.style.opacity = '0.7';
@@ -888,6 +1464,7 @@
           }
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
+          calculateTacticalAnalysis(); // Show tactical analysis
           return;
         }
       } catch (e) {
@@ -1034,6 +1611,7 @@
 
       checkSubmitButton();
       calculateTeamStats(); // Update team stats
+      calculateTacticalAnalysis(); // Update tactical analysis
       
       // Update progress bar
       const filledCount = selectedTeam.filter(p => p !== null).length;
@@ -1272,6 +1850,57 @@
       }, stepTime);
     }
 
+    function calculateTacticalAnalysis() {
+      if (selectedTeam.some(p => p === null)) {
+        document.getElementById('tacticalAnalysis').style.display = 'none';
+        return;
+      }
+
+      // Calculate team strength (simplified version)
+      const validPlayers = selectedTeam.filter(p => p !== null);
+      const teamValue = validPlayers.reduce((sum, p) => sum + parseFloat(p.now_cost || 0), 0);
+      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
+      const totalPoints = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
+      
+      // Real-world formula would be more complex
+      const teamStrength = Math.min(100, Math.floor(
+        (avgForm * 10) + 
+        (totalPoints / 11) + 
+        (teamValue > 95 ? 5 : 0)
+      ));
+
+      // Calculate position balance
+      const positionCounts = { gk: 0, def: 0, mid: 0, fwd: 0 };
+      validPlayers.forEach(player => {
+        if (player.element_type === 1) positionCounts.gk++;
+        if (player.element_type === 2) positionCounts.def++;
+        if (player.element_type === 3) positionCounts.mid++;
+        if (player.element_type === 4) positionCounts.fwd++;
+      });
+
+      // Display results
+      document.getElementById('teamStrength').innerText = `${teamStrength}/100`;
+      
+      // Best substitutes (simplified)
+      const bestSubs = Math.min(3, 11 - validPlayers.length);
+      document.getElementById('bestSubs').innerText = `${bestSubs} player${bestSubs !== 1 ? 's' : ''}`;
+      
+      // Position balance is handled in the UI
+      document.getElementById('tacticalAnalysis').style.display = 'block';
+    }
+
+    // Add pro mode toggle
+    document.getElementById('proModeToggle').addEventListener('change', function() {
+      const proModeSection = document.getElementById('proModeSection');
+      if (this.checked) {
+        proModeSection.style.display = 'block';
+        document.getElementById('tacticalAnalysis').style.display = 'block';
+      } else {
+        proModeSection.style.display = 'none';
+        document.getElementById('tacticalAnalysis').style.display = 'block'; // Keep tactical analysis visible
+      }
+    });
+
     closeModal.addEventListener('click', () => {
       playerModal.classList.remove('slide-in-up');
       setTimeout(() => {
@@ -1334,6 +1963,7 @@
           );
           renderTeamGrid();
           calculateTeamStats();
+          calculateTacticalAnalysis();
           document.querySelectorAll('.slot').forEach(slot => {
             slot.style.opacity = '0.7';
           });
@@ -1356,6 +1986,38 @@
       const isComplete = !selectedTeam.some(p => p === null);
       submitTeamBtn.disabled = !isComplete;
     }
+
+    // Add real-time deadline countdown
+    function updateDeadlineCountdown() {
+      const now = new Date();
+      const deadline = new Date("2023-10-20T18:00:00Z");
+      const diff = deadline - now;
+      
+      if (diff <= 0) {
+        document.getElementById('deadline-timer').innerText = "GAMETIME";
+        document.getElementById('deadline-timer').style.color = 'var(--error)';
+        return;
+      }
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      
+      document.getElementById('deadline-timer').innerText = `${hours}h ${minutes}m`;
+      
+      // Change color when < 2 hours
+      if (diff < 2 * 60 * 60 * 1000) {
+        document.getElementById('deadline-timer').style.color = 'var(--error)';
+      } else if (diff < 12 * 60 * 60 * 1000) {
+        document.getElementById('deadline-timer').style.color = 'var(--warning)';
+      } else {
+        document.getElementById('deadline-timer').style.color = 'var(--accent)';
+      }
+      
+      setTimeout(updateDeadlineCountdown, 60000); // Update every minute
+    }
+
+    // Initialize countdown
+    updateDeadlineCountdown();
   </script>
 </body>
 </html>
