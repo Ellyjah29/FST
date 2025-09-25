@@ -551,10 +551,9 @@
               );
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
-              // Disable all slots (read-only)
+              // Only reduce opacity (don't disable pointer events)
               document.querySelectorAll('.slot').forEach(slot => {
                 slot.style.opacity = '0.7';
-                slot.style.pointerEvents = 'none';
               });
               submitTeamBtn.style.display = 'none';
               
@@ -690,25 +689,20 @@
 
       teamGrid.innerHTML = html;
 
+      // ✅ FIXED: PROPER CLICK HANDLER FOR STATS
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
           const player = selectedTeam[index];
           
-          // Check if team is submitted (read-only mode)
-          const isSubmitted = submitTeamBtn.style.display === 'none';
+          // If team is submitted and player exists, show stats
+          if (player && player.id && submitTeamBtn.style.display === 'none') {
+            showPlayerStats(player);
+            return;
+          }
           
-          if (player && player.id) {
-            if (isSubmitted) {
-              // Show stats for submitted teams
-              showPlayerStats(player);
-            } else {
-              // Allow editing for non-submitted teams
-              const type = slot.dataset.type;
-              openPlayerModal(type, index);
-            }
-          } else if (!player && !isSubmitted) {
-            // Empty slot - allow selection
+          // For non-submitted teams, allow selection on empty slots
+          if (submitTeamBtn.style.display !== 'none' && !player) {
             const type = slot.dataset.type;
             openPlayerModal(type, index);
           }
@@ -961,9 +955,9 @@
           );
           renderTeamGrid();
           calculateTeamStats();
+          // ✅ FIXED: ONLY REDUCE OPACITY, DON'T DISABLE CLICKS
           document.querySelectorAll('.slot').forEach(slot => {
             slot.style.opacity = '0.7';
-            slot.style.pointerEvents = 'none';
           });
           submitTeamBtn.style.display = 'none';
           const banner = document.createElement('div');
