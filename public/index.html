@@ -326,6 +326,28 @@
     .stat-row:last-child {
       border-bottom: none;
     }
+
+    /* TEAM STATS GRID */
+    .team-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .team-stat-item {
+      text-align: center;
+    }
+    .team-stat-label {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .team-stat-value {
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .total-points { color: gold; }
+    .team-value { color: var(--accent); }
+    .avg-form, .avg-ppg { color: var(--primary); }
   </style>
 </head>
 <body>
@@ -374,6 +396,29 @@
         <div class="team-grid" id="teamGrid"></div>
 
         <button id="submitTeam" disabled>🎯 Submit Team</button>
+      </div>
+
+      <!-- TEAM STATS SECTION -->
+      <div id="teamStats" class="section" style="display:none;">
+        <h3 class="section-title">📊 Team Stats</h3>
+        <div class="team-stats-grid">
+          <div class="team-stat-item">
+            <div class="team-stat-label">Total Points</div>
+            <div id="totalPoints" class="team-stat-value total-points">0</div>
+          </div>
+          <div class="team-stat-item">
+            <div class="team-stat-label">Team Value</div>
+            <div id="teamValue" class="team-stat-value team-value">£0.0m</div>
+          </div>
+          <div class="team-stat-item">
+            <div class="team-stat-label">Avg. Form</div>
+            <div id="avgForm" class="team-stat-value avg-form">0.0</div>
+          </div>
+          <div class="team-stat-item">
+            <div class="team-stat-label">Avg. Pts/Game</div>
+            <div id="avgPPG" class="team-stat-value avg-ppg">0.0</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -505,6 +550,7 @@
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               renderTeamGrid();
+              calculateTeamStats(); // Show team stats
               // Disable all slots (read-only)
               document.querySelectorAll('.slot').forEach(slot => {
                 slot.style.opacity = '0.7';
@@ -536,6 +582,7 @@
             );
           }
           renderTeamGrid();
+          calculateTeamStats(); // Show team stats
           return;
         }
       } catch (e) {
@@ -669,6 +716,7 @@
       });
 
       checkSubmitButton();
+      calculateTeamStats(); // Update team stats
     }
 
     function openPlayerModal(positionType, slotIndex) {
@@ -852,6 +900,26 @@
       document.getElementById('statsModal').style.display = 'flex';
     }
 
+    function calculateTeamStats() {
+      if (selectedTeam.some(p => p === null)) {
+        document.getElementById('teamStats').style.display = 'none';
+        return;
+      }
+      
+      const validPlayers = selectedTeam.filter(p => p !== null);
+      const totalPoints = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
+      const teamValue = validPlayers.reduce((sum, p) => sum + parseFloat(p.now_cost || 0), 0);
+      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
+      const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
+      
+      document.getElementById('totalPoints').innerText = totalPoints;
+      document.getElementById('teamValue').innerText = `£${teamValue.toFixed(1)}m`;
+      document.getElementById('avgForm').innerText = avgForm.toFixed(1);
+      document.getElementById('avgPPG').innerText = avgPPG.toFixed(1);
+      
+      document.getElementById('teamStats').style.display = 'block';
+    }
+
     closeModal.addEventListener('click', () => {
       playerModal.style.display = 'none';
     });
@@ -892,6 +960,7 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           renderTeamGrid();
+          calculateTeamStats();
           document.querySelectorAll('.slot').forEach(slot => {
             slot.style.opacity = '0.7';
             slot.style.pointerEvents = 'none';
