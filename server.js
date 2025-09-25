@@ -1,4 +1,4 @@
-// server.js — REAL-TIME FPL DATA INTEGRATION
+// server.js — FINAL: PLAYER STATS + TEAM STATS
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -82,7 +82,7 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// Get Players — REAL-TIME FPL DATA
+// Get Players — WITH DETAILED STATS
 app.get('/players', async (req, res) => {
   try {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
@@ -91,13 +91,6 @@ app.get('/players', async (req, res) => {
 
     const players = response.data.elements;
     const teams = response.data.teams;
-    const gameweeks = response.data.events;
-    
-    // Find current gameweek
-    const currentGameweek = gameweeks.find(gw => gw.is_current);
-    const nextGameweek = gameweeks.find(gw => gw.is_next);
-    
-    // Build team map
     const teamMap = {};
     teams.forEach(team => {
       teamMap[team.id] = team.name;
@@ -120,53 +113,13 @@ app.get('/players', async (req, res) => {
       form: p.form || "0.0",
       points_per_game: p.points_per_game || "0.0",
       selected_by_percent: p.selected_by_percent || "0.0",
-      photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`,
-      status: p.status,
-      in_dreamteam: p.in_dreamteam,
-      news: p.news,
-      news_added: p.news_added,
-      chance_of_playing: p.chance_of_playing,
-      event_points: p.event_points
+      photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
     }));
 
-    // Add real-time gameweek data
-    res.json({
-      players: formatted,
-      gameweek: {
-        current: currentGameweek ? {
-          id: currentGameweek.id,
-          name: currentGameweek.name,
-          deadline_time: currentGameweek.deadline_time,
-          is_current: currentGameweek.is_current,
-          is_next: currentGameweek.is_next,
-          is_previous: currentGameweek.is_previous,
-          has_fast: currentGameweek.has_fast,
-          highest_scoring: currentGameweek.highest_scoring
-        } : null,
-        next: nextGameweek ? {
-          id: nextGameweek.id,
-          name: nextGameweek.name,
-          deadline_time: nextGameweek.deadline_time,
-          is_current: nextGameweek.is_current,
-          is_next: nextGameweek.is_next,
-          is_previous: nextGameweek.is_previous,
-          has_fast: nextGameweek.has_fast,
-          highest_scoring: nextGameweek.highest_scoring
-        } : null,
-        matches: response.data.fixtures
-      }
-    });
+    res.json(formatted);
   } catch (error) {
     console.error('FPL error:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to load players. Please try again later.',
-      players: [],
-      gameweek: {
-        current: null,
-        next: null,
-        matches: []
-      }
-    });
+    res.status(500).json({ error: 'Failed to load players. Please try again later.' });
   }
 });
 
