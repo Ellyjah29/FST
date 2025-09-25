@@ -1,4 +1,4 @@
-// server.js — FINAL: ADVANCED FILTERING READY, NO MOCK PLAYERS
+// server.js — FINAL: PLAYER STATS, ADVANCED FILTERING, FULL NAMES
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -82,7 +82,7 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// Get Players
+// Get Players — WITH FULL STATS
 app.get('/players', async (req, res) => {
   try {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
@@ -98,13 +98,19 @@ app.get('/players', async (req, res) => {
 
     const formatted = players.map(p => ({
       id: p.id,
-      web_name: p.web_name,
+      web_name: p.web_name, // FULL NAME
       team: p.team,
       team_name: teamMap[p.team] || 'Unknown',
       element_type: p.element_type,
       position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
       now_cost: (p.now_cost / 10).toFixed(1),
       total_points: p.total_points || 0,
+      goals_scored: p.goals_scored || 0,
+      assists: p.assists || 0,
+      clean_sheets: p.clean_sheets || 0,
+      minutes: p.minutes || 0,
+      yellow_cards: p.yellow_cards || 0,
+      red_cards: p.red_cards || 0,
       photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
     }));
 
@@ -112,6 +118,41 @@ app.get('/players', async (req, res) => {
   } catch (error) {
     console.error('FPL error:', error.message);
     res.status(500).json({ error: 'Failed to load players. Please try again later.' });
+  }
+});
+
+// Get Player Stats
+app.get('/player-stats/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get detailed stats
+    const statsResponse = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${id}/`, {
+      timeout: 5000
+    });
+    
+    // Get basic player info
+    const bootstrapResponse = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
+      timeout: 5000
+    });
+    
+    const player = bootstrapResponse.data.elements.find(p => p.id == id);
+    const team = bootstrapResponse.data.teams.find(t => t.id == player.team);
+    
+    res.json({
+      player: {
+        id: player.id,
+        name: player.web_name, // FULL NAME
+        team: team.name,
+        position: ["GK", "DEF", "MID", "FWD"][player.element_type - 1],
+        now_cost: (player.now_cost / 10).toFixed(1),
+        total_points: player.total_points
+      },
+      stats: statsResponse.data
+    });
+  } catch (error) {
+    console.error('Player stats error:', error.message);
+    res.status(500).json({ error: 'Failed to load player stats' });
   }
 });
 
