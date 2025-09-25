@@ -672,6 +672,7 @@
       }
     }
 
+    // ✅ FULLY FIXED renderTeamGrid FUNCTION
     function renderTeamGrid() {
       const [gk, def, mid, fwd] = formations[currentFormation];
       const slots = [];
@@ -711,25 +712,26 @@
 
       teamGrid.innerHTML = html;
 
-      // Slot click handler - DIFFERENT BEHAVIOR FOR READ-ONLY MODE
+      // ✅ FIXED SLOT CLICK HANDLER - WORKS IN JOIN MODE
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
           const player = selectedTeam[index];
           
-          if (!player) return;
-          
           // Check if team is locked (read-only mode)
           const isLocked = document.querySelector('.submission-banner') !== null;
           
           if (isLocked) {
-            // Show stats modal
-            showPlayerStats(player.id);
-          } else {
-            // Show selection modal
-            const type = slot.dataset.type;
-            openPlayerModal(type, index);
+            // Only show stats if player exists
+            if (player) {
+              showPlayerStats(player.id);
+            }
+            return;
           }
+          
+          // In join mode: always allow selection (even if slot is empty)
+          const type = slot.dataset.type;
+          openPlayerModal(type, index);
         });
       });
 
