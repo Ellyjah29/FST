@@ -684,6 +684,17 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+
+    /* ERROR MESSAGES */
+    .error-banner {
+      text-align: center;
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.15);
+      border-radius: 12px;
+      margin: 16px 0;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--error);
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -700,6 +711,11 @@
   </div>
 
   <div class="main-content">
+    <!-- ERROR BANNER -->
+    <div id="errorBanner" class="error-banner" style="display: none;">
+      <div id="errorMessage">Error loading players. Please try again.</div>
+    </div>
+
     <!-- JOIN VIEW -->
     <div id="joinView" class="view">
       <div class="section">
@@ -956,6 +972,7 @@
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
+    let playersLoaded = false;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1005,7 +1022,6 @@
           if (profile.locked) {
             joinView.style.display = 'none';
             teamView.style.display = 'block';
-            userBudget = profile.budget;
             loadPlayers().then(() => {
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
@@ -1091,10 +1107,17 @@
 
     async function loadPlayers() {
       const statusDiv = document.getElementById('status') || document.createElement('div');
+      const errorBanner = document.getElementById('errorBanner');
+      const errorMessage = document.getElementById('errorMessage');
+      
       if (!document.getElementById('status')) {
         const firstSection = document.querySelector('.section');
         firstSection.insertBefore(statusDiv, firstSection.firstChild);
         statusDiv.id = 'status';
+      }
+
+      if (errorBanner) {
+        errorBanner.style.display = 'none';
       }
 
       // Show skeleton loading
@@ -1109,14 +1132,22 @@
       try {
         const response = await fetch('/players');
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to load players');
+          throw new Error('Failed to load players from server');
         }
+        
         const players = await response.json();
+        
+        if (!Array.isArray(players) || players.length === 0) {
+          throw new Error('Invalid players data received');
+        }
+        
         allPlayers = players;
+        playersLoaded = true;
         statusDiv.innerText = "";
         renderTeamGrid(); // This will replace skeleton with real data
       } catch (e) {
+        console.error('Player loading error:', e);
+        
         teamGrid.innerHTML = ''; // Clear skeleton on error
         statusDiv.innerHTML = `
           ❌ ${e.message}<br>
@@ -1124,11 +1155,22 @@
             <i class="fas fa-redo"></i> Retry
           </button>
         `;
+        
+        if (errorMessage) {
+          errorMessage.innerText = e.message || 'Error loading players. Please try again.';
+          errorBanner.style.display = 'block';
+        }
+        
         document.getElementById('retryBtn').addEventListener('click', loadPlayers);
       }
     }
 
     function renderTeamGrid() {
+      // Only render if players are loaded
+      if (!playersLoaded) {
+        return;
+      }
+
       // Render starters (first 11 players)
       const [gk, def, mid, fwd] = formations[currentFormation];
       const slots = [];
@@ -1198,6 +1240,11 @@
       // ✅ FIXED: PROPER CLICK HANDLER FOR STATS
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
+          if (!playersLoaded) {
+            alert("Players still loading. Please wait a moment.");
+            return;
+          }
+          
           const index = slot.dataset.index;
           const player = selectedTeam[index];
           
@@ -1243,19 +1290,25 @@
     }
 
     function openPlayerModal(positionType, slotIndex) {
+      // Don't open modal if players aren't loaded
+      if (!playersLoaded) {
+        alert("Players still loading. Please wait a moment.");
+        return;
+      }
+
       const positionMap = { 
         gk: 1, 
         def: 2, 
         mid: 3, 
         fwd: 4,
-        sub: 5 // Special case for substitutes
+        sub: 5
       };
       
       let fplType;
       let positionName;
       
       if (positionType === 'sub') {
-        fplType = 0; // Special case - allow any position for substitutes
+        fplType = 0;
         positionName = "Substitute";
       } else {
         fplType = positionMap[positionType];
@@ -1400,6 +1453,12 @@
     }
 
     function showPlayerStats(player) {
+      // Don't show stats if players aren't loaded
+      if (!playersLoaded) {
+        alert("Players still loading. Please wait a moment.");
+        return;
+      }
+
       const statsContent = document.getElementById('statsContent');
       
       // Position-specific stats
@@ -1531,6 +1590,11 @@
 
     // UPDATE LIVE SCORES
     async function updateLiveScores() {
+      if (!playersLoaded) {
+        alert("Players still loading. Please wait a moment.");
+        return;
+      }
+      
       if (selectedTeam.every(p => p === null)) return;
       
       try {
@@ -1570,12 +1634,13 @@
         }
       } catch (e) {
         console.error('Failed to update scores:', e.message);
+        alert("Failed to update scores: " + (e.message || "Please try again later"));
       }
     }
 
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
-      if (submitTeamBtn.style.display === 'none') {
+      if (submitTeamBtn.style.display === 'none' && playersLoaded) {
         updateLiveScores();
       }
     }, 300000); // 5 minutes
