@@ -7,6 +7,9 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// CRITICAL FIX: Trust Render's reverse proxy
+app.set('trust proxy', 1);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public', {
@@ -25,7 +28,7 @@ const rateLimit = require('express-rate-limit');
 
 const updatePointsLimiter = rateLimit({
   windowMs: 5 * 60 * 1000, // 5 minutes
-  max: 3, // 3 requests per 5 minutes (prevents abuse)
+  max: 3, // 3 requests per 5 minutes
   message: 'Too many updates from this IP, please try again after 5 minutes',
   standardHeaders: true,
   legacyHeaders: false,
