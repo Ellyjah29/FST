@@ -445,6 +445,7 @@
     .stat-team-value { color: var(--accent); }
     .stat-avg-form { color: var(--primary); }
     .stat-avg-ppg { color: var(--warning); }
+    .stat-budget { color: var(--accent); }
 
     /* SUBMISSION BANNER */
     .submission-banner {
@@ -737,11 +738,11 @@
 
       <!-- TEAM STATS SECTION -->
       <div id="teamStats" class="section" style="display:none;">
-        <h3 class="section-title">📊 Your Team Stats</h3>
+        <h3 class="section-title">💰 Your Team Budget</h3>
         <div class="team-stats-grid">
           <div class="team-stat-card">
-            <div class="team-stat-label">Current Points</div>
-            <div id="currentPoints" class="team-stat-value stat-total-points">0</div>
+            <div class="team-stat-label">Budget Remaining</div>
+            <div id="budgetStats" class="team-stat-value stat-budget">£100.0m</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Season Total</div>
@@ -1061,7 +1062,8 @@
 
     function updateBudgetDisplay() {
       const budgetContainer = document.getElementById('budgetRemaining');
-      if (!budgetContainer) return;
+      const budgetStats = document.getElementById('budgetStats');
+      if (!budgetContainer || !budgetStats) return;
       
       // Format budget with color based on value
       let budgetClass = 'budget-value';
@@ -1073,6 +1075,8 @@
       
       budgetContainer.className = budgetClass;
       budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
+      budgetStats.className = budgetClass;
+      budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
     }
 
     function calculateTeamValue() {
@@ -1376,7 +1380,6 @@
       }
       
       const validPlayers = selectedTeam.filter(p => p !== null);
-      const currentPoints = validPlayers.reduce((sum, p) => sum + (liveScores[p.id]?.points || 0), 0);
       const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
       const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
       const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
@@ -1386,10 +1389,12 @@
       statsContainer.style.display = 'block';
       
       // Animate stat values
-      animateValue('currentPoints', 0, currentPoints, 1000);
       animateValue('seasonTotal', 0, seasonTotal, 1000);
       animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
       animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
+      
+      // Update budget stats
+      updateBudgetDisplay();
     }
 
     function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
