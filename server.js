@@ -1,4 +1,4 @@
-// server.js — FINAL: REAL-TIME GAMWEEK SCORING
+// server.js — FINAL: 15-PLAYER SQUAD + BUDGET TRACKER
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -31,15 +31,16 @@ const userSchema = new mongoose.Schema({
     maxlength: 20
   },
   solWallet: { type: String },
-  team: [{ type: Number }],
-  points: { type: Number, default: 0 }, // Current gameweek points
-  totalPoints: { type: Number, default: 0 }, // Season total points
+  team: [{ type: Number, default: null }], // 15 players (11 starters + 4 subs)
+  points: { type: Number, default: 0 },
+  totalPoints: { type: Number, default: 0 },
   entries: { type: Number, default: 0 },
   joined: { type: Boolean, default: false },
   locked: { type: Boolean, default: false },
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  budget: { type: Number, default: 100.0 } // £100m starting budget
 });
 
 const User = mongoose.model('User', userSchema);
@@ -70,7 +71,9 @@ app.post('/connect-wallet', async (req, res) => {
         managerName: managerName.trim().substring(0, 20) || "FST Manager",
         solWallet: solWallet || undefined,
         joined: true,
-        currentGameweek: 1 // Reset for new contest
+        team: Array(15).fill(null),
+        budget: 100.0,
+        currentGameweek: 1
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -78,7 +81,8 @@ app.post('/connect-wallet', async (req, res) => {
     res.json({
       success: true,
       userId: user.telegramId,
-      managerName: user.managerName
+      managerName: user.managerName,
+      budget: user.budget
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -158,31 +162,47 @@ app.get('/player-stats/:playerId', async (req, res) => {
   }
 });
 
-// Save Team — WITH DUPLICATE CHECK
+// Save Team — 15-PLAYER SQUAD + BUDGET VALIDATION
 app.post('/save-team', async (req, res) => {
   try {
     const { userId, team } = req.body;
-    if (!userId || !Array.isArray(team) || team.length !== 11) {
-      return res.status(400).json({ error: 'Team must have 11 players' });
-    }
-
-    const uniquePlayers = new Set(team);
-    if (uniquePlayers.size !== team.length) {
-      return res.status(400).json({ error: 'Duplicate players not allowed' });
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+    if (!Array.isArray(team) || team.length !== 15) {
+      return res.status(400).json({ error: 'Team must have 15 players (11 starters + 4 substitutes)' });
     }
 
     const user = await User.findOne({ telegramId: userId });
     if (!user) return res.status(404).json({ error: 'Join contest first' });
     if (user.locked) return res.status(400).json({ error: 'Team already submitted' });
 
+    // Validate team composition
+    const validPlayers = team.filter(p => p !== null);
+    if (validPlayers.length < 11) {
+      return res.status(400).json({ error: 'Must have at least 11 players (11 starters)' });
+    }
+
+    // Validate budget
+    const totalCost = validPlayers.reduce((sum, playerId) => {
+      const player = user.allPlayers.find(p => p.id === playerId);
+      return sum + (player ? parseFloat(player.now_cost) : 0);
+    }, 0);
+    
+    if (totalCost > 100.0) {
+      return res.status(400).json({ 
+        error: `Team exceeds budget! Total: £${totalCost.toFixed(1)}m (max £100.0m)`,
+        remainingBudget: (100.0 - totalCost).toFixed(1)
+      });
+    }
+
     user.team = team;
     user.locked = true;
     user.entries += 1;
-    user.points = 0; // Reset points for new gameweek
+    user.points = 0;
+    user.budget = 100.0 - totalCost;
     user.lastUpdated = new Date();
     await user.save();
 
-    res.json({ success: true, message: '✅ Team locked in!' });
+    res.json({ success: true, message: '✅ Team locked in!', budget: user.budget });
   } catch (error) {
     console.error('Save error:', error.message);
     res.status(500).json({ error: 'Failed to save team' });
@@ -198,7 +218,7 @@ app.post('/update-points', async (req, res) => {
     const user = await User.findOne({ telegramId: userId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    if (!user.team || user.team.length !== 11) {
+    if (!user.team || user.team.length !== 15) {
       return res.status(400).json({ error: 'Team not complete' });
     }
 
@@ -207,6 +227,8 @@ app.post('/update-points', async (req, res) => {
 
     // Fetch stats for each player
     for (const playerId of user.team) {
+      if (!playerId) continue;
+      
       try {
         const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
@@ -243,14 +265,15 @@ app.post('/update-points', async (req, res) => {
 
     // Update user points
     user.points = totalPoints;
-    user.totalPoints = totalPoints; // For now, season total = current GW
+    user.totalPoints = totalPoints;
     user.lastUpdated = new Date();
     await user.save();
 
     res.json({
       success: true,
       points: totalPoints,
-      playerStats: playerStats
+      playerStats: playerStats,
+      budget: user.budget
     });
   } catch (error) {
     console.error('Update points error:', error.message);
@@ -277,7 +300,8 @@ app.get('/user-profile', async (req, res) => {
       locked: user.locked,
       joined: user.joined,
       currentGameweek: user.currentGameweek,
-      lastUpdated: user.lastUpdated
+      lastUpdated: user.lastUpdated,
+      budget: user.budget
     });
   } catch (error) {
     console.error('Profile error:', error.message);
