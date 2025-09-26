@@ -619,81 +619,35 @@
       animation: pulse 0.8s ease-in-out infinite;
     }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-
     /* BUDGET TRACKER */
-    .budget-tracker {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 14px;
-      padding: 16px;
+    .budget-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: rgba(26, 42, 58, 0.7);
+      border-radius: 12px;
       margin: 16px 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .budget-item {
-      text-align: center;
+    .budget-label {
+      font-weight: 600;
+      color: var(--text-tertiary);
     }
 
     .budget-value {
       font-weight: 700;
-      font-size: 18px;
-      margin-top: 4px;
-    }
-
-    .budget-remaining {
+      font-size: 16px;
       color: var(--success);
     }
 
-    .budget-used {
+    .budget-warning {
       color: var(--warning);
     }
 
-    .budget-total {
-      color: var(--primary);
-    }
-
-    /* SQUAD SECTION */
-    .squad-section {
-      margin-top: 20px;
-    }
-
-    .squad-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .substitutes-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-top: 12px;
-    }
-
-    .sub-label {
-      font-size: 10px;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* ERROR MESSAGES */
-    .error-banner {
-      text-align: center;
-      padding: 12px;
-      background: rgba(239, 68, 68, 0.15);
-      border-radius: 12px;
-      margin: 16px 0;
-      border: 1px solid rgba(239, 68, 68, 0.3);
+    .budget-critical {
       color: var(--error);
+      font-weight: 700;
     }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -711,11 +665,6 @@
   </div>
 
   <div class="main-content">
-    <!-- ERROR BANNER -->
-    <div id="errorBanner" class="error-banner" style="display: none;">
-      <div id="errorMessage">Error loading players. Please try again.</div>
-    </div>
-
     <!-- JOIN VIEW -->
     <div id="joinView" class="view">
       <div class="section">
@@ -750,32 +699,18 @@
     <div id="teamView" class="view" style="display:none;">
       <div class="section">
         <h2 class="section-title">
-          <i class="fas fa-users"></i> Build Your 15-Player Squad
+          <i class="fas fa-users"></i> Build Your Dream Team
         </h2>
         
         <!-- BUDGET TRACKER -->
-        <div class="budget-tracker">
-          <div class="budget-item">
-            <div class="budget-label">Remaining</div>
-            <div id="budgetRemaining" class="budget-value budget-remaining">£100.0m</div>
-          </div>
-          <div class="budget-item">
-            <div class="budget-label">Used</div>
-            <div id="budgetUsed" class="budget-value budget-used">£0.0m</div>
-          </div>
-          <div class="budget-item">
-            <div class="budget-label">Total</div>
-            <div id="budgetTotal" class="budget-value budget-total">£100.0m</div>
-          </div>
-          <div class="budget-item">
-            <div class="budget-label">Players</div>
-            <div id="playerCount" class="budget-value">0/15</div>
-          </div>
+        <div class="budget-container">
+          <div class="budget-label">Budget Remaining:</div>
+          <div id="budgetRemaining" class="budget-value">£100.0m</div>
         </div>
         
         <!-- FORMATION CONTAINER -->
         <div id="formationSelectorContainer" class="input-group">
-          <label class="input-label">Starting Formation</label>
+          <label class="input-label">Choose Formation</label>
           <div class="formation-selector">
             <button class="formation-btn active" data-formation="4-3-3">4-3-3</button>
             <button class="formation-btn" data-formation="3-5-2">3-5-2</button>
@@ -784,30 +719,15 @@
           </div>
         </div>
 
-        <div class="squad-section">
-          <div class="squad-title">
-            <h3 style="margin: 0; color: var(--primary);">Starting XI</h3>
-          </div>
-          <div class="team-grid" id="teamGrid">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-
-        <div class="squad-section">
-          <div class="squad-title">
-            <h3 style="margin: 0; color: var(--primary);">Substitutes</h3>
-            <div class="sub-label">4 players max</div>
-          </div>
-          <div class="substitutes-grid" id="substitutesGrid">
-            <!-- Populated by JS -->
-          </div>
+        <div class="team-grid" id="teamGrid">
+          <!-- Populated by JS -->
         </div>
 
         <div class="progress-container">
           <div class="progress-bar" id="teamProgress"></div>
         </div>
         <div style="text-align: center; color: var(--text-tertiary); font-size: 13px; margin-bottom: 16px;">
-          <span id="teamProgressText">0/15 players selected</span>
+          <span id="teamProgressText">0/11 players selected</span>
         </div>
 
         <button id="submitTeam" class="btn-secondary" disabled>
@@ -820,14 +740,12 @@
         <h3 class="section-title">📊 Your Team Stats</h3>
         <div class="team-stats-grid">
           <div class="team-stat-card">
-            <div class="team-stat-label">This Gameweek</div>
+            <div class="team-stat-label">Current Points</div>
             <div id="currentPoints" class="team-stat-value stat-total-points">0</div>
-            <div style="color:var(--text-tertiary); font-size:12px; margin-top:4px;">Points this week</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Season Total</div>
             <div id="seasonTotal" class="team-stat-value stat-team-value">0</div>
-            <div style="color:var(--text-tertiary); font-size:12px; margin-top:4px;">Cumulative points</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Form</div>
@@ -847,11 +765,6 @@
           <div id="lastUpdated" style="margin-top: 8px; color: var(--text-tertiary); font-size: 12px;">
             Last updated: Never
           </div>
-        </div>
-        
-        <!-- EXPLANATION -->
-        <div style="text-align:center; color:var(--text-tertiary); font-size:12px; margin-top:16px;">
-          <i class="fas fa-info-circle"></i> Points can decrease due to negative events (yellow cards, red cards, own goals)
         </div>
       </div>
     </div>
@@ -950,7 +863,6 @@
     const closeModal = document.getElementById('closeModal');
     const playerList = document.getElementById('playerList');
     const teamGrid = document.getElementById('teamGrid');
-    const substitutesGrid = document.getElementById('substitutesGrid');
     const managerNameInput = document.getElementById('managerNameInput');
 
     if (telegramUser) {
@@ -968,11 +880,10 @@
     };
 
     let currentFormation = "4-3-3";
-    let selectedTeam = Array(15).fill(null); // 15 players (11 starters + 4 substitutes)
+    let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
-    let playersLoaded = false;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1026,6 +937,8 @@
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
+              userBudget = profile.budget || 100.0;
+              updateBudgetDisplay();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
               // Only reduce opacity (don't disable pointer events)
@@ -1055,13 +968,14 @@
           // If joined but not submitted, show team builder
           joinView.style.display = 'none';
           teamView.style.display = 'block';
-          userBudget = profile.budget;
           loadPlayers();
           if (profile.team && profile.team.length > 0) {
             selectedTeam = profile.team.map(id => 
               allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
             );
           }
+          userBudget = profile.budget || 100.0;
+          updateBudgetDisplay();
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
           return;
@@ -1092,11 +1006,12 @@
         const data = await response.json();
         if (data.success) {
           topUserName.innerText = data.managerName;
-          userBudget = data.budget;
           joinView.style.display = 'none';
           teamView.style.display = 'block';
           loadPlayers();
           renderTeamGrid();
+          userBudget = data.budget || 100.0;
+          updateBudgetDisplay();
         } else {
           throw new Error(data.error || 'Failed to join');
         }
@@ -1107,17 +1022,10 @@
 
     async function loadPlayers() {
       const statusDiv = document.getElementById('status') || document.createElement('div');
-      const errorBanner = document.getElementById('errorBanner');
-      const errorMessage = document.getElementById('errorMessage');
-      
       if (!document.getElementById('status')) {
         const firstSection = document.querySelector('.section');
         firstSection.insertBefore(statusDiv, firstSection.firstChild);
         statusDiv.id = 'status';
-      }
-
-      if (errorBanner) {
-        errorBanner.style.display = 'none';
       }
 
       // Show skeleton loading
@@ -1132,22 +1040,14 @@
       try {
         const response = await fetch('/players');
         if (!response.ok) {
-          throw new Error('Failed to load players from server');
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load players');
         }
-        
         const players = await response.json();
-        
-        if (!Array.isArray(players) || players.length === 0) {
-          throw new Error('Invalid players data received');
-        }
-        
         allPlayers = players;
-        playersLoaded = true;
         statusDiv.innerText = "";
         renderTeamGrid(); // This will replace skeleton with real data
       } catch (e) {
-        console.error('Player loading error:', e);
-        
         teamGrid.innerHTML = ''; // Clear skeleton on error
         statusDiv.innerHTML = `
           ❌ ${e.message}<br>
@@ -1155,23 +1055,38 @@
             <i class="fas fa-redo"></i> Retry
           </button>
         `;
-        
-        if (errorMessage) {
-          errorMessage.innerText = e.message || 'Error loading players. Please try again.';
-          errorBanner.style.display = 'block';
-        }
-        
         document.getElementById('retryBtn').addEventListener('click', loadPlayers);
       }
     }
 
-    function renderTeamGrid() {
-      // Only render if players are loaded
-      if (!playersLoaded) {
-        return;
+    function updateBudgetDisplay() {
+      const budgetContainer = document.getElementById('budgetRemaining');
+      if (!budgetContainer) return;
+      
+      // Format budget with color based on value
+      let budgetClass = 'budget-value';
+      if (userBudget < 10) {
+        budgetClass = 'budget-critical';
+      } else if (userBudget < 20) {
+        budgetClass = 'budget-warning';
       }
+      
+      budgetContainer.className = budgetClass;
+      budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
+    }
 
-      // Render starters (first 11 players)
+    function calculateTeamValue() {
+      return selectedTeam
+        .filter(p => p !== null)
+        .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
+    }
+
+    function calculateRemainingBudget() {
+      const teamValue = calculateTeamValue();
+      return (100.0 - teamValue).toFixed(1);
+    }
+
+    function renderTeamGrid() {
       const [gk, def, mid, fwd] = formations[currentFormation];
       const slots = [];
       
@@ -1213,38 +1128,9 @@
 
       teamGrid.innerHTML = html;
 
-      // Render substitutes (next 4 players)
-      let subHtml = '';
-      for (let i = 0; i < 4; i++) {
-        const slotIndex = 11 + i;
-        const player = selectedTeam[slotIndex];
-        subHtml += `
-          <div class="slot ${player ? 'filled' : ''}" 
-               data-index="${slotIndex}" 
-               data-type="sub">
-            ${player ? 
-              `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
-               ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
-               ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
-              ` : 
-              `<span class="sub-label">SUB</span>`
-            }
-          </div>
-        `;
-      }
-      substitutesGrid.innerHTML = subHtml;
-
-      // Update budget display
-      calculateBudget();
-
       // ✅ FIXED: PROPER CLICK HANDLER FOR STATS
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
-          if (!playersLoaded) {
-            alert("Players still loading. Please wait a moment.");
-            return;
-          }
-          
           const index = slot.dataset.index;
           const player = selectedTeam[index];
           
@@ -1257,11 +1143,7 @@
           // For non-submitted teams, allow selection on empty slots
           if (submitTeamBtn.style.display !== 'none' && !player) {
             const type = slot.dataset.type;
-            if (type === 'sub') {
-              openPlayerModal('sub', index);
-            } else {
-              openPlayerModal(type, index);
-            }
+            openPlayerModal(type, index);
             
             // Add selection animation
             slot.style.transform = 'scale(0.95)';
@@ -1277,9 +1159,9 @@
       
       // Update progress bar
       const filledCount = selectedTeam.filter(p => p !== null).length;
-      const progressPercent = (filledCount / 15) * 100;
+      const progressPercent = (filledCount / 11) * 100;
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
-      document.getElementById('teamProgressText').innerText = `${filledCount}/15 players selected`;
+      document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
       
       // ✅ HIDE FORMATION FOR SUBMITTED TEAMS
       const isSubmitted = submitTeamBtn.style.display === 'none';
@@ -1287,38 +1169,16 @@
       if (formationContainer) {
         formationContainer.style.display = isSubmitted ? 'none' : 'block';
       }
+      
+      // Update budget
+      userBudget = 100.0 - calculateTeamValue();
+      updateBudgetDisplay();
     }
 
     function openPlayerModal(positionType, slotIndex) {
-      // Don't open modal if players aren't loaded
-      if (!playersLoaded) {
-        alert("Players still loading. Please wait a moment.");
-        return;
-      }
-
-      const positionMap = { 
-        gk: 1, 
-        def: 2, 
-        mid: 3, 
-        fwd: 4,
-        sub: 5
-      };
-      
-      let fplType;
-      let positionName;
-      
-      if (positionType === 'sub') {
-        fplType = 0;
-        positionName = "Substitute";
-      } else {
-        fplType = positionMap[positionType];
-        positionName = { 
-          gk: 'Goalkeeper', 
-          def: 'Defender', 
-          mid: 'Midfielder', 
-          fwd: 'Forward' 
-        }[positionType];
-      }
+      const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
+      const fplType = positionMap[positionType];
+      const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
 
       document.getElementById('modalPosition').innerText = positionName;
 
@@ -1328,17 +1188,9 @@
           .map(p => p.id)
       );
 
-      let availablePlayers;
-      
-      if (positionType === 'sub') {
-        // Substitutes can be any player
-        availablePlayers = allPlayers.filter(p => !selectedIds.has(p.id));
-      } else {
-        // Starters must be specific position
-        availablePlayers = allPlayers
-          .filter(p => p.element_type === fplType)
-          .filter(p => !selectedIds.has(p.id));
-      }
+      let availablePlayers = allPlayers
+        .filter(p => p.element_type === fplType)
+        .filter(p => !selectedIds.has(p.id));
 
       const originalPlayers = [...availablePlayers];
       renderPlayerList(availablePlayers, slotIndex);
@@ -1402,14 +1254,12 @@
     function renderPlayerList(players, slotIndex) {
       let html = '';
       players.forEach(player => {
-        // Calculate if player can be added without exceeding budget
-        const newCost = parseFloat(player.now_cost) || 0;
-        const currentCost = selectedTeam.filter(p => p !== null).reduce((sum, p) => 
-          sum + (allPlayers.find(pl => pl.id === p.id)?.now_cost || 0), 0);
-        const wouldExceedBudget = (currentCost + newCost) > 100.0;
-
+        // Check if adding this player would exceed budget
+        const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
+        const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
+        
         html += `
-          <div class="player-card ${wouldExceedBudget ? 'disabled' : ''}" data-id="${player.id}">
+          <div class="${playerClass}" data-id="${player.id}">
             <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
             <div class="player-info">
               <div class="player-name">${player.web_name}</div>
@@ -1419,11 +1269,6 @@
                 <span class="points-tag">${player.total_points} pts</span>
               </div>
             </div>
-            ${wouldExceedBudget ? `
-              <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
-                BUDGET
-              </div>
-            ` : ''}
           </div>
         `;
       });
@@ -1434,7 +1279,7 @@
 
       playerList.innerHTML = html;
 
-      document.querySelectorAll('.player-card:not(.disabled)').forEach(card => {
+      document.querySelectorAll('.player-card').forEach(card => {
         card.addEventListener('click', () => {
           const playerId = parseInt(card.dataset.id);
           const player = allPlayers.find(p => p.id === playerId);
@@ -1445,6 +1290,13 @@
             }
           }
           
+          // Check if adding this player would exceed budget
+          const playerCost = parseFloat(player.now_cost);
+          if (userBudget < playerCost) {
+            alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
+            return;
+          }
+          
           selectedTeam[slotIndex] = player;
           renderTeamGrid();
           playerModal.style.display = 'none';
@@ -1453,12 +1305,6 @@
     }
 
     function showPlayerStats(player) {
-      // Don't show stats if players aren't loaded
-      if (!playersLoaded) {
-        alert("Players still loading. Please wait a moment.");
-        return;
-      }
-
       const statsContent = document.getElementById('statsContent');
       
       // Position-specific stats
@@ -1563,38 +1409,8 @@
       }, stepTime);
     }
 
-    // BUDGET TRACKER
-    function calculateBudget() {
-      const validPlayers = selectedTeam.filter(p => p !== null);
-      const totalCost = validPlayers.reduce((sum, playerId) => {
-        const player = allPlayers.find(p => p.id === playerId);
-        return sum + (player ? parseFloat(player.now_cost) : 0);
-      }, 0);
-      
-      const remaining = 100.0 - totalCost;
-      
-      // Update UI
-      document.getElementById('budgetRemaining').innerText = `£${remaining.toFixed(1)}m`;
-      document.getElementById('budgetUsed').innerText = `£${totalCost.toFixed(1)}m`;
-      document.getElementById('playerCount').innerText = `${validPlayers.length}/15`;
-      
-      // Budget bar
-      const budgetBar = document.querySelector('.budget-bar');
-      if (budgetBar) {
-        budgetBar.style.width = `${(totalCost / 100.0) * 100}%`;
-      }
-      
-      // Update budget variable
-      userBudget = remaining;
-    }
-
     // UPDATE LIVE SCORES
     async function updateLiveScores() {
-      if (!playersLoaded) {
-        alert("Players still loading. Please wait a moment.");
-        return;
-      }
-      
       if (selectedTeam.every(p => p === null)) return;
       
       try {
@@ -1634,13 +1450,12 @@
         }
       } catch (e) {
         console.error('Failed to update scores:', e.message);
-        alert("Failed to update scores: " + (e.message || "Please try again later"));
       }
     }
 
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
-      if (submitTeamBtn.style.display === 'none' && playersLoaded) {
+      if (submitTeamBtn.style.display === 'none') {
         updateLiveScores();
       }
     }, 300000); // 5 minutes
@@ -1667,30 +1482,18 @@
         document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFormation = btn.dataset.formation;
+        selectedTeam = Array(11).fill(null);
         renderTeamGrid();
       });
     });
 
     submitTeamBtn.addEventListener('click', async () => {
-      const filledCount = selectedTeam.filter(p => p !== null).length;
-      if (filledCount < 11) {
-        alert("Please select at least 11 players (starters)");
+      if (selectedTeam.some(p => p === null)) {
+        alert("Please fill all 11 slots");
         return;
       }
 
-      // Validate budget
-      const validPlayers = selectedTeam.filter(p => p !== null);
-      const totalCost = validPlayers.reduce((sum, playerId) => {
-        const player = allPlayers.find(p => p.id === playerId);
-        return sum + (player ? parseFloat(player.now_cost) : 0);
-      }, 0);
-      
-      if (totalCost > 100.0) {
-        alert(`Team exceeds budget! Total: £${totalCost.toFixed(1)}m (max £100.0m)`);
-        return;
-      }
-
-      const teamIds = selectedTeam.map(p => p ? p.id : null);
+      const teamIds = selectedTeam.map(p => p.id);
       try {
         const response = await fetch('/save-team', {
           method: 'POST',
@@ -1720,6 +1523,8 @@
           selectedTeam = profile.team.map(id => 
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
+          userBudget = profile.budget || 100.0;
+          updateBudgetDisplay();
           renderTeamGrid();
           calculateTeamStats();
           document.querySelectorAll('.slot').forEach(slot => {
@@ -1744,15 +1549,16 @@
     });
 
     function checkSubmitButton() {
-      const filledCount = selectedTeam.filter(p => p !== null).length;
-      const validPlayers = selectedTeam.filter(p => p !== null);
-      const totalCost = validPlayers.reduce((sum, playerId) => {
-        const player = allPlayers.find(p => p.id === playerId);
-        return sum + (player ? parseFloat(player.now_cost) : 0);
-      }, 0);
+      const isComplete = !selectedTeam.some(p => p === null);
+      const isOverBudget = calculateTeamValue() > 100;
       
-      const isComplete = filledCount >= 11 && totalCost <= 100.0;
-      submitTeamBtn.disabled = !isComplete;
+      submitTeamBtn.disabled = !isComplete || isOverBudget;
+      
+      if (isOverBudget) {
+        submitTeamBtn.title = "Team budget exceeds £100m";
+      } else {
+        submitTeamBtn.title = "";
+      }
     }
   </script>
 </body>
