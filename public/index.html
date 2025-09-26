@@ -624,6 +624,14 @@
       50% { transform: scale(1.1); }
       100% { transform: scale(1); }
     }
+
+    /* GAMWEEK LABEL */
+    .gameweek-label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+      font-weight: 500;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -709,20 +717,24 @@
         <h3 class="section-title">📊 Your Team Stats</h3>
         <div class="team-stats-grid">
           <div class="team-stat-card">
-            <div class="team-stat-label">Current Points</div>
+            <div class="team-stat-label" id="gameweekLabel">GW1 Points</div>
             <div id="currentPoints" class="team-stat-value stat-total-points">0</div>
+            <div class="gameweek-label">This gameweek's points</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Season Total</div>
             <div id="seasonTotal" class="team-stat-value stat-team-value">0</div>
+            <div class="gameweek-label">Cumulative season points</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Form</div>
             <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
+            <div class="gameweek-label">Recent performance</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Pts/Game</div>
             <div id="avgPPG" class="team-stat-value stat-avg-ppg">0.0</div>
+            <div class="gameweek-label">Points per game</div>
           </div>
         </div>
         
@@ -733,6 +745,9 @@
           </button>
           <div id="lastUpdated" style="margin-top: 8px; color: var(--text-tertiary); font-size: 12px;">
             Last updated: Never
+          </div>
+          <div style="margin-top: 8px; color: var(--text-tertiary); font-size: 12px;">
+            <i class="fas fa-info-circle"></i> Points update after each gameweek. During a gameweek, points can change based on player performance.
           </div>
         </div>
       </div>
@@ -852,6 +867,7 @@
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
     let liveScores = {};
+    let isUpdating = false; // Prevent multiple simultaneous updates
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1064,6 +1080,13 @@
       teamGrid.innerHTML = html;
 
       // ✅ FIXED: PROPER CLICK HANDLER FOR STATS
+      // First, remove any existing event listeners by cloning elements
+      document.querySelectorAll('.slot').forEach(slot => {
+        const clonedSlot = slot.cloneNode(true);
+        slot.parentNode.replaceChild(clonedSlot, slot);
+      });
+
+      // Now add new event listeners
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
@@ -1296,18 +1319,30 @@
       }
       
       const validPlayers = selectedTeam.filter(p => p !== null);
-      const currentPoints = validPlayers.reduce((sum, p) => sum + (liveScores[p.id]?.points || 0), 0);
-      const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
-      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
-      const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
       
-      // Add fade-in animation to stats cards
-      const statsContainer = document.getElementById('teamStats');
-      statsContainer.style.display = 'block';
+      // This is the current gameweek points
+      const currentPoints = validPlayers.reduce((sum, p) => sum + (liveScores[p.id]?.points || 0), 0);
+      
+      // This is the season total (should only increase)
+      const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
+      
+      // Update UI
+      document.getElementById('currentPoints').innerText = currentPoints;
+      document.getElementById('seasonTotal').innerText = seasonTotal;
+      
+      // Update gameweek label
+      if (liveScores[validPlayers[0]?.id]) {
+        document.getElementById('gameweekLabel').innerText = `GW${liveScores[validPlayers[0].id].gameweek} Points`;
+      }
       
       // Animate stat values
       animateValue('currentPoints', 0, currentPoints, 1000);
       animateValue('seasonTotal', 0, seasonTotal, 1000);
+      
+      // Calculate avg form and PPG
+      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
+      const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
+      
       animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
       animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
     }
@@ -1331,9 +1366,12 @@
 
     // UPDATE LIVE SCORES
     async function updateLiveScores() {
-      if (selectedTeam.every(p => p === null)) return;
+      if (isUpdating) return; // Prevent multiple simultaneous updates
+      isUpdating = true;
       
       try {
+        if (selectedTeam.every(p => p === null)) return;
+        
         const response = await fetch('/update-points', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1370,15 +1408,17 @@
         }
       } catch (e) {
         console.error('Failed to update scores:', e.message);
+      } finally {
+        isUpdating = false;
       }
     }
 
-    // Auto-update every 5 minutes (for demo)
+    // Auto-update every 15 minutes (prevents rapid updates)
     setInterval(() => {
       if (submitTeamBtn.style.display === 'none') {
         updateLiveScores();
       }
-    }, 300000); // 5 minutes
+    }, 900000); // 15 minutes
 
     // Manual update button
     document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
