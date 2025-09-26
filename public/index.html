@@ -584,6 +584,46 @@
     .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
     .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
     .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* LIVE SCORING BADGE */
+    .live-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .live-indicator {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    .live-update {
+      color: var(--success);
+      font-weight: 600;
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -669,12 +709,12 @@
         <h3 class="section-title">📊 Your Team Stats</h3>
         <div class="team-stats-grid">
           <div class="team-stat-card">
-            <div class="team-stat-label">Total Points</div>
-            <div id="totalPoints" class="team-stat-value stat-total-points">0</div>
+            <div class="team-stat-label">Current Points</div>
+            <div id="currentPoints" class="team-stat-value stat-total-points">0</div>
           </div>
           <div class="team-stat-card">
-            <div class="team-stat-label">Team Value</div>
-            <div id="teamValue" class="team-stat-value stat-team-value">£0.0m</div>
+            <div class="team-stat-label">Season Total</div>
+            <div id="seasonTotal" class="team-stat-value stat-team-value">0</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Form</div>
@@ -683,6 +723,16 @@
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Pts/Game</div>
             <div id="avgPPG" class="team-stat-value stat-avg-ppg">0.0</div>
+          </div>
+        </div>
+        
+        <!-- LIVE SCORING BUTTON -->
+        <div style="margin-top: 20px; text-align: center;">
+          <button id="updatePointsBtn" class="btn-outline" style="padding: 12px 24px; font-size: 14px;">
+            <i class="fas fa-sync-alt"></i> Update Live Scores
+          </button>
+          <div id="lastUpdated" style="margin-top: 8px; color: var(--text-tertiary); font-size: 12px;">
+            Last updated: Never
           </div>
         </div>
       </div>
@@ -801,6 +851,7 @@
     let currentFormation = "4-3-3";
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
+    let liveScores = {};
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -873,6 +924,9 @@
               `;
               const firstSection = document.querySelector('.section');
               firstSection.insertBefore(banner, firstSection.firstChild);
+              
+              // Load live scores
+              updateLiveScores();
             });
             return;
           }
@@ -995,7 +1049,10 @@
                  data-index="${slotIndex}" 
                  data-type="${slot.type}">
               ${player ? 
-                `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">` : 
+                `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
+                 ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
+                 ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
+                ` : 
                 `<span class="slot-label">${slot.label}</span>`
               }
             </div>
@@ -1239,8 +1296,8 @@
       }
       
       const validPlayers = selectedTeam.filter(p => p !== null);
-      const totalPoints = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
-      const teamValue = validPlayers.reduce((sum, p) => sum + parseFloat(p.now_cost || 0), 0);
+      const currentPoints = validPlayers.reduce((sum, p) => sum + (liveScores[p.id]?.points || 0), 0);
+      const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
       const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
       const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
       
@@ -1249,8 +1306,8 @@
       statsContainer.style.display = 'block';
       
       // Animate stat values
-      animateValue('totalPoints', 0, totalPoints, 1000);
-      animateValue('teamValue', 0, teamValue, 1000, (val) => `£${val.toFixed(1)}m`);
+      animateValue('currentPoints', 0, currentPoints, 1000);
+      animateValue('seasonTotal', 0, seasonTotal, 1000);
       animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
       animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
     }
@@ -1271,6 +1328,60 @@
         }
       }, stepTime);
     }
+
+    // UPDATE LIVE SCORES
+    async function updateLiveScores() {
+      if (selectedTeam.every(p => p === null)) return;
+      
+      try {
+        const response = await fetch('/update-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update liveScores object
+          data.playerStats.forEach(stat => {
+            liveScores[stat.player_id] = stat;
+          });
+          
+          // Update UI
+          renderTeamGrid();
+          calculateTeamStats();
+          
+          // Update last updated time
+          const lastUpdated = document.getElementById('lastUpdated');
+          lastUpdated.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
+          
+          // Show live update indicator
+          const updateBtn = document.getElementById('updatePointsBtn');
+          updateBtn.innerHTML = `<i class="fas fa-check"></i> Live Scores Updated!`;
+          updateBtn.style.backgroundColor = 'rgba(74, 222, 128, 0.1)';
+          updateBtn.style.color = '#000';
+          
+          // Reset button after 3 seconds
+          setTimeout(() => {
+            updateBtn.innerHTML = `<i class="fas fa-sync-alt"></i> Update Live Scores`;
+            updateBtn.style.backgroundColor = '';
+            updateBtn.style.color = '';
+          }, 3000);
+        }
+      } catch (e) {
+        console.error('Failed to update scores:', e.message);
+      }
+    }
+
+    // Auto-update every 5 minutes (for demo)
+    setInterval(() => {
+      if (submitTeamBtn.style.display === 'none') {
+        updateLiveScores();
+      }
+    }, 300000); // 5 minutes
+
+    // Manual update button
+    document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
 
     closeModal.addEventListener('click', () => {
       playerModal.classList.remove('slide-in-up');
@@ -1346,6 +1457,9 @@
               successBanner.parentNode.removeChild(successBanner);
             }
           }, 3000);
+          
+          // Start live scoring updates
+          updateLiveScores();
         }
       } catch (e) {
         alert("Failed to submit team: " + (e.message || ""));
