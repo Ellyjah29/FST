@@ -1,4 +1,4 @@
-// server.js — FINAL: PLAYER STATS + TEAM STATS
+// server.js — FINAL: REAL-TIME GAMWEEK SCORING
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -32,10 +32,13 @@ const userSchema = new mongoose.Schema({
   },
   solWallet: { type: String },
   team: [{ type: Number }],
-  points: { type: Number, default: 0 },
+  points: { type: Number, default: 0 }, // Current gameweek points
+  totalPoints: { type: Number, default: 0 }, // Season total points
   entries: { type: Number, default: 0 },
   joined: { type: Boolean, default: false },
   locked: { type: Boolean, default: false },
+  currentGameweek: { type: Number, default: 1 },
+  lastUpdated: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -66,7 +69,8 @@ app.post('/connect-wallet', async (req, res) => {
       { 
         managerName: managerName.trim().substring(0, 20) || "FST Manager",
         solWallet: solWallet || undefined,
-        joined: true
+        joined: true,
+        currentGameweek: 1 // Reset for new contest
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -123,6 +127,37 @@ app.get('/players', async (req, res) => {
   }
 });
 
+// Get Player Gameweek Stats
+app.get('/player-stats/:playerId', async (req, res) => {
+  try {
+    const { playerId } = req.params;
+    const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+      timeout: 5000
+    });
+
+    const data = response.data;
+    
+    // Return most recent gameweek stats
+    const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
+    
+    res.json({
+      success: true,
+      player_id: playerId,
+      gameweek: latestGW?.round || 0,
+      points: latestGW?.total_points || 0,
+      minutes: latestGW?.minutes || 0,
+      goals: latestGW?.goals_scored || 0,
+      assists: latestGW?.assists || 0,
+      clean_sheets: latestGW?.clean_sheets || 0,
+      bonus: latestGW?.bonus || 0,
+      form: latestGW?.form || "0.0"
+    });
+  } catch (error) {
+    console.error('Player stats error:', error.message);
+    res.status(500).json({ error: 'Failed to load player stats' });
+  }
+});
+
 // Save Team — WITH DUPLICATE CHECK
 app.post('/save-team', async (req, res) => {
   try {
@@ -143,13 +178,83 @@ app.post('/save-team', async (req, res) => {
     user.team = team;
     user.locked = true;
     user.entries += 1;
-    user.points = Math.floor(Math.random() * 150) + 20;
+    user.points = 0; // Reset points for new gameweek
+    user.lastUpdated = new Date();
     await user.save();
 
     res.json({ success: true, message: '✅ Team locked in!' });
   } catch (error) {
     console.error('Save error:', error.message);
     res.status(500).json({ error: 'Failed to save team' });
+  }
+});
+
+// Update Team Points (Real-time scoring)
+app.post('/update-points', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.team || user.team.length !== 11) {
+      return res.status(400).json({ error: 'Team not complete' });
+    }
+
+    let totalPoints = 0;
+    const playerStats = [];
+
+    // Fetch stats for each player
+    for (const playerId of user.team) {
+      try {
+        const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+          timeout: 5000
+        });
+        
+        const data = response.data;
+        const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
+        
+        const points = latestGW?.total_points || 0;
+        totalPoints += points;
+        
+        playerStats.push({
+          player_id: playerId,
+          points: points,
+          minutes: latestGW?.minutes || 0,
+          goals: latestGW?.goals_scored || 0,
+          assists: latestGW?.assists || 0,
+          clean_sheets: latestGW?.clean_sheets || 0,
+          bonus: latestGW?.bonus || 0
+        });
+      } catch (e) {
+        // If API fails, use 0 points for this player
+        playerStats.push({
+          player_id: playerId,
+          points: 0,
+          minutes: 0,
+          goals: 0,
+          assists: 0,
+          clean_sheets: 0,
+          bonus: 0
+        });
+      }
+    }
+
+    // Update user points
+    user.points = totalPoints;
+    user.totalPoints = totalPoints; // For now, season total = current GW
+    user.lastUpdated = new Date();
+    await user.save();
+
+    res.json({
+      success: true,
+      points: totalPoints,
+      playerStats: playerStats
+    });
+  } catch (error) {
+    console.error('Update points error:', error.message);
+    res.status(500).json({ error: 'Failed to update points' });
   }
 });
 
@@ -167,9 +272,12 @@ app.get('/user-profile', async (req, res) => {
       solWallet: user.solWallet,
       team: user.team,
       points: user.points,
+      totalPoints: user.totalPoints,
       entries: user.entries,
       locked: user.locked,
-      joined: user.joined
+      joined: user.joined,
+      currentGameweek: user.currentGameweek,
+      lastUpdated: user.lastUpdated
     });
   } catch (error) {
     console.error('Profile error:', error.message);
