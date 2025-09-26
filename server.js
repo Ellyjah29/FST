@@ -1,4 +1,4 @@
-// server.js — FINAL: 15-PLAYER SQUAD + BUDGET TRACKER
+// server.js — FIXED: Proper API error handling
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     maxlength: 20
   },
   solWallet: { type: String },
-  team: [{ type: Number, default: null }], // 15 players (11 starters + 4 subs)
+  team: [{ type: Number, default: null }],
   points: { type: Number, default: 0 },
   totalPoints: { type: Number, default: 0 },
   entries: { type: Number, default: 0 },
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
   createdAt: { type: Date, default: Date.now },
-  budget: { type: Number, default: 100.0 } // £100m starting budget
+  budget: { type: Number, default: 100.0 }
 });
 
 const User = mongoose.model('User', userSchema);
@@ -97,19 +97,30 @@ app.get('/players', async (req, res) => {
       timeout: 5000
     });
 
+    // Add robust error handling for FPL API response
+    if (!response.data || !response.data.elements || !response.data.teams) {
+      throw new Error('Invalid FPL API response format');
+    }
+
     const players = response.data.elements;
     const teams = response.data.teams;
+    
+    // Validate teams structure
+    if (!Array.isArray(teams)) {
+      throw new Error('Teams data is not an array');
+    }
+
     const teamMap = {};
     teams.forEach(team => {
-      teamMap[team.id] = team.name;
+      teamMap[team.id] = team.name || 'Unknown';
     });
 
     const formatted = players.map(p => ({
       id: p.id,
-      web_name: p.web_name,
-      team: p.team,
+      web_name: p.web_name || 'Unknown',
+      team: p.team || 0,
       team_name: teamMap[p.team] || 'Unknown',
-      element_type: p.element_type,
+      element_type: p.element_type || 1,
       position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
       now_cost: (p.now_cost / 10).toFixed(1),
       total_points: p.total_points || 0,
@@ -127,7 +138,10 @@ app.get('/players', async (req, res) => {
     res.json(formatted);
   } catch (error) {
     console.error('FPL error:', error.message);
-    res.status(500).json({ error: 'Failed to load players. Please try again later.' });
+    res.status(500).json({ 
+      error: 'Failed to load players. Please try again later.',
+      details: error.message
+    });
   }
 });
 
@@ -139,22 +153,27 @@ app.get('/player-stats/:playerId', async (req, res) => {
       timeout: 5000
     });
 
+    // Add robust error handling
+    if (!response.data || !response.data.history) {
+      throw new Error('Invalid player stats response');
+    }
+
     const data = response.data;
     
     // Return most recent gameweek stats
-    const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
+    const latestGW = data.history.sort((a, b) => b.round - a.round)[0] || {};
     
     res.json({
       success: true,
       player_id: playerId,
-      gameweek: latestGW?.round || 0,
-      points: latestGW?.total_points || 0,
-      minutes: latestGW?.minutes || 0,
-      goals: latestGW?.goals_scored || 0,
-      assists: latestGW?.assists || 0,
-      clean_sheets: latestGW?.clean_sheets || 0,
-      bonus: latestGW?.bonus || 0,
-      form: latestGW?.form || "0.0"
+      gameweek: latestGW.round || 0,
+      points: latestGW.total_points || 0,
+      minutes: latestGW.minutes || 0,
+      goals: latestGW.goals_scored || 0,
+      assists: latestGW.assists || 0,
+      clean_sheets: latestGW.clean_sheets || 0,
+      bonus: latestGW.bonus || 0,
+      form: latestGW.form || "0.0"
     });
   } catch (error) {
     console.error('Player stats error:', error.message);
@@ -183,7 +202,7 @@ app.post('/save-team', async (req, res) => {
 
     // Validate budget
     const totalCost = validPlayers.reduce((sum, playerId) => {
-      const player = user.allPlayers.find(p => p.id === playerId);
+      const player = user.allPlayers?.find(p => p.id === playerId);
       return sum + (player ? parseFloat(player.now_cost) : 0);
     }, 0);
     
@@ -234,20 +253,25 @@ app.post('/update-points', async (req, res) => {
           timeout: 5000
         });
         
-        const data = response.data;
-        const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
+        // Add robust error handling
+        if (!response.data || !response.data.history) {
+          throw new Error('Invalid player stats response');
+        }
         
-        const points = latestGW?.total_points || 0;
+        const data = response.data;
+        const latestGW = data.history.sort((a, b) => b.round - a.round)[0] || {};
+        
+        const points = latestGW.total_points || 0;
         totalPoints += points;
         
         playerStats.push({
           player_id: playerId,
           points: points,
-          minutes: latestGW?.minutes || 0,
-          goals: latestGW?.goals_scored || 0,
-          assists: latestGW?.assists || 0,
-          clean_sheets: latestGW?.clean_sheets || 0,
-          bonus: latestGW?.bonus || 0
+          minutes: latestGW.minutes || 0,
+          goals: latestGW.goals_scored || 0,
+          assists: latestGW.assists || 0,
+          clean_sheets: latestGW.clean_sheets || 0,
+          bonus: latestGW.bonus || 0
         });
       } catch (e) {
         // If API fails, use 0 points for this player
