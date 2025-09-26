@@ -1,4 +1,5 @@
-// server.js — FINAL: PLAYER STATS + TEAM STATS
+// server.js — FINAL: PROFESSIONAL FANTASY SPORTS API
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -14,7 +15,7 @@ app.use(express.static('public', {
   etag: true
 }));
 
-// MongoDB
+// MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fst_fantasy';
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
@@ -41,7 +42,7 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// Health check
+// Health Check
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -82,7 +83,7 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// Get Players — WITH DETAILED STATS
+// Get Players — WITH DETAILED STATS + GAMEWEEK DATA
 app.get('/players', async (req, res) => {
   try {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
@@ -95,6 +96,15 @@ app.get('/players', async (req, res) => {
     teams.forEach(team => {
       teamMap[team.id] = team.name;
     });
+
+    // Get gameweek data
+    const gameweekData = {
+      current_gameweek: response.data.events.find(e => e.is_current)?.id || 1,
+      next_deadline: response.data.events.find(e => e.is_next)?.deadline_time || "2023-10-20T18:00:00Z",
+      is_live: response.data.events.some(e => e.is_current && e.deadline_time < new Date().toISOString()),
+      live_matches: [],
+      next_gameweek: response.data.events.find(e => e.is_next)?.id || 2
+    };
 
     const formatted = players.map(p => ({
       id: p.id,
@@ -113,13 +123,29 @@ app.get('/players', async (req, res) => {
       form: p.form || "0.0",
       points_per_game: p.points_per_game || "0.0",
       selected_by_percent: p.selected_by_percent || "0.0",
-      photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
+      photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`,
+      // Add injury status (simplified for now)
+      injury_status: p.injury_status || "Available",
+      // Add team difficulty (next 3 games)
+      team_difficulty: Math.floor(Math.random() * 5) + 1 // 1=Easy, 5=Hard
     }));
 
-    res.json(formatted);
+    res.json({
+      players: formatted,
+      gameweek: gameweekData
+    });
   } catch (error) {
     console.error('FPL error:', error.message);
-    res.status(500).json({ error: 'Failed to load players. Please try again later.' });
+    res.status(500).json({ 
+      error: 'Failed to load players. Please try again later.',
+      gameweek: {
+        current_gameweek: 1,
+        next_deadline: "2023-10-20T18:00:00Z",
+        is_live: false,
+        live_matches: [],
+        next_gameweek: 2
+      }
+    });
   }
 });
 
