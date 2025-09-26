@@ -632,6 +632,17 @@
       margin-top: 4px;
       font-weight: 500;
     }
+
+    /* POST-SUBMISSION VIEW */
+    .post-submission-view {
+      display: none;
+    }
+
+    .read-only-team {
+      opacity: 0.7;
+      cursor: default;
+      pointer-events: none;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -867,6 +878,7 @@
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
     let liveScores = {};
+    let isUpdating = false; // Prevent multiple simultaneous updates
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1079,6 +1091,13 @@
       teamGrid.innerHTML = html;
 
       // ✅ FIXED: PROPER CLICK HANDLER FOR STATS
+      // First, remove any existing event listeners by cloning elements
+      document.querySelectorAll('.slot').forEach(slot => {
+        const clonedSlot = slot.cloneNode(true);
+        slot.parentNode.replaceChild(clonedSlot, slot);
+      });
+
+      // Now add new event listeners
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
@@ -1358,9 +1377,12 @@
 
     // UPDATE LIVE SCORES
     async function updateLiveScores() {
-      if (selectedTeam.every(p => p === null)) return;
+      if (isUpdating) return; // Prevent multiple simultaneous updates
+      isUpdating = true;
       
       try {
+        if (selectedTeam.every(p => p === null)) return;
+        
         const response = await fetch('/update-points', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1397,15 +1419,17 @@
         }
       } catch (e) {
         console.error('Failed to update scores:', e.message);
+      } finally {
+        isUpdating = false;
       }
     }
 
-    // Auto-update every 5 minutes (for demo)
+    // Auto-update every 15 minutes (prevents rapid updates)
     setInterval(() => {
       if (submitTeamBtn.style.display === 'none') {
         updateLiveScores();
       }
-    }, 300000); // 5 minutes
+    }, 900000); // 15 minutes
 
     // Manual update button
     document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
