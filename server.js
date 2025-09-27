@@ -1,4 +1,4 @@
-// server.js — FINAL: BUDGET TRACKER & REAL-TIME SCORING
+// server.js — FINAL: TRANSFER SYSTEM + BUDGET TRACKER + REAL-TIME SCORING
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -39,7 +39,22 @@ const userSchema = new mongoose.Schema({
   locked: { type: Boolean, default: false },
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
-  budget: { type: Number, default: 100.0 }, // NEW: Budget tracking
+  budget: { type: Number, default: 100.0 }, // Budget tracking
+  transfers: {
+    free: { type: Number, default: 1 },
+    used: { type: Number, default: 0 },
+    remaining: { type: Number, default: 1 },
+    penaltyPoints: { type: Number, default: 0 }
+  },
+  wildcardUsed: { type: Boolean, default: false },
+  transferHistory: [{
+    gameweek: Number,
+    playerOut: Number,
+    playerIn: Number,
+    timestamp: { type: Date, default: Date.now },
+    pointsGained: Number,
+    penalty: Boolean
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -72,7 +87,15 @@ app.post('/connect-wallet', async (req, res) => {
         solWallet: solWallet || undefined,
         joined: true,
         currentGameweek: 1,
-        budget: 100.0 // Reset budget for new contest
+        budget: 100.0,
+        transfers: {
+          free: 1,
+          used: 0,
+          remaining: 1,
+          penaltyPoints: 0
+        },
+        wildcardUsed: false,
+        transferHistory: []
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -81,7 +104,9 @@ app.post('/connect-wallet', async (req, res) => {
       success: true,
       userId: user.telegramId,
       managerName: user.managerName,
-      budget: user.budget
+      budget: user.budget,
+      transfers: user.transfers,
+      wildcardUsed: user.wildcardUsed
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -221,6 +246,134 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
+// Make Transfer
+app.post('/make-transfer', async (req, res) => {
+  try {
+    const { userId, playerOutId, playerInId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+    if (!playerOutId || !playerInId) {
+      return res.status(400).json({ error: 'Both players required for transfer' });
+    }
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.locked) return res.status(400).json({ error: 'Team is locked for this gameweek' });
+
+    // Check if playerOut is in team
+    const playerOutIndex = user.team.indexOf(playerOutId);
+    if (playerOutIndex === -1) {
+      return res.status(400).json({ error: 'Player out not in your team' });
+    }
+
+    // Check if playerIn is already in team
+    if (user.team.includes(playerInId)) {
+      return res.status(400).json({ error: 'Player in is already in your team' });
+    }
+
+    // Get player costs
+    let playerOutCost = 0;
+    let playerInCost = 0;
+    
+    try {
+      const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/');
+      const players = response.data.elements;
+      const playerOut = players.find(p => p.id === playerOutId);
+      const playerIn = players.find(p => p.id === playerInId);
+      
+      if (playerOut && playerIn) {
+        playerOutCost = playerOut.now_cost / 10;
+        playerInCost = playerIn.now_cost / 10;
+      } else {
+        // Fallback if API fails
+        playerOutCost = 5.0;
+        playerInCost = 5.0;
+      }
+    } catch (e) {
+      playerOutCost = 5.0;
+      playerInCost = 5.0;
+    }
+
+    // Check budget
+    const budgetAfterTransfer = user.budget + playerOutCost - playerInCost;
+    if (budgetAfterTransfer < 0) {
+      return res.status(400).json({ 
+        error: `Transfer would exceed budget! Need £${(playerInCost - (user.budget + playerOutCost)).toFixed(1)}m more`,
+        remaining: budgetAfterTransfer.toFixed(1)
+      });
+    }
+
+    // Apply transfer
+    const newTeam = [...user.team];
+    newTeam[playerOutIndex] = playerInId;
+    
+    // Update user
+    user.team = newTeam;
+    user.budget = budgetAfterTransfer;
+    
+    // Update transfers
+    let penalty = false;
+    if (user.transfers.remaining <= 0 && !user.wildcardUsed) {
+      user.transfers.penaltyPoints += 4;
+      penalty = true;
+    } else if (user.wildcardUsed) {
+      // No penalty when wildcard is active
+    } else {
+      user.transfers.remaining--;
+    }
+    
+    // Add to transfer history
+    user.transferHistory.push({
+      gameweek: user.currentGameweek,
+      playerOut: playerOutId,
+      playerIn: playerInId,
+      pointsGained: 0, // Will be calculated later
+      penalty: penalty
+    });
+    
+    await user.save();
+
+    res.json({
+      success: true,
+      message: penalty ? '⚠️ Transfer made with 4-point penalty!' : '✅ Transfer made!',
+      newBudget: user.budget,
+      transfers: user.transfers,
+      wildcardUsed: user.wildcardUsed,
+      transferHistory: user.transferHistory.slice(-1) // Return only the new transfer
+    });
+  } catch (error) {
+    console.error('Transfer error:', error.message);
+    res.status(500).json({ error: 'Failed to make transfer' });
+  }
+});
+
+// Use Wildcard
+app.post('/use-wildcard', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.locked) return res.status(400).json({ error: 'Team is locked for this gameweek' });
+    if (user.wildcardUsed) return res.status(400).json({ error: 'Wildcard already used this season' });
+
+    // Update user
+    user.wildcardUsed = true;
+    user.transfers.remaining = 1; // Reset transfers for wildcard week
+    await user.save();
+
+    res.json({
+      success: true,
+      message: '✅ Wildcard activated! Make unlimited transfers this week',
+      transfers: user.transfers,
+      wildcardUsed: user.wildcardUsed
+    });
+  } catch (error) {
+    console.error('Wildcard error:', error.message);
+    res.status(500).json({ error: 'Failed to use wildcard' });
+  }
+});
+
 // Update Team Points (Real-time scoring)
 app.post('/update-points', async (req, res) => {
   try {
@@ -275,7 +428,7 @@ app.post('/update-points', async (req, res) => {
 
     // Update user points
     user.points = totalPoints;
-    user.totalPoints = totalPoints;
+    user.totalPoints = totalPoints + user.transfers.penaltyPoints;
     user.lastUpdated = new Date();
     await user.save();
 
@@ -310,7 +463,10 @@ app.get('/user-profile', async (req, res) => {
       joined: user.joined,
       currentGameweek: user.currentGameweek,
       lastUpdated: user.lastUpdated,
-      budget: user.budget // NEW: Include budget
+      budget: user.budget,
+      transfers: user.transfers,
+      wildcardUsed: user.wildcardUsed,
+      transferHistory: user.transferHistory
     });
   } catch (error) {
     console.error('Profile error:', error.message);
@@ -322,14 +478,14 @@ app.get('/user-profile', async (req, res) => {
 app.get('/leaderboard', async (req, res) => {
   try {
     const users = await User.find({ locked: true })
-      .sort({ points: -1 })
+      .sort({ totalPoints: -1 })
       .limit(10)
-      .select('managerName points');
+      .select('managerName totalPoints');
 
     const leaderboard = users.map((user, i) => ({
       rank: i + 1,
       managerName: user.managerName,
-      points: user.points
+      points: user.totalPoints
     }));
 
     res.json(leaderboard);
