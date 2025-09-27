@@ -1717,58 +1717,111 @@
       });
       
       // Transfer button
-      document.getElementById('btnTransfer').addEventListener('click', () => {
-        const transferPlayer = transferPlayerList.querySelector('.transfer-player-card.selected');
-        if (!transferPlayer) return;
-        
-        const playerId = parseInt(transferPlayer.dataset.id);
-        const player = allPlayers.find(p => p.id === playerId);
-        
-        // Replace player
-        const playerIndex = selectedTeam.findIndex(p => p === currentPlayer);
-        if (playerIndex !== -1) {
+      const transferButton = document.getElementById('btnTransfer');
+      if (transferButton) {
+        transferButton.addEventListener('click', () => {
+          console.log("Replace player button clicked");
+          
+          const transferPlayer = transferPlayerList.querySelector('.transfer-player-card.selected');
+          if (!transferPlayer) {
+            console.error("No player selected for transfer");
+            alert("Please select a player to replace with");
+            return;
+          }
+          
+          const playerId = parseInt(transferPlayer.dataset.id);
+          if (isNaN(playerId)) {
+            console.error("Invalid player ID");
+            return;
+          }
+          
+          const player = allPlayers.find(p => p.id === playerId);
+          if (!player) {
+            console.error("Player not found in allPlayers array");
+            return;
+          }
+          
+          // Replace player
+          const playerIndex = selectedTeam.findIndex(p => p === currentPlayer);
+          if (playerIndex === -1) {
+            console.error("Current player not found in team");
+            return;
+          }
+          
           selectedTeam[playerIndex] = player;
+          
+          // Update UI
           renderTeamGrid();
           document.getElementById('statsModal').style.display = 'none';
           
           // Update transfer system
-          userBudget = userBudget + parseFloat(currentPlayer.now_cost) - parseFloat(player.now_cost);
+          const currentPlayerCost = parseFloat(currentPlayer.now_cost);
+          const newPlayerCost = parseFloat(player.now_cost);
+          userBudget = userBudget + currentPlayerCost - newPlayerCost;
+          
           updateBudgetDisplay();
-          updateTransferSystem();
           
           alert(`Player replaced! New budget: £${userBudget.toFixed(1)}m`);
-        }
-      });
+        });
+      }
       
       // Wildcard button
-      document.getElementById('btnWildcard').addEventListener('click', async () => {
-        try {
-          const response = await fetch('/use-wildcard', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-          });
-          const data = await response.json();
-          
-          if (data.success) {
-            // Update local state
-            userTransfers = data.transfers;
-            wildcardUsed = data.wildcardUsed;
+      const wildcardButton = document.getElementById('btnWildcard');
+      if (wildcardButton) {
+        wildcardButton.addEventListener('click', async () => {
+          try {
+            const response = await fetch('/use-wildcard', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ userId })
+            });
+            const data = await response.json();
             
-            // Update UI
-            updateTransferSystem();
-            
-            // Update transfers remaining in modal
-            document.getElementById('transfersRemainingInModal').innerHTML = '<span style="color: var(--warning);">Wildcard Active!</span>';
-            document.getElementById('btnWildcard').disabled = true;
-            document.getElementById('btnWildcard').classList.add('wildcard-active');
-            
-            // Show success message
-            alert(data.message);
+            if (data.success) {
+              // Update local state
+              userTransfers = data.transfers;
+              wildcardUsed = data.wildcardUsed;
+              
+              // Update UI
+              updateTransferSystem();
+              
+              // Update transfers remaining in modal
+              document.getElementById('transfersRemainingInModal').innerHTML = '<span style="color: var(--warning);">Wildcard Active!</span>';
+              document.getElementById('btnWildcard').disabled = true;
+              document.getElementById('btnWildcard').classList.add('wildcard-active');
+              
+              // Show success message
+              alert(data.message);
+            }
+          } catch (e) {
+            alert("Failed to use wildcard: " + (e.message || ""));
           }
-        } catch (e) {
-          alert("Failed to use wildcard: " + (e.message || ""));
-        }
+        });
+      }
+
+      // Add click handlers for player cards
+      document.querySelectorAll('.transfer-player-card').forEach(card => {
+        card.addEventListener('click', () => {
+          // Clear previous selection
+          document.querySelectorAll('.transfer-player-card').forEach(c => {
+            c.classList.remove('selected');
+            c.style.backgroundColor = '';
+            c.style.transform = '';
+            c.style.boxShadow = '';
+          });
+          
+          // Highlight new selection
+          card.classList.add('selected');
+          card.style.backgroundColor = 'rgba(0, 195, 255, 0.1)';
+          card.style.transform = 'scale(1.03)';
+          card.style.boxShadow = '0 4px 12px rgba(0, 195, 255, 0.3)';
+          
+          // Update transfer button
+          const btnTransfer = document.getElementById('btnTransfer');
+          if (btnTransfer) {
+            btnTransfer.disabled = false;
+          }
+        });
       });
     }
 
@@ -1839,18 +1892,23 @@
         card.addEventListener('click', () => {
           // Clear previous selection
           document.querySelectorAll('.transfer-player-card').forEach(c => {
+            c.classList.remove('selected');
             c.style.backgroundColor = '';
             c.style.transform = '';
             c.style.boxShadow = '';
           });
           
           // Highlight new selection
+          card.classList.add('selected');
           card.style.backgroundColor = 'rgba(0, 195, 255, 0.1)';
           card.style.transform = 'scale(1.03)';
           card.style.boxShadow = '0 4px 12px rgba(0, 195, 255, 0.3)';
           
           // Update transfer button
-          document.getElementById('btnTransfer').disabled = false;
+          const btnTransfer = document.getElementById('btnTransfer');
+          if (btnTransfer) {
+            btnTransfer.disabled = false;
+          }
         });
       });
     }
