@@ -652,73 +652,6 @@
       font-weight: 700;
     }
 
-    /* TRANSFER SYSTEM */
-    .transfer-section {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-    }
-
-    .transfer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .transfer-count {
-      display: inline-block;
-      padding: 6px 12px;
-      background: rgba(78, 205, 196, 0.1);
-      border-radius: 12px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    .transfer-history {
-      margin-top: 16px;
-    }
-
-    .transfer-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .transfer-players {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .transfer-arrow {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .transfer-penalty {
-      color: var(--error);
-      font-weight: 600;
-    }
-
-    .wildcard-button {
-      background: linear-gradient(135deg, var(--warning), #ff9900);
-      color: #000;
-      box-shadow: 0 4px 12px rgba(255, 187, 0, 0.3);
-    }
-
-    .wildcard-button:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(255, 187, 0, 0.4);
-    }
-
-    .wildcard-active {
-      background: var(--warning);
-      color: #000;
-      opacity: 0.8;
-    }
-
     /* PLAYER STATS MODAL - ENHANCED */
     .stats-modal .modal-content {
       display: flex;
@@ -988,6 +921,33 @@
       opacity: 0.7;
       cursor: not-allowed;
     }
+
+    .wildcard-button {
+      background: linear-gradient(135deg, var(--warning), #ff9900);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .wildcard-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 187, 0, 0.4);
+    }
+
+    .wildcard-active {
+      background: var(--warning);
+      color: #000;
+      opacity: 0.8;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1093,42 +1053,6 @@
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Pts/Game</div>
             <div id="avgPPG" class="team-stat-value stat-avg-ppg">0.0</div>
-          </div>
-        </div>
-        
-        <!-- TRANSFER SYSTEM -->
-        <div class="transfer-section">
-          <div class="transfer-header">
-            <h3 class="section-title" style="margin: 0;">🔄 Transfers</h3>
-            <div class="transfer-count" id="transfersRemaining">1 Free Transfer</div>
-          </div>
-          
-          <div class="input-group">
-            <label class="input-label">Transfer Player</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-              <select id="playerOutSelect" class="input-select">
-                <option value="">Select player to replace</option>
-              </select>
-              <select id="playerInSelect" class="input-select">
-                <option value="">Select new player</option>
-              </select>
-            </div>
-          </div>
-          
-          <button id="makeTransferBtn" class="btn-primary" disabled>
-            <i class="fas fa-exchange-alt"></i> Make Transfer
-          </button>
-          
-          <button id="useWildcardBtn" class="wildcard-button" style="margin-top: 10px;">
-            <i class="fas fa-star"></i> Use Wildcard
-          </button>
-          
-          <div class="transfer-history">
-            <h4 style="margin: 16px 0 8px; color: var(--text-tertiary);">Transfer History</h4>
-            <div id="transferHistoryContainer">
-              <!-- Transfer history will be populated here -->
-              <div style="text-align: center; color: var(--text-tertiary); padding: 20px;">No transfers yet</div>
-            </div>
           </div>
         </div>
         
@@ -1239,14 +1163,6 @@
     const playerList = document.getElementById('playerList');
     const teamGrid = document.getElementById('teamGrid');
     const managerNameInput = document.getElementById('managerNameInput');
-
-    // Transfer System Elements
-    const transfersRemaining = document.getElementById('transfersRemaining');
-    const playerOutSelect = document.getElementById('playerOutSelect');
-    const playerInSelect = document.getElementById('playerInSelect');
-    const makeTransferBtn = document.getElementById('makeTransferBtn');
-    const useWildcardBtn = document.getElementById('useWildcardBtn');
-    const transferHistoryContainer = document.getElementById('transferHistoryContainer');
 
     if (telegramUser) {
       topUserName.innerText = telegramUser.first_name || "FST Manager";
@@ -1511,95 +1427,15 @@
     }
 
     function updateTransferSystem() {
-      if (!transfersRemaining) return;
-      
-      // Update transfer count display
-      let transferText = '';
-      if (wildcardUsed) {
-        transferText = '<span style="color: var(--warning);">Wildcard Active!</span>';
-      } else if (userTransfers.remaining > 0) {
-        transferText = `${userTransfers.remaining} Free Transfer${userTransfers.remaining === 1 ? '' : 's'}`;
-      } else {
-        transferText = '<span class="transfer-penalty">0 Free Transfers (4-point penalty)</span>';
-      }
-      
-      transfersRemaining.innerHTML = transferText;
-      
-      // Update wildcard button
-      if (useWildcardBtn) {
-        if (wildcardUsed) {
-          useWildcardBtn.innerHTML = '<i class="fas fa-star"></i> Wildcard Used';
-          useWildcardBtn.classList.add('wildcard-active');
-          useWildcardBtn.disabled = true;
-        } else {
-          useWildcardBtn.innerHTML = '<i class="fas fa-star"></i> Use Wildcard';
-          useWildcardBtn.classList.remove('wildcard-active');
-          useWildcardBtn.disabled = false;
-        }
-      }
-      
-      // Update transfer history
-      renderTransferHistory();
-      
-      // Update transfer dropdowns
-      updateTransferDropdowns();
-    }
-
-    function updateTransferDropdowns() {
-      // Clear existing options
-      playerOutSelect.innerHTML = '<option value="">Select player to replace</option>';
-      playerInSelect.innerHTML = '<option value="">Select new player</option>';
-      
-      // Add players to replace
-      selectedTeam.forEach((player, index) => {
-        if (player) {
-          const option = document.createElement('option');
-          option.value = player.id;
-          option.textContent = `${player.web_name} (${player.position})`;
-          playerOutSelect.appendChild(option);
-        }
-      });
-      
-      // Add players to add (excluding current team)
-      const currentTeamIds = new Set(selectedTeam.filter(p => p !== null).map(p => p.id));
-      allPlayers.forEach(player => {
-        if (!currentTeamIds.has(player.id)) {
-          const option = document.createElement('option');
-          option.value = player.id;
-          option.textContent = `${player.web_name} (£${player.now_cost}m)`;
-          playerInSelect.appendChild(option);
-        }
-      });
-      
-      // Update transfer button
-      makeTransferBtn.disabled = !playerOutSelect.value || !playerInSelect.value;
+      // No longer used in main page
     }
 
     function renderTransferHistory() {
-      if (!transferHistoryContainer) return;
-      
-      if (transferHistory.length === 0) {
-        transferHistoryContainer.innerHTML = '<div style="text-align: center; color: var(--text-tertiary); padding: 20px;">No transfers yet</div>';
-        return;
-      }
-      
-      let html = '';
-      transferHistory.slice().reverse().forEach(transfer => {
-        const playerOut = allPlayers.find(p => p.id === transfer.playerOut);
-        const playerIn = allPlayers.find(p => p.id === transfer.playerIn);
-        
-        html += `
-          <div class="transfer-item">
-            <div class="transfer-players">
-              <span>${playerOut ? playerOut.web_name : 'Unknown'} →</span>
-              <span>${playerIn ? playerIn.web_name : 'Unknown'}</span>
-            </div>
-            <div>${transfer.penalty ? '<span class="transfer-penalty">-4</span>' : '✓'}</div>
-          </div>
-        `;
-      });
-      
-      transferHistoryContainer.innerHTML = html;
+      // No longer used in main page
+    }
+
+    function updateTransferDropdowns() {
+      // No longer used in main page
     }
 
     function renderTeamGrid() {
@@ -1818,6 +1654,10 @@
           <button id="btnTransfer" class="btn-transfer" disabled>
             <i class="fas fa-exchange-alt"></i> Replace Player
           </button>
+          
+          <button id="btnWildcard" class="wildcard-button" style="margin-top: 10px;">
+            <i class="fas fa-star"></i> Use Wildcard
+          </button>
         </div>
         
         <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
@@ -1897,6 +1737,37 @@
           updateTransferSystem();
           
           alert(`Player replaced! New budget: £${userBudget.toFixed(1)}m`);
+        }
+      });
+      
+      // Wildcard button
+      document.getElementById('btnWildcard').addEventListener('click', async () => {
+        try {
+          const response = await fetch('/use-wildcard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            // Update local state
+            userTransfers = data.transfers;
+            wildcardUsed = data.wildcardUsed;
+            
+            // Update UI
+            updateTransferSystem();
+            
+            // Update transfers remaining in modal
+            document.getElementById('transfersRemainingInModal').innerHTML = '<span style="color: var(--warning);">Wildcard Active!</span>';
+            document.getElementById('btnWildcard').disabled = true;
+            document.getElementById('btnWildcard').classList.add('wildcard-active');
+            
+            // Show success message
+            alert(data.message);
+          }
+        } catch (e) {
+          alert("Failed to use wildcard: " + (e.message || ""));
         }
       });
     }
@@ -2089,70 +1960,6 @@
 
     // Manual update button
     document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
-
-    // Make Transfer Button
-    document.getElementById('makeTransferBtn').addEventListener('click', async () => {
-      const playerOutId = parseInt(playerOutSelect.value);
-      const playerInId = parseInt(playerInSelect.value);
-      
-      if (!playerOutId || !playerInId) {
-        alert("Please select both players for transfer");
-        return;
-      }
-
-      try {
-        const response = await fetch('/make-transfer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, playerOutId, playerInId })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          // Update local state
-          userBudget = data.newBudget;
-          userTransfers = data.transfers;
-          wildcardUsed = data.wildcardUsed;
-          transferHistory = data.transferHistory.concat(transferHistory);
-          
-          // Update UI
-          renderTeamGrid();
-          updateBudgetDisplay();
-          updateTransferSystem();
-          
-          // Show success message
-          alert(data.message);
-        }
-      } catch (e) {
-        alert("Failed to make transfer: " + (e.message || ""));
-      }
-    });
-
-    // Use Wildcard Button
-    document.getElementById('useWildcardBtn').addEventListener('click', async () => {
-      try {
-        const response = await fetch('/use-wildcard', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          // Update local state
-          userTransfers = data.transfers;
-          wildcardUsed = data.wildcardUsed;
-          
-          // Update UI
-          updateTransferSystem();
-          
-          // Show success message
-          alert(data.message);
-        }
-      } catch (e) {
-        alert("Failed to use wildcard: " + (e.message || ""));
-      }
-    });
 
     closeModal.addEventListener('click', () => {
       playerModal.classList.remove('slide-in-up');
