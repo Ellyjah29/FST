@@ -445,8 +445,6 @@
     .stat-team-value { color: var(--accent); }
     .stat-avg-form { color: var(--primary); }
     .stat-avg-ppg { color: var(--warning); }
-    .stat-budget { color: var(--accent); }
-    .stat-transfers { color: var(--primary); }
 
     /* SUBMISSION BANNER */
     .submission-banner {
@@ -651,152 +649,6 @@
       color: var(--error);
       font-weight: 700;
     }
-
-    /* TRANSFER SYSTEM */
-    .transfer-section {
-      margin-top: 20px;
-      padding: 16px;
-      background: rgba(26, 42, 58, 0.7);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .transfer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .transfer-title {
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .transfer-count {
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .transfer-button {
-      background: var(--primary);
-      color: #000;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .transfer-button:hover {
-      background: var(--primary-dark);
-    }
-
-    .transfer-button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .transfer-player {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      margin: 8px 0;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .transfer-player:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .transfer-player.selected {
-      background: rgba(0, 195, 255, 0.1);
-      border: 2px solid var(--primary);
-    }
-
-    .transfer-player-info {
-      flex: 1;
-    }
-
-    .transfer-player-name {
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-
-    .transfer-player-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--text-tertiary);
-    }
-
-    .transfer-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .transfer-confirm {
-      background: var(--success);
-      color: #000;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .transfer-confirm:hover {
-      background: var(--success-dark);
-    }
-
-    .transfer-cancel {
-      background: var(--error);
-      color: #000;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .transfer-cancel:hover {
-      background: #e26a6a;
-    }
-
-    .transfer-info {
-      margin-top: 12px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      font-size: 13px;
-      color: var(--text-tertiary);
-    }
-
-    .transfer-warning {
-      color: var(--warning);
-      font-weight: 600;
-    }
-
-    .transfer-penalty {
-      color: var(--error);
-      font-weight: 600;
-    }
-
-    .transfer-success {
-      color: var(--success);
-      font-weight: 600;
-    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -885,11 +737,11 @@
 
       <!-- TEAM STATS SECTION -->
       <div id="teamStats" class="section" style="display:none;">
-        <h3 class="section-title">💰 Your Team Budget</h3>
+        <h3 class="section-title">📊 Your Team Stats</h3>
         <div class="team-stats-grid">
           <div class="team-stat-card">
-            <div class="team-stat-label">Budget Remaining</div>
-            <div id="budgetStats" class="team-stat-value stat-budget">£100.0m</div>
+            <div class="team-stat-label">Current Points</div>
+            <div id="currentPoints" class="team-stat-value stat-total-points">0</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Season Total</div>
@@ -992,17 +844,6 @@
     </div>
   </div>
 
-  <!-- TRANSFER MODAL -->
-  <div class="player-modal" id="transferModal" style="display:none;">
-    <div class="modal-header">
-      <div class="modal-title">🔄 Make Transfer</div>
-      <button class="close-modal" id="closeTransferModal">&times;</button>
-    </div>
-    <div class="modal-content" id="transferContent" style="padding: 20px;">
-      <!-- Transfer content will be populated here -->
-    </div>
-  </div>
-
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -1043,11 +884,6 @@
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
-    let transfersRemaining = 1;
-    let currentGameweek = 1;
-    let wildcardUsed = false;
-    let selectedOutgoingPlayer = null;
-    let selectedIncomingPlayer = null;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1102,9 +938,6 @@
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               userBudget = profile.budget || 100.0;
-              transfersRemaining = profile.transfersRemaining || 1;
-              currentGameweek = profile.currentGameweek || 1;
-              wildcardUsed = profile.wildcardUsed || false;
               updateBudgetDisplay();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
@@ -1142,9 +975,6 @@
             );
           }
           userBudget = profile.budget || 100.0;
-          transfersRemaining = profile.transfersRemaining || 1;
-          currentGameweek = profile.currentGameweek || 1;
-          wildcardUsed = profile.wildcardUsed || false;
           updateBudgetDisplay();
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
@@ -1181,7 +1011,6 @@
           loadPlayers();
           renderTeamGrid();
           userBudget = data.budget || 100.0;
-          transfersRemaining = data.transfersRemaining || 1;
           updateBudgetDisplay();
         } else {
           throw new Error(data.error || 'Failed to join');
@@ -1232,8 +1061,7 @@
 
     function updateBudgetDisplay() {
       const budgetContainer = document.getElementById('budgetRemaining');
-      const budgetStats = document.getElementById('budgetStats');
-      if (!budgetContainer || !budgetStats) return;
+      if (!budgetContainer) return;
       
       // Format budget with color based on value
       let budgetClass = 'budget-value';
@@ -1245,8 +1073,6 @@
       
       budgetContainer.className = budgetClass;
       budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
-      budgetStats.className = budgetClass;
-      budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
     }
 
     function calculateTeamValue() {
@@ -1539,193 +1365,8 @@
         </div>
       `;
       
-      // Add transfer option for submitted teams
-      if (submitTeamBtn.style.display === 'none') {
-        const transferOption = document.createElement('div');
-        transferOption.innerHTML = `
-          <div style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.1);">
-            <div style="font-weight: 600; margin-bottom: 10px;">🔄 Make Transfer</div>
-            <div style="color: var(--text-tertiary); font-size: 13px; margin-bottom: 10px;">
-              You have ${transfersRemaining} free transfer${transfersRemaining !== 1 ? 's' : ''} remaining
-            </div>
-            <button id="makeTransferBtn" class="btn-outline" style="width: 100%; padding: 10px; font-size: 14px;">
-              <i class="fas fa-exchange-alt"></i> Replace This Player
-            </button>
-          </div>
-        `;
-        statsContent.appendChild(transferOption);
-        
-        document.getElementById('makeTransferBtn').addEventListener('click', () => {
-          showTransferModal(player);
-        });
-      }
-      
       document.getElementById('statsModal').style.display = 'flex';
       document.getElementById('statsModal').classList.add('slide-in-up');
-    }
-
-    function showTransferModal(outgoingPlayer) {
-      const transferContent = document.getElementById('transferContent');
-      
-      // Get position of outgoing player
-      const positionMap = { 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' };
-      const positionName = positionMap[outgoingPlayer.element_type];
-      
-      // Find available players for this position
-      const availablePlayers = allPlayers
-        .filter(p => p.element_type === outgoingPlayer.element_type)
-        .filter(p => p.id !== outgoingPlayer.id);
-      
-      // Create transfer modal content
-      transferContent.innerHTML = `
-        <div style="text-align: center; margin-bottom: 20px;">
-          <div style="font-size: 24px; margin-bottom: 8px;">🔄</div>
-          <div style="font-weight: 700; color: var(--primary); font-size: 18px; margin-bottom: 6px;">Make Transfer</div>
-          <div style="color: var(--text-tertiary);">Replace ${outgoingPlayer.web_name} (${positionName})</div>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <div style="font-weight: 600; margin-bottom: 8px;">Available Replacements:</div>
-          <div id="replacementPlayers" style="max-height: 300px; overflow-y: auto;">
-            <!-- Replacement players will be populated here -->
-          </div>
-        </div>
-        
-        <div style="margin-bottom: 20px;">
-          <div style="font-weight: 600; margin-bottom: 8px;">Current Budget: £${userBudget.toFixed(1)}m</div>
-          <div style="color: var(--text-tertiary); font-size: 13px;">
-            You have ${transfersRemaining} free transfer${transfersRemaining !== 1 ? 's' : ''} remaining
-          </div>
-        </div>
-        
-        <div style="display: flex; gap: 8px; justify-content: center;">
-          <button id="cancelTransferBtn" class="transfer-cancel">Cancel</button>
-          <button id="confirmTransferBtn" class="transfer-confirm" disabled>Confirm Transfer</button>
-        </div>
-      `;
-      
-      // Populate replacement players
-      const replacementPlayers = document.getElementById('replacementPlayers');
-      let replacementHTML = '';
-      
-      availablePlayers.forEach(player => {
-        const playerCost = parseFloat(player.now_cost);
-        const newBudget = userBudget + parseFloat(outgoingPlayer.now_cost) - playerCost;
-        const isAffordable = newBudget >= 0;
-        
-        replacementHTML += `
-          <div class="transfer-player" data-id="${player.id}" style="${isAffordable ? '' : 'opacity: 0.7;'}">
-            <img src="${player.photo_url}" class="player-photo" style="width: 40px; height: 50px; border-radius: 8px;">
-            <div class="transfer-player-info">
-              <div class="transfer-player-name">${player.web_name}</div>
-              <div class="transfer-player-meta">
-                <span>${player.team_name}</span>
-                <span class="price-tag">£${player.now_cost}m</span>
-                <span class="points-tag">${player.total_points} pts</span>
-              </div>
-            </div>
-            ${!isAffordable ? `<div class="transfer-warning">Not affordable</div>` : ''}
-          </div>
-        `;
-      });
-      
-      replacementPlayers.innerHTML = replacementHTML;
-      
-      // Add click handlers to replacement players
-      document.querySelectorAll('.transfer-player').forEach(playerElement => {
-        playerElement.addEventListener('click', () => {
-          // Reset all selections
-          document.querySelectorAll('.transfer-player').forEach(el => {
-            el.classList.remove('selected');
-          });
-          
-          // Select this player
-          playerElement.classList.add('selected');
-          selectedIncomingPlayer = parseInt(playerElement.dataset.id);
-          
-          // Enable confirm button if affordable
-          const confirmBtn = document.getElementById('confirmTransferBtn');
-          const selectedPlayer = allPlayers.find(p => p.id === selectedIncomingPlayer);
-          const newBudget = userBudget + parseFloat(outgoingPlayer.now_cost) - parseFloat(selectedPlayer.now_cost);
-          
-          confirmBtn.disabled = newBudget < 0;
-        });
-      });
-      
-      // Add cancel button handler
-      document.getElementById('cancelTransferBtn').addEventListener('click', () => {
-        document.getElementById('transferModal').style.display = 'none';
-      });
-      
-      // Add confirm button handler
-      document.getElementById('confirmTransferBtn').addEventListener('click', () => {
-        if (!selectedIncomingPlayer) return;
-        
-        const incomingPlayer = allPlayers.find(p => p.id === selectedIncomingPlayer);
-        const newBudget = userBudget + parseFloat(outgoingPlayer.now_cost) - parseFloat(incomingPlayer.now_cost);
-        
-        // Make the transfer
-        makeTransfer(outgoingPlayer.id, selectedIncomingPlayer);
-      });
-      
-      // Show transfer modal
-      document.getElementById('transferModal').style.display = 'flex';
-      document.getElementById('transferModal').classList.add('slide-in-up');
-    }
-
-    function makeTransfer(outgoingPlayerId, incomingPlayerId) {
-      // Validate transfer
-      const outgoingPlayer = allPlayers.find(p => p.id === outgoingPlayerId);
-      const incomingPlayer = allPlayers.find(p => p.id === incomingPlayerId);
-      
-      if (!outgoingPlayer || !incomingPlayer) {
-        alert('Invalid player IDs');
-        return;
-      }
-      
-      // Check position compatibility
-      if (outgoingPlayer.element_type !== incomingPlayer.element_type) {
-        alert(`Cannot replace ${outgoingPlayer.position} with ${incomingPlayer.position}`);
-        return;
-      }
-      
-      // Check budget
-      const newBudget = userBudget + parseFloat(outgoingPlayer.now_cost) - parseFloat(incomingPlayer.now_cost);
-      if (newBudget < 0) {
-        alert(`Transfer would exceed budget by £${Math.abs(newBudget).toFixed(1)}m`);
-        return;
-      }
-      
-      // Check transfers remaining
-      if (transfersRemaining <= 0 && !wildcardUsed) {
-        alert('No transfers remaining. Use wildcard or wait for next gameweek.');
-        return;
-      }
-      
-      // Make the transfer
-      const team = [...selectedTeam];
-      const outgoingIndex = team.indexOf(outgoingPlayerId);
-      if (outgoingIndex === -1) {
-        alert('Outgoing player not in team');
-        return;
-      }
-      
-      team[outgoingIndex] = incomingPlayerId;
-      
-      // Update UI
-      selectedTeam = team;
-      userBudget = newBudget;
-      transfersRemaining = transfersRemaining > 0 ? transfersRemaining - 1 : 0;
-      
-      // Update team grid
-      renderTeamGrid();
-      calculateTeamStats();
-      
-      // Close transfer modal
-      document.getElementById('transferModal').style.display = 'none';
-      
-      // Show success message
-      alert(`✅ Successfully replaced ${outgoingPlayer.web_name} with ${incomingPlayer.web_name}!`);
     }
 
     function calculateTeamStats() {
@@ -1735,6 +1376,7 @@
       }
       
       const validPlayers = selectedTeam.filter(p => p !== null);
+      const currentPoints = validPlayers.reduce((sum, p) => sum + (liveScores[p.id]?.points || 0), 0);
       const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
       const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
       const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
@@ -1744,12 +1386,10 @@
       statsContainer.style.display = 'block';
       
       // Animate stat values
+      animateValue('currentPoints', 0, currentPoints, 1000);
       animateValue('seasonTotal', 0, seasonTotal, 1000);
       animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
       animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
-      
-      // Update budget stats
-      updateBudgetDisplay();
     }
 
     function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
@@ -1837,13 +1477,6 @@
       }, 300);
     });
 
-    document.getElementById('closeTransferModal').addEventListener('click', () => {
-      document.getElementById('transferModal').classList.remove('slide-in-up');
-      setTimeout(() => {
-        document.getElementById('transferModal').style.display = 'none';
-      }, 300);
-    });
-
     document.querySelectorAll('.formation-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
@@ -1891,9 +1524,6 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           userBudget = profile.budget || 100.0;
-          transfersRemaining = profile.transfersRemaining || 1;
-          currentGameweek = profile.currentGameweek || 1;
-          wildcardUsed = profile.wildcardUsed || false;
           updateBudgetDisplay();
           renderTeamGrid();
           calculateTeamStats();
