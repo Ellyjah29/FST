@@ -1,4 +1,4 @@
-// server.js — FINAL: BUDGET TRACKER & REAL-TIME SCORING
+// server.js — FINAL: PROFESSIONAL TRANSFER SYSTEM
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -39,7 +39,17 @@ const userSchema = new mongoose.Schema({
   locked: { type: Boolean, default: false },
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
-  budget: { type: Number, default: 100.0 }, // NEW: Budget tracking
+  budget: { type: Number, default: 100.0 }, // Budget tracking
+  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
+  transfersUsed: { type: Number, default: 0 }, // Total transfers used
+  transferHistory: [{ // Transfer history
+    date: { type: Date, default: Date.now },
+    fromPlayer: Number,
+    toPlayer: Number,
+    costDifference: Number,
+    pointsBefore: Number,
+    pointsAfter: Number
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -72,7 +82,10 @@ app.post('/connect-wallet', async (req, res) => {
         solWallet: solWallet || undefined,
         joined: true,
         currentGameweek: 1,
-        budget: 100.0 // Reset budget for new contest
+        budget: 100.0,
+        freeTransfers: 1,
+        transfersUsed: 0,
+        transferHistory: []
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -81,7 +94,8 @@ app.post('/connect-wallet', async (req, res) => {
       success: true,
       userId: user.telegramId,
       managerName: user.managerName,
-      budget: user.budget
+      budget: user.budget,
+      freeTransfers: user.freeTransfers
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -213,7 +227,8 @@ app.post('/save-team', async (req, res) => {
     res.json({ 
       success: true, 
       message: '✅ Team locked in!',
-      budget: user.budget
+      budget: user.budget,
+      freeTransfers: user.freeTransfers
     });
   } catch (error) {
     console.error('Save error:', error.message);
@@ -290,6 +305,88 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
+// Make Transfer
+app.post('/make-transfer', async (req, res) => {
+  try {
+    const { userId, fromPlayerId, toPlayerId } = req.body;
+    if (!userId || !fromPlayerId || !toPlayerId) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.locked) {
+      return res.status(400).json({ error: 'Team must be locked to make transfers' });
+    }
+
+    // Check if fromPlayer is in team
+    const fromPlayerIndex = user.team.findIndex(id => id === fromPlayerId);
+    if (fromPlayerIndex === -1) {
+      return res.status(400).json({ error: 'Player to replace not found in team' });
+    }
+
+    // Get player details
+    const fromPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${fromPlayerId}/`, {
+      timeout: 5000
+    }).then(r => r.data);
+    
+    const toPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${toPlayerId}/`, {
+      timeout: 5000
+    }).then(r => r.data);
+
+    // Calculate cost difference
+    const fromCost = parseFloat(fromPlayer.element_type === 1 ? fromPlayer.now_cost / 10 : fromPlayer.now_cost / 10);
+    const toCost = parseFloat(toPlayer.element_type === 1 ? toPlayer.now_cost / 10 : toPlayer.now_cost / 10);
+    const costDifference = toCost - fromCost;
+
+    // Check budget
+    if (user.budget < costDifference) {
+      return res.status(400).json({ 
+        error: `Transfer would exceed budget by £${(costDifference - user.budget).toFixed(1)}m`,
+        remaining: (user.budget - costDifference).toFixed(1)
+      });
+    }
+
+    // Check free transfers
+    if (user.freeTransfers <= 0) {
+      return res.status(400).json({ 
+        error: 'No free transfers remaining. Use wildcard or pay -4 points',
+        freeTransfers: user.freeTransfers
+      });
+    }
+
+    // Perform transfer
+    user.team[fromPlayerIndex] = toPlayerId;
+    user.budget -= costDifference;
+    user.freeTransfers -= 1;
+    user.transfersUsed += 1;
+
+    // Add to transfer history
+    user.transferHistory.push({
+      date: new Date(),
+      fromPlayer: fromPlayerId,
+      toPlayer: toPlayerId,
+      costDifference: costDifference,
+      pointsBefore: fromPlayer.history[0]?.total_points || 0,
+      pointsAfter: toPlayer.history[0]?.total_points || 0
+    });
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: '✅ Transfer completed!',
+      newBudget: user.budget,
+      freeTransfers: user.freeTransfers,
+      transfersUsed: user.transfersUsed
+    });
+  } catch (error) {
+    console.error('Transfer error:', error.message);
+    res.status(500).json({ error: 'Failed to make transfer' });
+  }
+});
+
 // Get User Profile
 app.get('/user-profile', async (req, res) => {
   try {
@@ -310,7 +407,9 @@ app.get('/user-profile', async (req, res) => {
       joined: user.joined,
       currentGameweek: user.currentGameweek,
       lastUpdated: user.lastUpdated,
-      budget: user.budget // NEW: Include budget
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      transfersUsed: user.transfersUsed
     });
   } catch (error) {
     console.error('Profile error:', error.message);
