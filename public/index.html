@@ -948,6 +948,36 @@
       color: #000;
       opacity: 0.8;
     }
+
+    .refresh-button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .refresh-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(78, 205, 196, 0.4);
+    }
+
+    .refresh-icon {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1065,6 +1095,13 @@
             Last updated: Never
           </div>
         </div>
+        
+        <!-- REFRESH BUTTON -->
+        <div style="margin-top: 20px; text-align: center;">
+          <button id="refreshBtn" class="refresh-button" style="padding: 12px 24px; font-size: 14px;">
+            <i class="fas fa-redo refresh-icon"></i> Refresh Team Data
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1163,6 +1200,15 @@
     const playerList = document.getElementById('playerList');
     const teamGrid = document.getElementById('teamGrid');
     const managerNameInput = document.getElementById('managerNameInput');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    // Transfer System Elements
+    const transfersRemaining = document.getElementById('transfersRemaining');
+    const playerOutSelect = document.getElementById('playerOutSelect');
+    const playerInSelect = document.getElementById('playerInSelect');
+    const makeTransferBtn = document.getElementById('makeTransferBtn');
+    const useWildcardBtn = document.getElementById('useWildcardBtn');
+    const transferHistoryContainer = document.getElementById('transferHistoryContainer');
 
     if (telegramUser) {
       topUserName.innerText = telegramUser.first_name || "FST Manager";
@@ -2018,6 +2064,44 @@
 
     // Manual update button
     document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
+
+    // Refresh button for server restarts
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch(`/user-profile?userId=${userId}`);
+        const profile = await response.json();
+        
+        if (profile.managerName && profile.joined) {
+          // Update local state with fresh data from server
+          topUserName.innerText = profile.managerName;
+          userBudget = profile.budget || 100.0;
+          userTransfers = profile.transfers || {
+            free: 1,
+            used: 0,
+            remaining: 1,
+            penaltyPoints: 0
+          };
+          wildcardUsed = profile.wildcardUsed || false;
+          transferHistory = profile.transferHistory || [];
+          
+          // Update team data
+          if (profile.team && profile.team.length > 0) {
+            selectedTeam = profile.team.map(id => 
+              allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+            );
+          }
+          
+          // Update UI
+          updateBudgetDisplay();
+          renderTeamGrid();
+          calculateTeamStats();
+          
+          alert("Team data refreshed from server!");
+        }
+      } catch (e) {
+        alert("Failed to refresh team data: " + (e.message || ""));
+      }
+    });
 
     closeModal.addEventListener('click', () => {
       playerModal.classList.remove('slide-in-up');
