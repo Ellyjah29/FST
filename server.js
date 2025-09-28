@@ -1,4 +1,4 @@
-// server.js — FINAL: PROFESSIONAL TRANSFER SYSTEM WITH ROBUST COST VALIDATION
+// server.js — FINAL: TRANSFER SYSTEM & BUDGET TRACKER
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
     maxlength: 20
   },
   solWallet: { type: String },
-  team: [{ type: Number }], // 11 players
+  team: [{ type: Number, length: 11 }], // 11 players max
   points: { type: Number, default: 0 }, // Current gameweek points
   totalPoints: { type: Number, default: 0 }, // Season total points
   entries: { type: Number, default: 0 },
@@ -41,15 +41,7 @@ const userSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now },
   budget: { type: Number, default: 100.0 }, // Budget tracking
   freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
-  transfersUsed: { type: Number, default: 0 }, // Total transfers used
-  transferHistory: [{ // Transfer history
-    date: { type: Date, default: Date.now },
-    fromPlayer: Number,
-    toPlayer: Number,
-    costDifference: Number,
-    pointsBefore: Number,
-    pointsAfter: Number
-  }],
+  lastTransferGameweek: { type: Number, default: 1 }, // Track when last transfer happened
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -84,8 +76,7 @@ app.post('/connect-wallet', async (req, res) => {
         currentGameweek: 1,
         budget: 100.0,
         freeTransfers: 1,
-        transfersUsed: 0,
-        transferHistory: []
+        lastTransferGameweek: 1
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -103,7 +94,7 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// Get Players — WITH DETAILED STATS & BUDGET
+// Get Players — WITH DETAILED STATS
 app.get('/players', async (req, res) => {
   try {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
@@ -188,31 +179,22 @@ app.post('/save-team', async (req, res) => {
       return res.status(400).json({ error: 'Duplicate players not allowed' });
     }
 
-    // Calculate total cost with robust validation
-    let totalCost = 0;
+    // Get player costs
+    const playerCosts = {};
     for (const playerId of team) {
-      let playerCost = 5.0; // Default fallback
-      
       try {
-        const player = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+        const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
-        }).then(r => r.data);
-        
-        // Get player cost with validation
-        if (player && player.now_cost) {
-          const rawCost = parseFloat(player.now_cost);
-          if (!isNaN(rawCost)) {
-            playerCost = rawCost / 10;
-          }
-        }
-        
-        totalCost += playerCost;
+        });
+        const player = response.data;
+        playerCosts[playerId] = parseFloat(player.now_cost / 10) || 5.0;
       } catch (e) {
-        // Use default if API fails
-        totalCost += 5.0;
+        playerCosts[playerId] = 5.0;
       }
     }
 
+    // Calculate total cost
+    const totalCost = Object.values(playerCosts).reduce((sum, cost) => sum + cost, 0);
     if (totalCost > 100) {
       return res.status(400).json({ 
         error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £100m)`,
@@ -235,12 +217,100 @@ app.post('/save-team', async (req, res) => {
     res.json({ 
       success: true, 
       message: '✅ Team locked in!',
-      budget: user.budget,
-      freeTransfers: user.freeTransfers
+      budget: user.budget
     });
   } catch (error) {
     console.error('Save error:', error.message);
     res.status(500).json({ error: 'Failed to save team' });
+  }
+});
+
+// Transfer Player
+app.post('/transfer-player', async (req, res) => {
+  try {
+    const { userId, oldPlayerId, newPlayerId } = req.body;
+    if (!userId || !oldPlayerId || !newPlayerId) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.locked) return res.status(400).json({ error: 'Team not submitted' });
+
+    // Check if team is complete
+    if (!user.team || user.team.length !== 11) {
+      return res.status(400).json({ error: 'Team not complete' });
+    }
+
+    // Check if player is in team
+    const oldPlayerIndex = user.team.indexOf(parseInt(oldPlayerId));
+    if (oldPlayerIndex === -1) {
+      return res.status(400).json({ error: 'Player not in your team' });
+    }
+
+    // Get player costs
+    let oldPlayerCost = 0;
+    let newPlayerCost = 0;
+    
+    try {
+      const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${oldPlayerId}/`, {
+        timeout: 5000
+      });
+      oldPlayerCost = parseFloat(response.data.now_cost / 10) || 5.0;
+    } catch (e) {
+      oldPlayerCost = 5.0;
+    }
+    
+    try {
+      const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${newPlayerId}/`, {
+        timeout: 5000
+      });
+      newPlayerCost = parseFloat(response.data.now_cost / 10) || 5.0;
+    } catch (e) {
+      newPlayerCost = 5.0;
+    }
+
+    // Calculate new budget
+    const budgetChange = newPlayerCost - oldPlayerCost;
+    const newBudget = user.budget - budgetChange;
+    
+    // Check budget
+    if (newBudget < 0) {
+      return res.status(400).json({ 
+        error: `Cannot afford this transfer! Need £${(-newBudget).toFixed(1)}m more`,
+        remaining: newBudget.toFixed(1)
+      });
+    }
+
+    // Check transfer rules
+    if (user.currentGameweek !== user.lastTransferGameweek) {
+      // Reset transfers at new gameweek
+      user.freeTransfers = 1;
+      user.lastTransferGameweek = user.currentGameweek;
+    }
+
+    if (user.freeTransfers < 1) {
+      // -4 points penalty for extra transfers
+      user.points = Math.max(0, user.points - 4);
+    }
+
+    // Perform transfer
+    user.team[oldPlayerIndex] = parseInt(newPlayerId);
+    user.budget = newBudget;
+    user.freeTransfers = user.freeTransfers > 0 ? user.freeTransfers - 1 : 0;
+    user.lastUpdated = new Date();
+    await user.save();
+
+    res.json({
+      success: true,
+      message: '✅ Player transferred!',
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      points: user.points
+    });
+  } catch (error) {
+    console.error('Transfer error:', error.message);
+    res.status(500).json({ error: 'Failed to transfer player' });
   }
 });
 
@@ -313,132 +383,6 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Make Transfer
-app.post('/make-transfer', async (req, res) => {
-  try {
-    const { userId, fromPlayerId, toPlayerId } = req.body;
-    if (!userId || !fromPlayerId || !toPlayerId) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
-
-    const user = await User.findOne({ telegramId: userId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    if (!user.locked) {
-      return res.status(400).json({ error: 'Team must be locked to make transfers' });
-    }
-
-    // Get player details
-    let fromPlayer, toPlayer;
-    try {
-      fromPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${fromPlayerId}/`, {
-        timeout: 5000
-      }).then(r => r.data);
-    } catch (e) {
-      return res.status(400).json({ error: 'Failed to get from player stats' });
-    }
-
-    try {
-      toPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${toPlayerId}/`, {
-        timeout: 5000
-      }).then(r => r.data);
-    } catch (e) {
-      return res.status(400).json({ error: 'Failed to get to player stats' });
-    }
-
-    // Calculate cost difference with robust validation
-    let fromCost = 5.0; // Default fallback
-    let toCost = 5.0;   // Default fallback
-
-    // Try to get from player cost
-    if (fromPlayer && fromPlayer.now_cost) {
-      const rawFromCost = parseFloat(fromPlayer.now_cost);
-      if (!isNaN(rawFromCost)) {
-        fromCost = rawFromCost / 10;
-      }
-    }
-
-    // Try to get to player cost
-    if (toPlayer && toPlayer.now_cost) {
-      const rawToCost = parseFloat(toPlayer.now_cost);
-      if (!isNaN(rawToCost)) {
-        toCost = rawToCost / 10;
-      }
-    }
-
-    // Validate costs
-    if (isNaN(fromCost) || isNaN(toCost)) {
-      return res.status(400).json({ 
-        error: 'Could not determine player costs. Using default values.',
-        fromCost: fromCost,
-        toCost: toCost,
-        warning: 'This is a fallback - please verify player costs manually'
-      });
-    }
-
-    const costDifference = toCost - fromCost;
-
-    // Check budget
-    if (isNaN(user.budget)) {
-      user.budget = 100.0; // Reset to default if NaN
-    }
-
-    if (user.budget < costDifference) {
-      return res.status(400).json({ 
-        error: `Transfer would exceed budget by £${(costDifference - user.budget).toFixed(1)}m`,
-        remaining: (user.budget - costDifference).toFixed(1)
-      });
-    }
-
-    // Check free transfers
-    if (isNaN(user.freeTransfers)) {
-      user.freeTransfers = 1; // Reset to default if NaN
-    }
-
-    if (user.freeTransfers <= 0) {
-      return res.status(400).json({ 
-        error: 'No free transfers remaining. Use wildcard or pay -4 points',
-        freeTransfers: user.freeTransfers
-      });
-    }
-
-    // Find current player's index
-    const fromPlayerIndex = user.team.findIndex(id => id === fromPlayerId);
-    if (fromPlayerIndex === -1) {
-      return res.status(400).json({ error: 'Player to replace not found in team' });
-    }
-
-    // Perform transfer
-    user.team[fromPlayerIndex] = toPlayerId;
-    user.budget -= costDifference;
-    user.freeTransfers -= 1;
-    user.transfersUsed += 1;
-
-    // Add to transfer history with validation
-    user.transferHistory.push({
-      date: new Date(),
-      fromPlayer: fromPlayerId,
-      toPlayer: toPlayerId,
-      costDifference: costDifference, // This should now be a valid number
-      pointsBefore: fromPlayer.history[0]?.total_points || 0,
-      pointsAfter: toPlayer.history[0]?.total_points || 0
-    });
-
-    await user.save();
-
-    res.json({
-      success: true,
-      message: '✅ Transfer completed!',
-      newBudget: user.budget,
-      freeTransfers: user.freeTransfers,
-      transfersUsed: user.transfersUsed
-    });
-  } catch (error) {
-    console.error('Transfer error:', error.message);
-    res.status(500).json({ error: 'Failed to make transfer' });
-  }
-});
-
 // Get User Profile
 app.get('/user-profile', async (req, res) => {
   try {
@@ -460,8 +404,7 @@ app.get('/user-profile', async (req, res) => {
       currentGameweek: user.currentGameweek,
       lastUpdated: user.lastUpdated,
       budget: user.budget,
-      freeTransfers: user.freeTransfers,
-      transfersUsed: user.transfersUsed
+      freeTransfers: user.freeTransfers
     });
   } catch (error) {
     console.error('Profile error:', error.message);
@@ -506,7 +449,6 @@ app.get('*', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
-// Port binding for Render
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ FST Fantasy running on port ${PORT}`);
