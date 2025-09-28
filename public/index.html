@@ -446,6 +446,7 @@
     .stat-avg-form { color: var(--primary); }
     .stat-avg-ppg { color: var(--warning); }
     .stat-budget { color: var(--accent); }
+    .stat-transfers { color: var(--warning); }
 
     /* SUBMISSION BANNER */
     .submission-banner {
@@ -650,6 +651,158 @@
       color: var(--error);
       font-weight: 700;
     }
+
+    /* TRANSFER SYSTEM */
+    .transfer-container {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0;
+      padding: 16px;
+      background: rgba(26, 42, 58, 0.7);
+      border-radius: 12px;
+      align-items: center;
+    }
+
+    .transfer-label {
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .transfer-count {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--warning);
+    }
+
+    .wildcard-btn {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .wildcard-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    .wildcard-used {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .transfer-section {
+      margin-top: 20px;
+    }
+
+    .transfer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .transfer-title {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .transfer-info {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .transfer-player {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .transfer-player:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .transfer-player img {
+      width: 50px;
+      height: 62px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .transfer-player-info {
+      flex: 1;
+    }
+
+    .transfer-player-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .transfer-player-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .transfer-action {
+      display: flex;
+      gap: 8px;
+    }
+
+    .transfer-btn {
+      padding: 6px 12px;
+      background: var(--primary);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .transfer-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .transfer-btn.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .transfer-success {
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: var(--success);
+      padding: 12px;
+      border-radius: 12px;
+      margin: 12px 0;
+      text-align: center;
+    }
+
+    .transfer-error {
+      background: rgba(248, 113, 113, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: var(--error);
+      padding: 12px;
+      border-radius: 12px;
+      margin: 12px 0;
+      text-align: center;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -709,6 +862,13 @@
           <div id="budgetRemaining" class="budget-value">£100.0m</div>
         </div>
         
+        <!-- TRANSFER SYSTEM -->
+        <div class="transfer-container">
+          <div class="transfer-label">Transfers:</div>
+          <div id="transfersCount" class="transfer-count">1/1</div>
+          <button id="wildcardBtn" class="wildcard-btn">Wildcard</button>
+        </div>
+        
         <!-- FORMATION CONTAINER -->
         <div id="formationSelectorContainer" class="input-group">
           <label class="input-label">Choose Formation</label>
@@ -755,6 +915,35 @@
           <div class="team-stat-card">
             <div class="team-stat-label">Avg. Pts/Game</div>
             <div id="avgPPG" class="team-stat-value stat-avg-ppg">0.0</div>
+          </div>
+        </div>
+        
+        <!-- TRANSFER SECTION -->
+        <div class="transfer-section">
+          <div class="transfer-header">
+            <div class="transfer-title">🔄 Make a Transfer</div>
+            <div class="transfer-info">1 free transfer per gameweek</div>
+          </div>
+          
+          <div id="transferMessage" style="margin: 12px 0; display: none;"></div>
+          
+          <div id="transferOutSection" style="margin-bottom: 16px;">
+            <div style="font-weight: 600; margin-bottom: 8px;">Select Player to Remove</div>
+            <div id="transferOutPlayers" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
+          </div>
+          
+          <div id="transferInSection" style="margin-bottom: 16px; display: none;">
+            <div style="font-weight: 600; margin-bottom: 8px;">Select Player to Add</div>
+            <div id="transferInPlayers" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;"></div>
+          </div>
+          
+          <div id="transferActions" style="display: none;">
+            <button id="confirmTransferBtn" class="btn-primary" style="margin: 8px 0;">
+              <i class="fas fa-exchange-alt"></i> Confirm Transfer
+            </button>
+            <button id="cancelTransferBtn" class="btn-outline" style="margin: 8px 0;">
+              <i class="fas fa-times"></i> Cancel
+            </button>
           </div>
         </div>
         
@@ -885,6 +1074,10 @@
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
+    let userTransfers = 1;
+    let userWildcardUsed = false;
+    let transferMode = false;
+    let transferOutPlayer = null;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -939,6 +1132,8 @@
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               userBudget = profile.budget || 100.0;
+              userTransfers = profile.transfers || 1;
+              userWildcardUsed = profile.wildcardUsed || false;
               updateBudgetDisplay();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
@@ -962,6 +1157,9 @@
               
               // Load live scores
               updateLiveScores();
+              
+              // Update transfer UI
+              updateTransferUI();
             });
             return;
           }
@@ -976,9 +1174,12 @@
             );
           }
           userBudget = profile.budget || 100.0;
+          userTransfers = profile.transfers || 1;
+          userWildcardUsed = profile.wildcardUsed || false;
           updateBudgetDisplay();
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
+          updateTransferUI();
           return;
         }
       } catch (e) {
@@ -1012,7 +1213,10 @@
           loadPlayers();
           renderTeamGrid();
           userBudget = data.budget || 100.0;
+          userTransfers = data.transfers || 1;
+          userWildcardUsed = false;
           updateBudgetDisplay();
+          updateTransferUI();
         } else {
           throw new Error(data.error || 'Failed to join');
         }
@@ -1077,6 +1281,27 @@
       budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
       budgetStats.className = budgetClass;
       budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
+    }
+
+    function updateTransferUI() {
+      const transfersCount = document.getElementById('transfersCount');
+      const wildcardBtn = document.getElementById('wildcardBtn');
+      
+      if (transfersCount) {
+        transfersCount.innerText = `${userTransfers}/1`;
+      }
+      
+      if (wildcardBtn) {
+        if (userWildcardUsed) {
+          wildcardBtn.classList.add('wildcard-used');
+          wildcardBtn.disabled = true;
+          wildcardBtn.innerText = 'Wildcard Used';
+        } else {
+          wildcardBtn.classList.remove('wildcard-used');
+          wildcardBtn.disabled = false;
+          wildcardBtn.innerText = 'Wildcard';
+        }
+      }
     }
 
     function calculateTeamValue() {
@@ -1529,6 +1754,8 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           userBudget = profile.budget || 100.0;
+          userTransfers = profile.transfers || 1;
+          userWildcardUsed = profile.wildcardUsed || false;
           updateBudgetDisplay();
           renderTeamGrid();
           calculateTeamStats();
@@ -1547,6 +1774,9 @@
           
           // Start live scoring updates
           updateLiveScores();
+          
+          // Update transfer UI
+          updateTransferUI();
         }
       } catch (e) {
         alert("Failed to submit team: " + (e.message || ""));
@@ -1565,6 +1795,224 @@
         submitTeamBtn.title = "";
       }
     }
+
+    // TRANSFER SYSTEM FUNCTIONS
+    function startTransfer(playerId) {
+      transferMode = true;
+      transferOutPlayer = playerId;
+      
+      // Show transfer UI
+      document.getElementById('transferOutSection').style.display = 'block';
+      document.getElementById('transferInSection').style.display = 'none';
+      document.getElementById('transferActions').style.display = 'none';
+      document.getElementById('transferMessage').style.display = 'none';
+      
+      // Populate transfer out players
+      const transferOutPlayers = document.getElementById('transferOutPlayers');
+      transferOutPlayers.innerHTML = '';
+      
+      selectedTeam.forEach((player, index) => {
+        if (player && player.id === playerId) {
+          const playerCard = document.createElement('div');
+          playerCard.className = 'transfer-player';
+          playerCard.innerHTML = `
+            <img src="${player.photo_url}" alt="${player.web_name}">
+            <div class="transfer-player-info">
+              <div class="transfer-player-name">${player.web_name}</div>
+              <div class="transfer-player-meta">
+                <span>£${player.now_cost}m</span>
+                <span>${player.total_points} pts</span>
+              </div>
+            </div>
+            <div class="transfer-action">
+              <button class="transfer-btn" data-player-id="${player.id}">Remove</button>
+            </div>
+          `;
+          playerCard.addEventListener('click', () => {
+            selectTransferOutPlayer(player.id);
+          });
+          transferOutPlayers.appendChild(playerCard);
+        }
+      });
+    }
+
+    function selectTransferOutPlayer(playerId) {
+      // Show transfer in players
+      const transferInPlayers = document.getElementById('transferInPlayers');
+      transferInPlayers.innerHTML = '';
+      
+      // Get position of player being removed
+      const outPlayer = allPlayers.find(p => p.id === playerId);
+      if (!outPlayer) return;
+      
+      // Get available players for same position
+      const availablePlayers = allPlayers
+        .filter(p => p.element_type === outPlayer.element_type)
+        .filter(p => !selectedTeam.includes(p.id));
+      
+      availablePlayers.forEach(player => {
+        const playerCard = document.createElement('div');
+        playerCard.className = 'transfer-player';
+        playerCard.innerHTML = `
+          <img src="${player.photo_url}" alt="${player.web_name}">
+          <div class="transfer-player-info">
+            <div class="transfer-player-name">${player.web_name}</div>
+            <div class="transfer-player-meta">
+              <span>£${player.now_cost}m</span>
+              <span>${player.total_points} pts</span>
+            </div>
+          </div>
+          <div class="transfer-action">
+            <button class="transfer-btn" data-player-id="${player.id}">Add</button>
+          </div>
+        `;
+        playerCard.addEventListener('click', () => {
+          confirmTransfer(playerId, player.id);
+        });
+        transferInPlayers.appendChild(playerCard);
+      });
+      
+      // Show transfer in section
+      document.getElementById('transferOutSection').style.display = 'none';
+      document.getElementById('transferInSection').style.display = 'block';
+      document.getElementById('transferActions').style.display = 'block';
+    }
+
+    function confirmTransfer(outPlayerId, inPlayerId) {
+      // Show confirmation
+      const transferMessage = document.getElementById('transferMessage');
+      const outPlayer = allPlayers.find(p => p.id === outPlayerId);
+      const inPlayer = allPlayers.find(p => p.id === inPlayerId);
+      
+      if (!outPlayer || !inPlayer) return;
+      
+      transferMessage.innerHTML = `
+        <div class="transfer-success">
+          <i class="fas fa-check"></i> Transfer: ${outPlayer.web_name} → ${inPlayer.web_name}
+        </div>
+      `;
+      transferMessage.style.display = 'block';
+    }
+
+    function cancelTransfer() {
+      transferMode = false;
+      transferOutPlayer = null;
+      
+      // Reset UI
+      document.getElementById('transferOutSection').style.display = 'none';
+      document.getElementById('transferInSection').style.display = 'none';
+      document.getElementById('transferActions').style.display = 'none';
+      document.getElementById('transferMessage').style.display = 'none';
+    }
+
+    // WILDCARD FUNCTION
+    document.getElementById('wildcardBtn').addEventListener('click', async () => {
+      if (userWildcardUsed) {
+        alert("Wildcard already used!");
+        return;
+      }
+      
+      if (confirm("Are you sure you want to use your wildcard? This allows unlimited transfers for this gameweek.")) {
+        try {
+          const response = await fetch('/make-transfer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, outPlayerId: 0, inPlayerId: 0 }) // Special case for wildcard
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            userWildcardUsed = true;
+            updateTransferUI();
+            alert("Wildcard activated! You can now make unlimited transfers.");
+          }
+        } catch (e) {
+          alert("Failed to activate wildcard: " + (e.message || ""));
+        }
+      }
+    });
+
+    // TRANSFER CONFIRMATION
+    document.getElementById('confirmTransferBtn').addEventListener('click', async () => {
+      if (!transferOutPlayer) return;
+      
+      // Get the selected in player
+      const inPlayerButton = document.querySelector('#transferInPlayers .transfer-btn[data-player-id]');
+      if (!inPlayerButton) return;
+      
+      const inPlayerId = parseInt(inPlayerButton.dataset.playerId);
+      
+      try {
+        const response = await fetch('/make-transfer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, outPlayerId: transferOutPlayer, inPlayerId: inPlayerId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update UI
+          const outPlayerIndex = selectedTeam.indexOf(transferOutPlayer);
+          if (outPlayerIndex !== -1) {
+            selectedTeam[outPlayerIndex] = inPlayerId;
+            renderTeamGrid();
+            calculateTeamStats();
+            userBudget = data.newBudget;
+            userTransfers = data.transfersRemaining;
+            updateBudgetDisplay();
+            updateTransferUI();
+            
+            // Show success message
+            const transferMessage = document.getElementById('transferMessage');
+            transferMessage.innerHTML = `
+              <div class="transfer-success">
+                <i class="fas fa-check"></i> Transfer completed!
+              </div>
+            `;
+            transferMessage.style.display = 'block';
+            
+            // Reset transfer mode
+            setTimeout(() => {
+              cancelTransfer();
+            }, 2000);
+          }
+        }
+      } catch (e) {
+        const transferMessage = document.getElementById('transferMessage');
+        transferMessage.innerHTML = `
+          <div class="transfer-error">
+            <i class="fas fa-exclamation"></i> ${e.message || 'Failed to make transfer'}
+          </div>
+        `;
+        transferMessage.style.display = 'block';
+      }
+    });
+
+    document.getElementById('cancelTransferBtn').addEventListener('click', () => {
+      cancelTransfer();
+    });
+
+    // RESET TRANSFERS (FOR DEMO)
+    // In production, this would be automated at start of new gameweek
+    document.getElementById('resetTransfersBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/reset-transfers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          userTransfers = data.transfers;
+          userWildcardUsed = data.wildcardUsed;
+          updateTransferUI();
+          alert(`Transfers reset for Gameweek ${data.currentGameweek}`);
+        }
+      } catch (e) {
+        alert("Failed to reset transfers: " + (e.message || ""));
+      }
+    });
   </script>
 </body>
 </html>
