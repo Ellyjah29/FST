@@ -1560,12 +1560,26 @@
               const currentIndex = selectedTeam.findIndex(p => p && p.id === player.id);
               if (currentIndex === -1) return;
               
-              // Check if transfer would exceed budget
+              // Get player costs with validation
               const playerCost = parseFloat(newPlayer.now_cost);
               const currentCost = parseFloat(player.now_cost);
+              
+              // Validate costs
+              if (isNaN(playerCost) || isNaN(currentCost)) {
+                alert("Error: Invalid player cost data");
+                return;
+              }
+              
               const costDifference = playerCost - currentCost;
               const newBudget = userBudget - costDifference;
               
+              // Validate new budget
+              if (isNaN(newBudget)) {
+                alert("Error: Budget calculation failed");
+                return;
+              }
+              
+              // Check if transfer would exceed budget
               if (newBudget < 0) {
                 alert(`Transfer would exceed budget by £${(-newBudget).toFixed(1)}m`);
                 return;
