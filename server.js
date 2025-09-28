@@ -1,4 +1,4 @@
-// server.js — FIXED: BETTER TRANSFER PERSISTENCE
+// server.js — FINAL: TRANSFER SYSTEM + BUDGET TRACKER + REAL-TIME SCORING
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -332,30 +332,13 @@ app.post('/make-transfer', async (req, res) => {
     
     await user.save();
 
-    // Return complete updated profile
     res.json({
       success: true,
       message: penalty ? '⚠️ Transfer made with 4-point penalty!' : '✅ Transfer made!',
       newBudget: user.budget,
       transfers: user.transfers,
       wildcardUsed: user.wildcardUsed,
-      transferHistory: user.transferHistory.slice(-1),
-      profile: {
-        managerName: user.managerName,
-        solWallet: user.solWallet,
-        team: user.team,
-        points: user.points,
-        totalPoints: user.totalPoints,
-        entries: user.entries,
-        locked: user.locked,
-        joined: user.joined,
-        currentGameweek: user.currentGameweek,
-        lastUpdated: user.lastUpdated,
-        budget: user.budget,
-        transfers: user.transfers,
-        wildcardUsed: user.wildcardUsed,
-        transferHistory: user.transferHistory
-      }
+      transferHistory: user.transferHistory.slice(-1) // Return only the new transfer
     });
   } catch (error) {
     console.error('Transfer error:', error.message);
@@ -379,28 +362,11 @@ app.post('/use-wildcard', async (req, res) => {
     user.transfers.remaining = 1; // Reset transfers for wildcard week
     await user.save();
 
-    // Return complete updated profile
     res.json({
       success: true,
       message: '✅ Wildcard activated! Make unlimited transfers this week',
       transfers: user.transfers,
-      wildcardUsed: user.wildcardUsed,
-      profile: {
-        managerName: user.managerName,
-        solWallet: user.solWallet,
-        team: user.team,
-        points: user.points,
-        totalPoints: user.totalPoints,
-        entries: user.entries,
-        locked: user.locked,
-        joined: user.joined,
-        currentGameweek: user.currentGameweek,
-        lastUpdated: user.lastUpdated,
-        budget: user.budget,
-        transfers: user.transfers,
-        wildcardUsed: user.wildcardUsed,
-        transferHistory: user.transferHistory
-      }
+      wildcardUsed: user.wildcardUsed
     });
   } catch (error) {
     console.error('Wildcard error:', error.message);
@@ -469,23 +435,7 @@ app.post('/update-points', async (req, res) => {
     res.json({
       success: true,
       points: totalPoints,
-      playerStats: playerStats,
-      profile: {
-        managerName: user.managerName,
-        solWallet: user.solWallet,
-        team: user.team,
-        points: user.points,
-        totalPoints: user.totalPoints,
-        entries: user.entries,
-        locked: user.locked,
-        joined: user.joined,
-        currentGameweek: user.currentGameweek,
-        lastUpdated: user.lastUpdated,
-        budget: user.budget,
-        transfers: user.transfers,
-        wildcardUsed: user.wildcardUsed,
-        transferHistory: user.transferHistory
-      }
+      playerStats: playerStats
     });
   } catch (error) {
     console.error('Update points error:', error.message);
@@ -493,7 +443,7 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Get User Profile - Now returns complete profile
+// Get User Profile
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
