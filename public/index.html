@@ -948,6 +948,19 @@
       color: #000;
       opacity: 0.8;
     }
+
+    /* TRANSFER BUTTONS AT TOP */
+    .transfer-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .transfer-buttons .btn-transfer,
+    .transfer-buttons .wildcard-button {
+      flex: 1;
+      margin: 0;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1573,8 +1586,18 @@
         `;
       }
       
-      // Build stats modal with transfer section
+      // Build stats modal with transfer section at top
       statsContent.innerHTML = `
+        <!-- TRANSFER BUTTONS AT TOP -->
+        <div class="transfer-buttons">
+          <button id="btnTransfer" class="btn-transfer" disabled>
+            <i class="fas fa-exchange-alt"></i> Replace Player
+          </button>
+          <button id="btnWildcard" class="wildcard-button">
+            <i class="fas fa-star"></i> Use Wildcard
+          </button>
+        </div>
+        
         <div class="player-stats-header">
           <img src="${player.photo_url}" class="player-stats-img" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
           <div class="player-stats-info">
@@ -1650,14 +1673,6 @@
             <span>Current Budget:</span>
             <span class="budget-impact">£${userBudget.toFixed(1)}m</span>
           </div>
-          
-          <button id="btnTransfer" class="btn-transfer" disabled>
-            <i class="fas fa-exchange-alt"></i> Replace Player
-          </button>
-          
-          <button id="btnWildcard" class="wildcard-button" style="margin-top: 10px;">
-            <i class="fas fa-star"></i> Use Wildcard
-          </button>
         </div>
         
         <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
