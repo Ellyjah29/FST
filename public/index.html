@@ -1531,6 +1531,8 @@
     }
 
     function openPlayerModal(positionType, slotIndex) {
+      console.log('Opening player modal for position:', positionType, 'at index:', slotIndex);
+      
       const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
       const fplType = positionMap[positionType];
       const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
