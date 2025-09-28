@@ -26,7 +26,6 @@
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       --radius: 16px;
       --transition: all 0.2s ease;
-      --card-radius: 14px;
     }
 
     * {
@@ -651,303 +650,6 @@
       color: var(--error);
       font-weight: 700;
     }
-
-    /* PLAYER STATS MODAL - ENHANCED */
-    .stats-modal .modal-content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .player-stats-header {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .player-stats-img {
-      width: 100px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 12px;
-      background: #000;
-    }
-
-    .player-stats-info {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .stats-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 8px;
-    }
-
-    .stats-value {
-      font-weight: 600;
-      font-size: 16px;
-      color: var(--text);
-    }
-
-    .stats-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stat-key {
-      font-weight: 500;
-      color: var(--text-tertiary);
-    }
-
-    .stat-value {
-      font-weight: 600;
-    }
-
-    .position-badge {
-      background: var(--primary);
-      color: #000;
-      border-radius: 8px;
-      padding: 4px 12px;
-      font-weight: 600;
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    .transfer-section {
-      border-top: 1px solid var(--border);
-      padding-top: 20px;
-      margin-top: 10px;
-    }
-
-    .transfer-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .transfer-count {
-      display: inline-block;
-      padding: 6px 12px;
-      background: rgba(78, 205, 196, 0.1);
-      border-radius: 12px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    .player-search-container {
-      margin-bottom: 16px;
-      position: relative;
-    }
-
-    .player-search {
-      width: 100%;
-      padding: 14px 14px 14px 40px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      background: rgba(26, 42, 58, 0.7);
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-tertiary);
-      font-size: 16px;
-    }
-
-    .transfer-player-card {
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 14px;
-      padding: 16px;
-      display: grid;
-      grid-template-columns: 70px 1fr auto;
-      gap: 16px;
-      margin-bottom: 16px;
-      cursor: pointer;
-      transition: var(--transition);
-      border: 1px solid transparent;
-    }
-
-    .transfer-player-card:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 195, 255, 0.3);
-    }
-
-    .transfer-player-photo {
-      width: 70px;
-      height: 85px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #000;
-    }
-
-    .transfer-player-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .transfer-player-name {
-      font-weight: 600;
-      font-size: 16px;
-      color: var(--text);
-    }
-
-    .transfer-player-team {
-      color: var(--text-tertiary);
-      font-size: 13px;
-    }
-
-    .transfer-player-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      margin-top: 8px;
-      font-size: 12px;
-    }
-
-    .transfer-stat {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 8px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .transfer-stat-value {
-      font-weight: 600;
-      margin-top: 2px;
-    }
-
-    .transfer-stat-form {
-      color: var(--success);
-      font-weight: 600;
-    }
-
-    .transfer-stat-ppg {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .transfer-stat-points {
-      color: var(--warning);
-      font-weight: 600;
-    }
-
-    .transfer-player-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
-      margin-top: 5px;
-    }
-
-    .transfer-action-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 195, 255, 0.1);
-      color: var(--primary);
-      border: none;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .transfer-action-btn:hover {
-      background: rgba(0, 195, 255, 0.2);
-    }
-
-    .no-results {
-      text-align: center;
-      padding: 20px;
-      color: var(--text-tertiary);
-    }
-
-    .transfer-budget {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: 10px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-    }
-
-    .budget-impact {
-      font-weight: 600;
-      color: var(--success);
-    }
-
-    .budget-impact.negative {
-      color: var(--error);
-    }
-
-    .btn-transfer {
-      background: var(--primary);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      padding: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-
-    .btn-transfer:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-transfer:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .wildcard-button {
-      background: linear-gradient(135deg, var(--warning), #ff9900);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      padding: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .wildcard-button:hover:not(:disabled) {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(255, 187, 0, 0.4);
-    }
-
-    .wildcard-active {
-      background: var(--warning);
-      color: #000;
-      opacity: 0.8;
-    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1133,12 +835,12 @@
   </div>
 
   <!-- PLAYER STATS MODAL -->
-  <div class="player-modal stats-modal" id="statsModal" style="display:none;">
+  <div class="player-modal" id="statsModal" style="display:none;">
     <div class="modal-header">
       <div class="modal-title">Player Stats</div>
       <button class="close-modal" id="closeStatsModal">&times;</button>
     </div>
-    <div class="modal-content" id="statsContent">
+    <div class="modal-content" id="statsContent" style="padding: 20px;">
       <!-- Stats will be populated here -->
     </div>
   </div>
@@ -1183,18 +885,6 @@
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
-    let userTransfers = {
-      free: 1,
-      used: 0,
-      remaining: 1,
-      penaltyPoints: 0
-    };
-    let wildcardUsed = false;
-    let transferHistory = [];
-    let currentPlayer = null;
-    let currentPlayerPosition = null;
-    let transferSearchInput = null;
-    let transferPlayerList = null;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1249,16 +939,7 @@
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               userBudget = profile.budget || 100.0;
-              userTransfers = profile.transfers || {
-                free: 1,
-                used: 0,
-                remaining: 1,
-                penaltyPoints: 0
-              };
-              wildcardUsed = profile.wildcardUsed || false;
-              transferHistory = profile.transferHistory || [];
               updateBudgetDisplay();
-              updateTransferSystem();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
               // Only reduce opacity (don't disable pointer events)
@@ -1295,16 +976,7 @@
             );
           }
           userBudget = profile.budget || 100.0;
-          userTransfers = profile.transfers || {
-            free: 1,
-            used: 0,
-            remaining: 1,
-            penaltyPoints: 0
-          };
-          wildcardUsed = profile.wildcardUsed || false;
-          transferHistory = profile.transferHistory || [];
           updateBudgetDisplay();
-          updateTransferSystem();
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
           return;
@@ -1340,15 +1012,7 @@
           loadPlayers();
           renderTeamGrid();
           userBudget = data.budget || 100.0;
-          userTransfers = data.transfers || {
-            free: 1,
-            used: 0,
-            remaining: 1,
-            penaltyPoints: 0
-          };
-          wildcardUsed = data.wildcardUsed || false;
           updateBudgetDisplay();
-          updateTransferSystem();
         } else {
           throw new Error(data.error || 'Failed to join');
         }
@@ -1424,18 +1088,6 @@
     function calculateRemainingBudget() {
       const teamValue = calculateTeamValue();
       return (100.0 - teamValue).toFixed(1);
-    }
-
-    function updateTransferSystem() {
-      // No longer used in main page
-    }
-
-    function renderTransferHistory() {
-      // No longer used in main page
-    }
-
-    function updateTransferDropdowns() {
-      // No longer used in main page
     }
 
     function renderTeamGrid() {
@@ -1525,14 +1177,9 @@
       // Update budget
       userBudget = 100.0 - calculateTeamValue();
       updateBudgetDisplay();
-      
-      // Update transfer system
-      updateTransferSystem();
     }
 
     function openPlayerModal(positionType, slotIndex) {
-      console.log('Opening player modal for position:', positionType, 'at index:', slotIndex);
-      
       const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
       const fplType = positionMap[positionType];
       const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
@@ -1556,13 +1203,113 @@
       playerModal.classList.add('slide-in-up');
     }
 
+    function setupFilters(originalPlayers, slotIndex) {
+      const searchInput = document.getElementById('playerSearch');
+      const minPriceInput = document.getElementById('minPrice');
+      const maxPriceInput = document.getElementById('maxPrice');
+      const minPointsInput = document.getElementById('minPoints');
+      const maxPointsInput = document.getElementById('maxPoints');
+      const resetBtn = document.getElementById('resetFilters');
+
+      const applyFilters = () => {
+        let filtered = [...originalPlayers];
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+          filtered = filtered.filter(player => 
+            player.web_name.toLowerCase().includes(searchTerm) ||
+            player.team_name.toLowerCase().includes(searchTerm)
+          );
+        }
+        const minPrice = parseFloat(minPriceInput.value);
+        const maxPrice = parseFloat(maxPriceInput.value);
+        if (!isNaN(minPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) >= minPrice);
+        }
+        if (!isNaN(maxPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
+        }
+        const minPoints = parseInt(minPointsInput.value);
+        const maxPoints = parseInt(maxPointsInput.value);
+        if (!isNaN(minPoints)) {
+          filtered = filtered.filter(player => player.total_points >= minPoints);
+        }
+        if (!isNaN(maxPoints)) {
+          filtered = filtered.filter(player => player.total_points <= maxPoints);
+        }
+        renderPlayerList(filtered, slotIndex);
+      };
+
+      searchInput.addEventListener('input', applyFilters);
+      minPriceInput.addEventListener('input', applyFilters);
+      maxPriceInput.addEventListener('input', applyFilters);
+      minPointsInput.addEventListener('input', applyFilters);
+      maxPointsInput.addEventListener('input', applyFilters);
+      
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        minPriceInput.value = '';
+        maxPriceInput.value = '';
+        minPointsInput.value = '';
+        maxPointsInput.value = '';
+        renderPlayerList(originalPlayers, slotIndex);
+      });
+    }
+
+    function renderPlayerList(players, slotIndex) {
+      let html = '';
+      players.forEach(player => {
+        // Check if adding this player would exceed budget
+        const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
+        const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
+        
+        html += `
+          <div class="${playerClass}" data-id="${player.id}">
+            <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
+            <div class="player-info">
+              <div class="player-name">${player.web_name}</div>
+              <div class="player-meta">
+                <span>${player.team_name}</span>
+                <span class="price-tag">£${player.now_cost}m</span>
+                <span class="points-tag">${player.total_points} pts</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (players.length === 0) {
+        html = '<div class="empty-state"><i class="fas fa-search"></i><p>No players match your filters</p></div>';
+      }
+
+      playerList.innerHTML = html;
+
+      document.querySelectorAll('.player-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const playerId = parseInt(card.dataset.id);
+          const player = allPlayers.find(p => p.id === playerId);
+          
+          for (let i = 0; i < selectedTeam.length; i++) {
+            if (selectedTeam[i] && selectedTeam[i].id === playerId) {
+              selectedTeam[i] = null;
+            }
+          }
+          
+          // Check if adding this player would exceed budget
+          const playerCost = parseFloat(player.now_cost);
+          if (userBudget < playerCost) {
+            alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
+            return;
+          }
+          
+          selectedTeam[slotIndex] = player;
+          renderTeamGrid();
+          playerModal.style.display = 'none';
+        });
+      });
+    }
+
     function showPlayerStats(player) {
       const statsContent = document.getElementById('statsContent');
-      currentPlayer = player;
-      
-      // Position map for transfer logic
-      const positionMap = { 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' };
-      currentPlayerPosition = positionMap[player.element_type];
       
       // Position-specific stats
       let positionStats = '';
@@ -1575,91 +1322,44 @@
         `;
       }
       
-      // Build stats modal with transfer section
       statsContent.innerHTML = `
-        <div class="player-stats-header">
-          <img src="${player.photo_url}" class="player-stats-img" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
-          <div class="player-stats-info">
-            <div class="stats-title">${player.web_name}</div>
-            <div class="position-badge">${player.position}</div>
-            <div class="stats-row">
-              <span class="stat-key">Team:</span>
-              <span class="stat-value">${player.team_name}</span>
-            </div>
-            <div class="stats-row">
-              <span class="stat-key">Points:</span>
-              <span class="stat-value" style="color: var(--success);">${player.total_points} pts</span>
-            </div>
-            <div class="stats-row">
-              <span class="stat-key">Form:</span>
-              <span class="stat-value">${player.form}</span>
-            </div>
-          </div>
+        <div style="text-align:center; margin-bottom:20px;">
+          <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
+          <h3 style="margin:10px 0; color: var(--text);">${player.web_name}</h3>
+          <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
+          <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
         </div>
         
         <div class="stat-grid">
           <div class="stat-row">
-            <span class="stat-key">Points/Game:</span>
-            <span class="stat-value">${player.points_per_game}</span>
+            <span>Form:</span>
+            <span>${player.form}</span>
           </div>
           <div class="stat-row">
-            <span class="stat-key">Selected By:</span>
-            <span class="stat-value">${player.selected_by_percent}%</span>
+            <span>Pts/Game:</span>
+            <span>${player.points_per_game}</span>
           </div>
           <div class="stat-row">
-            <span class="stat-key">Minutes:</span>
-            <span class="stat-value">${player.minutes}</span>
+            <span>Selected By:</span>
+            <span>${player.selected_by_percent}%</span>
           </div>
           <div class="stat-row">
-            <span class="stat-key">Goals:</span>
-            <span class="stat-value">${player.goals_scored}</span>
+            <span>Minutes:</span>
+            <span>${player.minutes}</span>
           </div>
           <div class="stat-row">
-            <span class="stat-key">Assists:</span>
-            <span class="stat-value">${player.assists}</span>
+            <span>Goals:</span>
+            <span>${player.goals_scored}</span>
           </div>
           <div class="stat-row">
-            <span class="stat-key">Bonus:</span>
-            <span class="stat-value">${player.bonus}</span>
+            <span>Assists:</span>
+            <span>${player.assists}</span>
+          </div>
+          <div class="stat-row">
+            <span>Bonus:</span>
+            <span>${player.bonus}</span>
           </div>
           ${positionStats}
-        </div>
-        
-        <!-- TRANSFER SECTION -->
-        <div class="transfer-section">
-          <div class="transfer-header">
-            <h3 class="section-title" style="margin: 0;">🔄 Replace Player</h3>
-            <div class="transfer-count" id="transfersRemainingInModal">1 Free Transfer</div>
-          </div>
-          
-          <div class="player-search-container">
-            <i class="fas fa-search search-icon"></i>
-            <input type="text" 
-                   id="transferPlayerSearch" 
-                   placeholder="Search players..."
-                   class="player-search">
-          </div>
-          
-          <div id="transferPlayerList">
-            <!-- Players will be populated here -->
-            <div class="no-results">
-              <i class="fas fa-search"></i>
-              <p>Search for players to replace</p>
-            </div>
-          </div>
-          
-          <div class="transfer-budget">
-            <span>Current Budget:</span>
-            <span class="budget-impact">£${userBudget.toFixed(1)}m</span>
-          </div>
-          
-          <button id="btnTransfer" class="btn-transfer" disabled>
-            <i class="fas fa-exchange-alt"></i> Replace Player
-          </button>
-          
-          <button id="btnWildcard" class="wildcard-button" style="margin-top: 10px;">
-            <i class="fas fa-star"></i> Use Wildcard
-          </button>
         </div>
         
         <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
@@ -1669,203 +1369,8 @@
         </div>
       `;
       
-      // Save references for transfer functionality
-      transferSearchInput = document.getElementById('transferPlayerSearch');
-      transferPlayerList = document.getElementById('transferPlayerList');
-      
-      // Set up transfer functionality
-      setupTransferSystem();
-      
-      // Show the modal
       document.getElementById('statsModal').style.display = 'flex';
       document.getElementById('statsModal').classList.add('slide-in-up');
-    }
-
-    function setupTransferSystem() {
-      if (!transferSearchInput || !transferPlayerList) return;
-      
-      // Initial load of position-appropriate players
-      loadPositionPlayers(currentPlayerPosition);
-      
-      // Set up search
-      transferSearchInput.addEventListener('input', () => {
-        const searchTerm = transferSearchInput.value.toLowerCase();
-        if (!searchTerm) {
-          loadPositionPlayers(currentPlayerPosition);
-          return;
-        }
-        
-        const filtered = transferPlayerList.querySelectorAll('.transfer-player-card')
-          .filter(card => {
-            const playerName = card.querySelector('.transfer-player-name').textContent.toLowerCase();
-            const playerTeam = card.querySelector('.transfer-player-team').textContent.toLowerCase();
-            return playerName.includes(searchTerm) || playerTeam.includes(searchTerm);
-          });
-        
-        if (filtered.length === 0) {
-          transferPlayerList.innerHTML = `
-            <div class="no-results">
-              <i class="fas fa-search"></i>
-              <p>No players match your search</p>
-            </div>
-          `;
-          document.getElementById('btnTransfer').disabled = true;
-        } else {
-          const fragment = document.createDocumentFragment();
-          filtered.forEach(card => fragment.appendChild(card));
-          transferPlayerList.innerHTML = '';
-          transferPlayerList.appendChild(fragment);
-        }
-      });
-      
-      // Transfer button
-      document.getElementById('btnTransfer').addEventListener('click', () => {
-        const transferPlayer = transferPlayerList.querySelector('.transfer-player-card.selected');
-        if (!transferPlayer) return;
-        
-        const playerId = parseInt(transferPlayer.dataset.id);
-        const player = allPlayers.find(p => p.id === playerId);
-        
-        // Replace player
-        const playerIndex = selectedTeam.findIndex(p => p === currentPlayer);
-        if (playerIndex !== -1) {
-          selectedTeam[playerIndex] = player;
-          renderTeamGrid();
-          document.getElementById('statsModal').style.display = 'none';
-          
-          // Update transfer system
-          userBudget = userBudget + parseFloat(currentPlayer.now_cost) - parseFloat(player.now_cost);
-          updateBudgetDisplay();
-          updateTransferSystem();
-          
-          alert(`Player replaced! New budget: £${userBudget.toFixed(1)}m`);
-        }
-      });
-      
-      // Wildcard button
-      document.getElementById('btnWildcard').addEventListener('click', async () => {
-        try {
-          const response = await fetch('/use-wildcard', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId })
-          });
-          const data = await response.json();
-          
-          if (data.success) {
-            // Update local state
-            userTransfers = data.transfers;
-            wildcardUsed = data.wildcardUsed;
-            
-            // Update UI
-            updateTransferSystem();
-            
-            // Update transfers remaining in modal
-            document.getElementById('transfersRemainingInModal').innerHTML = '<span style="color: var(--warning);">Wildcard Active!</span>';
-            document.getElementById('btnWildcard').disabled = true;
-            document.getElementById('btnWildcard').classList.add('wildcard-active');
-            
-            // Show success message
-            alert(data.message);
-          }
-        } catch (e) {
-          alert("Failed to use wildcard: " + (e.message || ""));
-        }
-      });
-    }
-
-    function loadPositionPlayers(position) {
-      const positionMap = { 'GK': 1, 'DEF': 2, 'MID': 3, 'FWD': 4 };
-      const fplType = positionMap[position];
-      
-      const availablePlayers = allPlayers
-        .filter(p => p.element_type === fplType)
-        .filter(p => p.id !== currentPlayer.id);
-      
-      renderPositionPlayers(availablePlayers);
-    }
-
-    function renderPositionPlayers(players) {
-      if (players.length === 0) {
-        transferPlayerList.innerHTML = `
-          <div class="no-results">
-            <i class="fas fa-search"></i>
-            <p>No players match your criteria</p>
-          </div>
-        `;
-        document.getElementById('btnTransfer').disabled = true;
-        return;
-      }
-      
-      let html = '';
-      players.forEach(player => {
-        // Check if adding this player would exceed budget
-        const budgetImpact = parseFloat(player.now_cost) - parseFloat(currentPlayer.now_cost);
-        const budgetClass = budgetImpact > 0 ? 'negative' : 'positive';
-        
-        html += `
-          <div class="transfer-player-card" data-id="${player.id}">
-            <img src="${player.photo_url}" class="transfer-player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
-            <div class="transfer-player-info">
-              <div class="transfer-player-name">${player.web_name}</div>
-              <div class="transfer-player-team">${player.team_name}</div>
-              <div class="transfer-player-stats">
-                <div class="transfer-stat">
-                  <div class="stat-label">Form</div>
-                  <div class="transfer-stat-value transfer-stat-form">${player.form}</div>
-                </div>
-                <div class="transfer-stat">
-                  <div class="stat-label">PPG</div>
-                  <div class="transfer-stat-value transfer-stat-ppg">${player.points_per_game}</div>
-                </div>
-                <div class="transfer-stat">
-                  <div class="stat-label">Points</div>
-                  <div class="transfer-stat-value transfer-stat-points">${player.total_points}</div>
-                </div>
-              </div>
-            </div>
-            <div class="transfer-player-actions">
-              <div class="budget-impact ${budgetClass}">£${budgetImpact.toFixed(1)}m</div>
-              <button class="transfer-action-btn">
-                <i class="fas fa-arrow-right"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      });
-      
-      transferPlayerList.innerHTML = html;
-      
-      // Add click handlers
-      document.querySelectorAll('.transfer-player-card').forEach(card => {
-        card.addEventListener('click', () => {
-          // Clear previous selection
-          document.querySelectorAll('.transfer-player-card').forEach(c => {
-            c.style.backgroundColor = '';
-            c.style.transform = '';
-            c.style.boxShadow = '';
-          });
-          
-          // Highlight new selection
-          card.style.backgroundColor = 'rgba(0, 195, 255, 0.1)';
-          card.style.transform = 'scale(1.03)';
-          card.style.boxShadow = '0 4px 12px rgba(0, 195, 255, 0.3)';
-          
-          // Update transfer button
-          document.getElementById('btnTransfer').disabled = false;
-        });
-      });
-    }
-
-    function calculateTeamValue() {
-      return selectedTeam
-        .filter(p => p !== null)
-        .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
-    }
-
-    function calculateRemainingBudget() {
-      const teamValue = calculateTeamValue();
-      return (100.0 - teamValue).toFixed(1);
     }
 
     function calculateTeamStats() {
@@ -2024,16 +1529,7 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           userBudget = profile.budget || 100.0;
-          userTransfers = profile.transfers || {
-            free: 1,
-            used: 0,
-            remaining: 1,
-            penaltyPoints: 0
-          };
-          wildcardUsed = profile.wildcardUsed || false;
-          transferHistory = profile.transferHistory || [];
           updateBudgetDisplay();
-          updateTransferSystem();
           renderTeamGrid();
           calculateTeamStats();
           document.querySelectorAll('.slot').forEach(slot => {
