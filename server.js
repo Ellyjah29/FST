@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
   budget: { type: Number, default: 100.0 },
-  transfers: { type: Number, default: 1 }, // Free transfers remaining
+  transfersRemaining: { type: Number, default: 1 }, // Free transfers
   wildcardUsed: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
@@ -75,7 +75,7 @@ app.post('/connect-wallet', async (req, res) => {
         joined: true,
         currentGameweek: 1,
         budget: 100.0,
-        transfers: 1, // Reset transfers for new contest
+        transfersRemaining: 1, // Reset transfers for new contest
         wildcardUsed: false
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
@@ -86,7 +86,7 @@ app.post('/connect-wallet', async (req, res) => {
       userId: user.telegramId,
       managerName: user.managerName,
       budget: user.budget,
-      transfers: user.transfers
+      transfersRemaining: user.transfersRemaining
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -184,7 +184,7 @@ app.post('/save-team', async (req, res) => {
     for (const playerId of team) {
       const player = allPlayers.find(p => p.id === playerId);
       if (player) {
-        totalCost += parseFloat(player.now_cost) || 0;
+        totalCost += parseFloat(player.now_cost || 0);
       }
     }
 
@@ -211,7 +211,7 @@ app.post('/save-team', async (req, res) => {
       success: true, 
       message: '✅ Team locked in!',
       budget: user.budget,
-      transfers: user.transfers
+      transfersRemaining: user.transfersRemaining
     });
   } catch (error) {
     console.error('Save error:', error.message);
@@ -291,79 +291,74 @@ app.post('/update-points', async (req, res) => {
 // Make Transfer
 app.post('/make-transfer', async (req, res) => {
   try {
-    const { userId, outPlayerId, inPlayerId } = req.body;
-    if (!userId || !outPlayerId || !inPlayerId) {
-      return res.status(400).json({ error: 'Missing player IDs' });
+    const { userId, outgoingPlayerId, incomingPlayerId } = req.body;
+    if (!userId || !outgoingPlayerId || !incomingPlayerId) {
+      return res.status(400).json({ error: 'Missing required parameters' });
     }
 
     const user = await User.findOne({ telegramId: userId });
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (!user.locked) return res.status(400).json({ error: 'Team not submitted yet' });
 
-    // Check if user has free transfers
-    if (user.transfers <= 0 && !user.wildcardUsed) {
+    // Check if user has transfers remaining
+    if (user.transfersRemaining <= 0 && !user.wildcardUsed) {
       return res.status(400).json({ 
-        error: 'No free transfers available. Use wildcard or wait for next gameweek.',
-        transfers: user.transfers,
-        wildcardUsed: user.wildcardUsed
+        error: 'No transfers remaining. Use wildcard or wait for next gameweek.',
+        penalty: -4
       });
     }
 
-    // Find the player to remove
-    const outPlayerIndex = user.team.indexOf(outPlayerId);
-    if (outPlayerIndex === -1) {
-      return res.status(400).json({ error: 'Player to remove not in team' });
-    }
-
     // Get player costs
-    const outPlayer = allPlayers.find(p => p.id === outPlayerId);
-    const inPlayer = allPlayers.find(p => p.id === inPlayerId);
+    const outgoingPlayer = allPlayers.find(p => p.id === outgoingPlayerId);
+    const incomingPlayer = allPlayers.find(p => p.id === incomingPlayerId);
     
-    if (!outPlayer || !inPlayer) {
+    if (!outgoingPlayer || !incomingPlayer) {
       return res.status(400).json({ error: 'Invalid player IDs' });
     }
 
     // Check position compatibility
-    if (outPlayer.element_type !== inPlayer.element_type) {
+    if (outgoingPlayer.element_type !== incomingPlayer.element_type) {
       return res.status(400).json({ 
-        error: `Cannot replace ${outPlayer.position} with ${inPlayer.position}`,
-        outPosition: outPlayer.position,
-        inPosition: inPlayer.position
+        error: `Cannot replace ${outgoingPlayer.position} with ${incomingPlayer.position}`,
+        positions: [outgoingPlayer.position, incomingPlayer.position]
       });
     }
 
     // Check budget
-    const outCost = parseFloat(outPlayer.now_cost);
-    const inCost = parseFloat(inPlayer.now_cost);
-    const budgetChange = inCost - outCost;
-    const newBudget = user.budget - budgetChange;
-
+    const currentBudget = user.budget;
+    const outgoingCost = parseFloat(outgoingPlayer.now_cost || 0);
+    const incomingCost = parseFloat(incomingPlayer.now_cost || 0);
+    const newBudget = currentBudget + outgoingCost - incomingCost;
+    
     if (newBudget < 0) {
       return res.status(400).json({ 
-        error: `Transfer would exceed budget! Need £${Math.abs(newBudget).toFixed(1)}m more`,
-        currentBudget: user.budget,
-        newBudget: newBudget.toFixed(1)
+        error: `Transfer would exceed budget by £${Math.abs(newBudget).toFixed(1)}m`,
+        remaining: newBudget.toFixed(1)
       });
     }
 
-    // Make the transfer
-    user.team[outPlayerIndex] = inPlayerId;
-    user.budget = newBudget;
-    user.lastUpdated = new Date();
-
-    // Deduct transfer
-    if (!user.wildcardUsed) {
-      user.transfers -= 1;
+    // Perform transfer
+    const team = [...user.team];
+    const outgoingIndex = team.indexOf(outgoingPlayerId);
+    if (outgoingIndex === -1) {
+      return res.status(400).json({ error: 'Outgoing player not in team' });
     }
 
+    team[outgoingIndex] = incomingPlayerId;
+
+    // Update user
+    user.team = team;
+    user.budget = newBudget;
+    user.transfersRemaining = user.transfersRemaining > 0 ? user.transfersRemaining - 1 : 0;
+    user.lastUpdated = new Date();
     await user.save();
 
     res.json({
       success: true,
       message: '✅ Transfer completed!',
       newBudget: user.budget,
-      transfersRemaining: user.transfers,
-      wildcardUsed: user.wildcardUsed
+      transfersRemaining: user.transfersRemaining,
+      penalty: 0 // No penalty for free transfers
     });
   } catch (error) {
     console.error('Transfer error:', error.message);
@@ -371,7 +366,7 @@ app.post('/make-transfer', async (req, res) => {
   }
 });
 
-// Reset Transfers (for demo purposes - in production, this would be automated)
+// Reset Transfers (for demo - in real app, this would happen automatically at start of new gameweek)
 app.post('/reset-transfers', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -380,16 +375,16 @@ app.post('/reset-transfers', async (req, res) => {
     const user = await User.findOne({ telegramId: userId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.transfers = 1;
+    user.transfersRemaining = 1;
     user.wildcardUsed = false;
     user.currentGameweek = user.currentGameweek + 1;
     await user.save();
 
     res.json({
       success: true,
-      message: `✅ Transfers reset for Gameweek ${user.currentGameweek}`,
-      transfers: user.transfers,
-      wildcardUsed: user.wildcardUsed
+      message: '✅ Transfers reset for new gameweek!',
+      transfersRemaining: user.transfersRemaining,
+      currentGameweek: user.currentGameweek
     });
   } catch (error) {
     console.error('Reset transfers error:', error.message);
@@ -418,7 +413,7 @@ app.get('/user-profile', async (req, res) => {
       currentGameweek: user.currentGameweek,
       lastUpdated: user.lastUpdated,
       budget: user.budget,
-      transfers: user.transfers,
+      transfersRemaining: user.transfersRemaining,
       wildcardUsed: user.wildcardUsed
     });
   } catch (error) {
