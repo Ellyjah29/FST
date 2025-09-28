@@ -1,4 +1,4 @@
-// server.js — FINAL: PROFESSIONAL TRANSFER SYSTEM
+// server.js — FINAL: PROFESSIONAL TRANSFER SYSTEM WITH NAN FIX
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -188,23 +188,25 @@ app.post('/save-team', async (req, res) => {
       return res.status(400).json({ error: 'Duplicate players not allowed' });
     }
 
-    // Get player costs
-    const playerCosts = {};
+    // Calculate total cost
+    let totalCost = 0;
     for (const playerId of team) {
       try {
-        const player = await User.findOne({ telegramId: userId });
-        if (player) {
-          // In a real implementation, you'd get this from FPL API
-          // For now, we'll simulate
-          playerCosts[playerId] = 5.5; // Replace with actual cost
+        const player = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+          timeout: 5000
+        }).then(r => r.data);
+        
+        const cost = parseFloat(player.element_type === 1 ? player.now_cost / 10 : player.now_cost / 10);
+        if (isNaN(cost)) {
+          throw new Error(`Invalid cost for player ${playerId}`);
         }
+        totalCost += cost;
       } catch (e) {
-        playerCosts[playerId] = 5.0;
+        // If API fails, use 5.0 as default
+        totalCost += 5.0;
       }
     }
 
-    // Calculate total cost
-    const totalCost = Object.values(playerCosts).reduce((sum, cost) => sum + cost, 0);
     if (totalCost > 100) {
       return res.status(400).json({ 
         error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £100m)`,
@@ -320,27 +322,44 @@ app.post('/make-transfer', async (req, res) => {
       return res.status(400).json({ error: 'Team must be locked to make transfers' });
     }
 
-    // Check if fromPlayer is in team
-    const fromPlayerIndex = user.team.findIndex(id => id === fromPlayerId);
-    if (fromPlayerIndex === -1) {
-      return res.status(400).json({ error: 'Player to replace not found in team' });
+    // Get player details
+    let fromPlayer, toPlayer;
+    try {
+      fromPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${fromPlayerId}/`, {
+        timeout: 5000
+      }).then(r => r.data);
+    } catch (e) {
+      return res.status(400).json({ error: 'Failed to get from player stats' });
     }
 
-    // Get player details
-    const fromPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${fromPlayerId}/`, {
-      timeout: 5000
-    }).then(r => r.data);
-    
-    const toPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${toPlayerId}/`, {
-      timeout: 5000
-    }).then(r => r.data);
+    try {
+      toPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${toPlayerId}/`, {
+        timeout: 5000
+      }).then(r => r.data);
+    } catch (e) {
+      return res.status(400).json({ error: 'Failed to get to player stats' });
+    }
 
-    // Calculate cost difference
+    // Calculate cost difference with validation
     const fromCost = parseFloat(fromPlayer.element_type === 1 ? fromPlayer.now_cost / 10 : fromPlayer.now_cost / 10);
     const toCost = parseFloat(toPlayer.element_type === 1 ? toPlayer.now_cost / 10 : toPlayer.now_cost / 10);
+
+    // Validate costs
+    if (isNaN(fromCost) || isNaN(toCost)) {
+      return res.status(400).json({ 
+        error: 'Invalid player cost data',
+        fromCost: fromCost,
+        toCost: toCost
+      });
+    }
+
     const costDifference = toCost - fromCost;
 
     // Check budget
+    if (isNaN(user.budget)) {
+      user.budget = 100.0; // Reset to default if NaN
+    }
+
     if (user.budget < costDifference) {
       return res.status(400).json({ 
         error: `Transfer would exceed budget by £${(costDifference - user.budget).toFixed(1)}m`,
@@ -349,11 +368,21 @@ app.post('/make-transfer', async (req, res) => {
     }
 
     // Check free transfers
+    if (isNaN(user.freeTransfers)) {
+      user.freeTransfers = 1; // Reset to default if NaN
+    }
+
     if (user.freeTransfers <= 0) {
       return res.status(400).json({ 
         error: 'No free transfers remaining. Use wildcard or pay -4 points',
         freeTransfers: user.freeTransfers
       });
+    }
+
+    // Find current player's index
+    const fromPlayerIndex = user.team.findIndex(id => id === fromPlayerId);
+    if (fromPlayerIndex === -1) {
+      return res.status(400).json({ error: 'Player to replace not found in team' });
     }
 
     // Perform transfer
@@ -362,12 +391,12 @@ app.post('/make-transfer', async (req, res) => {
     user.freeTransfers -= 1;
     user.transfersUsed += 1;
 
-    // Add to transfer history
+    // Add to transfer history with validation
     user.transferHistory.push({
       date: new Date(),
       fromPlayer: fromPlayerId,
       toPlayer: toPlayerId,
-      costDifference: costDifference,
+      costDifference: costDifference, // This should now be a valid number
       pointsBefore: fromPlayer.history[0]?.total_points || 0,
       pointsAfter: toPlayer.history[0]?.total_points || 0
     });
@@ -454,6 +483,7 @@ app.get('*', (req, res) => {
   res.sendFile('index.html', { root: 'public' });
 });
 
+// Port binding for Render
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ FST Fantasy running on port ${PORT}`);
