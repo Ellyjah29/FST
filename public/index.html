@@ -445,6 +445,7 @@
     .stat-team-value { color: var(--accent); }
     .stat-avg-form { color: var(--primary); }
     .stat-avg-ppg { color: var(--warning); }
+    .stat-budget { color: var(--accent); }
 
     /* SUBMISSION BANNER */
     .submission-banner {
@@ -649,6 +650,100 @@
       color: var(--error);
       font-weight: 700;
     }
+
+    /* TRANSFER SYSTEM */
+    .transfer-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .transfer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .transfer-button {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .transfer-button:hover {
+      background: var(--accent-dark);
+    }
+
+    .transfer-info {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    .transfer-list {
+      margin-top: 12px;
+    }
+
+    .transfer-player {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .transfer-player:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .transfer-player img {
+      width: 40px;
+      height: 40px;
+      border-radius: 5px;
+      object-fit: cover;
+    }
+
+    .transfer-player-info {
+      flex: 1;
+    }
+
+    .transfer-player-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .transfer-player-stats {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .transfer-price {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .transfer-points {
+      color: var(--success);
+      font-weight: 600;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -737,11 +832,11 @@
 
       <!-- TEAM STATS SECTION -->
       <div id="teamStats" class="section" style="display:none;">
-        <h3 class="section-title">📊 Your Team Stats</h3>
+        <h3 class="section-title">💰 Your Team Budget</h3>
         <div class="team-stats-grid">
           <div class="team-stat-card">
-            <div class="team-stat-label">Current Points</div>
-            <div id="currentPoints" class="team-stat-value stat-total-points">0</div>
+            <div class="team-stat-label">Budget Remaining</div>
+            <div id="budgetStats" class="team-stat-value stat-budget">£100.0m</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Season Total</div>
@@ -884,6 +979,8 @@
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
+    let transferCount = 0; // Track free transfers used
+    let freeTransfers = 1; // 1 free transfer per gameweek
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1061,7 +1158,8 @@
 
     function updateBudgetDisplay() {
       const budgetContainer = document.getElementById('budgetRemaining');
-      if (!budgetContainer) return;
+      const budgetStats = document.getElementById('budgetStats');
+      if (!budgetContainer || !budgetStats) return;
       
       // Format budget with color based on value
       let budgetClass = 'budget-value';
@@ -1073,6 +1171,8 @@
       
       budgetContainer.className = budgetClass;
       budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
+      budgetStats.className = budgetClass;
+      budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
     }
 
     function calculateTeamValue() {
@@ -1318,6 +1418,45 @@
         `;
       }
       
+      // Create transfer section HTML
+      let transferSection = '';
+      if (submitTeamBtn.style.display === 'none') { // Only show transfer option if team is submitted
+        const playerPosition = ["GK", "DEF", "MID", "FWD"][player.element_type - 1] || "UNK";
+        
+        // Get available players for transfer (same position, not already in team)
+        const availableForTransfer = allPlayers
+          .filter(p => p.element_type === player.element_type)
+          .filter(p => p.id !== player.id)
+          .filter(p => !selectedTeam.some(teamPlayer => teamPlayer && teamPlayer.id === p.id))
+          .slice(0, 5); // Show top 5 options
+        
+        transferSection = `
+          <div class="transfer-section">
+            <div class="transfer-header">
+              <span>🔄 Transfer Options</span>
+              <button id="transferButton" class="transfer-button">Transfer</button>
+            </div>
+            <div class="transfer-info">
+              You have ${freeTransfers} free transfer${freeTransfers !== 1 ? 's' : ''} remaining
+            </div>
+            <div class="transfer-list">
+              ${availableForTransfer.map(p => `
+                <div class="transfer-player" data-id="${p.id}">
+                  <img src="${p.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
+                  <div class="transfer-player-info">
+                    <div class="transfer-player-name">${p.web_name}</div>
+                    <div class="transfer-player-stats">
+                      <span class="transfer-price">£${p.now_cost}m</span>
+                      <span class="transfer-points">${p.total_points} pts</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+      
       statsContent.innerHTML = `
         <div style="text-align:center; margin-bottom:20px;">
           <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
@@ -1363,10 +1502,70 @@
             * Stats updated after each gameweek
           </div>
         </div>
+        
+        ${transferSection}
       `;
       
       document.getElementById('statsModal').style.display = 'flex';
       document.getElementById('statsModal').classList.add('slide-in-up');
+      
+      // Add transfer functionality
+      if (submitTeamBtn.style.display === 'none') {
+        document.getElementById('transferButton').addEventListener('click', () => {
+          const transferOptions = document.querySelectorAll('.transfer-player');
+          transferOptions.forEach(option => {
+            option.addEventListener('click', () => {
+              const newPlayerId = parseInt(option.dataset.id);
+              const newPlayer = allPlayers.find(p => p.id === newPlayerId);
+              
+              // Find current player's index
+              const currentIndex = selectedTeam.findIndex(p => p && p.id === player.id);
+              if (currentIndex === -1) return;
+              
+              // Check if transfer would exceed budget
+              const playerCost = parseFloat(newPlayer.now_cost);
+              const currentCost = parseFloat(player.now_cost);
+              const costDifference = playerCost - currentCost;
+              const newBudget = userBudget - costDifference;
+              
+              if (newBudget < 0) {
+                alert(`Transfer would exceed budget by £${(-newBudget).toFixed(1)}m`);
+                return;
+              }
+              
+              // Perform transfer
+              selectedTeam[currentIndex] = newPlayer;
+              userBudget = newBudget;
+              updateBudgetDisplay();
+              renderTeamGrid();
+              calculateTeamStats();
+              
+              // Reduce free transfers
+              freeTransfers--;
+              if (freeTransfers < 0) {
+                freeTransfers = 0;
+              }
+              
+              // Show success message
+              const successMessage = document.createElement('div');
+              successMessage.innerHTML = `
+                <div style="text-align:center; padding:12px; background:rgba(74, 222, 128, 0.15); border-radius:8px; margin:12px 0;">
+                  <div style="font-weight:700; color:var(--success); font-size:16px; margin-bottom:6px;">✅ Transfer Successful!</div>
+                  <div style="color:var(--text-secondary);">You now have ${freeTransfers} free transfer${freeTransfers !== 1 ? 's' : ''} remaining</div>
+                </div>
+              `;
+              statsContent.insertBefore(successMessage, statsContent.firstChild);
+              
+              // Auto-close after 3 seconds
+              setTimeout(() => {
+                if (successMessage.parentNode) {
+                  successMessage.parentNode.removeChild(successMessage);
+                }
+              }, 3000);
+            });
+          });
+        });
+      }
     }
 
     function calculateTeamStats() {
@@ -1376,7 +1575,6 @@
       }
       
       const validPlayers = selectedTeam.filter(p => p !== null);
-      const currentPoints = validPlayers.reduce((sum, p) => sum + (liveScores[p.id]?.points || 0), 0);
       const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
       const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
       const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
@@ -1386,10 +1584,12 @@
       statsContainer.style.display = 'block';
       
       // Animate stat values
-      animateValue('currentPoints', 0, currentPoints, 1000);
       animateValue('seasonTotal', 0, seasonTotal, 1000);
       animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
       animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
+      
+      // Update budget stats
+      updateBudgetDisplay();
     }
 
     function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
