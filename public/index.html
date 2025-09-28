@@ -948,28 +948,6 @@
       color: #000;
       opacity: 0.8;
     }
-
-    .locked-message {
-      background: rgba(255, 0, 0, 0.1);
-      border: 1px solid var(--error);
-      border-radius: 8px;
-      padding: 10px;
-      margin: 10px 0;
-      color: var(--error);
-      font-weight: 600;
-      text-align: center;
-    }
-
-    .unlock-message {
-      background: rgba(0, 255, 0, 0.1);
-      border: 1px solid var(--success);
-      border-radius: 8px;
-      padding: 10px;
-      margin: 10px 0;
-      color: var(--success);
-      font-weight: 600;
-      text-align: center;
-    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1217,7 +1195,6 @@
     let currentPlayerPosition = null;
     let transferSearchInput = null;
     let transferPlayerList = null;
-    let isTeamLocked = false;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1265,7 +1242,6 @@
           
           // If team is LOCKED (submitted), show read-only view
           if (profile.locked) {
-            isTeamLocked = true;
             joinView.style.display = 'none';
             teamView.style.display = 'block';
             loadPlayers().then(() => {
@@ -1741,145 +1717,59 @@
       });
       
       // Transfer button
-      const transferButton = document.getElementById('btnTransfer');
-      if (transferButton) {
-        transferButton.addEventListener('click', () => {
-          console.log("Replace player button clicked");
-          
-          const transferPlayer = transferPlayerList.querySelector('.transfer-player-card.selected');
-          if (!transferPlayer) {
-            console.error("No player selected for transfer");
-            alert("Please select a player to replace with");
-            return;
-          }
-          
-          const playerId = parseInt(transferPlayer.dataset.id);
-          if (isNaN(playerId)) {
-            console.error("Invalid player ID");
-            return;
-          }
-          
-          const player = allPlayers.find(p => p.id === playerId);
-          if (!player) {
-            console.error("Player not found in allPlayers array");
-            return;
-          }
-          
-          // Make the API call to save the transfer to the database
-          saveTransferToDatabase(playerId);
-        });
-      }
-      
-      // Wildcard button
-      const wildcardButton = document.getElementById('btnWildcard');
-      if (wildcardButton) {
-        wildcardButton.addEventListener('click', async () => {
-          try {
-            const response = await fetch('/use-wildcard', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId })
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-              // Update local state
-              userTransfers = data.transfers;
-              wildcardUsed = data.wildcardUsed;
-              
-              // Update UI
-              updateTransferSystem();
-              
-              // Update transfers remaining in modal
-              document.getElementById('transfersRemainingInModal').innerHTML = '<span style="color: var(--warning);">Wildcard Active!</span>';
-              document.getElementById('btnWildcard').disabled = true;
-              document.getElementById('btnWildcard').classList.add('wildcard-active');
-              
-              // Show success message
-              alert(data.message);
-            }
-          } catch (e) {
-            alert("Failed to use wildcard: " + (e.message || ""));
-          }
-        });
-      }
-
-      // Add click handlers for player cards
-      document.querySelectorAll('.transfer-player-card').forEach(card => {
-        card.addEventListener('click', () => {
-          // Clear previous selection
-          document.querySelectorAll('.transfer-player-card').forEach(c => {
-            c.classList.remove('selected');
-            c.style.backgroundColor = '';
-            c.style.transform = '';
-            c.style.boxShadow = '';
-          });
-          
-          // Highlight new selection
-          card.classList.add('selected');
-          card.style.backgroundColor = 'rgba(0, 195, 255, 0.1)';
-          card.style.transform = 'scale(1.03)';
-          card.style.boxShadow = '0 4px 12px rgba(0, 195, 255, 0.3)';
-          
-          // Update transfer button
-          const btnTransfer = document.getElementById('btnTransfer');
-          if (btnTransfer) {
-            btnTransfer.disabled = false;
-          }
-        });
-      });
-    }
-
-    // NEW FUNCTION: Save transfer to database
-    async function saveTransferToDatabase(playerInId) {
-      try {
-        const playerOutId = currentPlayer.id;
-        const response = await fetch('/make-transfer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            playerOutId,
-            playerInId
-          })
-        });
+      document.getElementById('btnTransfer').addEventListener('click', () => {
+        const transferPlayer = transferPlayerList.querySelector('.transfer-player-card.selected');
+        if (!transferPlayer) return;
         
-        const data = await response.json();
+        const playerId = parseInt(transferPlayer.dataset.id);
+        const player = allPlayers.find(p => p.id === playerId);
         
-        if (data.success) {
-          // Update UI with new team from server
-          const playerIn = allPlayers.find(p => p.id === playerInId);
-          
-          // Update the team in memory
-          const playerIndex = selectedTeam.findIndex(p => p === currentPlayer);
-          if (playerIndex !== -1) {
-            selectedTeam[playerIndex] = playerIn;
-          }
-          
-          // Update budget
-          userBudget = data.newBudget;
-          
-          // Update transfers
-          userTransfers = data.transfers;
-          wildcardUsed = data.wildcardUsed;
-          
-          // Update UI
+        // Replace player
+        const playerIndex = selectedTeam.findIndex(p => p === currentPlayer);
+        if (playerIndex !== -1) {
+          selectedTeam[playerIndex] = player;
           renderTeamGrid();
+          document.getElementById('statsModal').style.display = 'none';
+          
+          // Update transfer system
+          userBudget = userBudget + parseFloat(currentPlayer.now_cost) - parseFloat(player.now_cost);
           updateBudgetDisplay();
           updateTransferSystem();
           
-          // Close the modal
-          document.getElementById('statsModal').style.display = 'none';
-          
-          // Show success message
-          alert(data.message);
-        } else {
-          throw new Error(data.error || 'Failed to save transfer');
+          alert(`Player replaced! New budget: £${userBudget.toFixed(1)}m`);
         }
-      } catch (error) {
-        console.error('Transfer error:', error.message);
-        alert(`Error: ${error.message}`);
-      }
+      });
+      
+      // Wildcard button
+      document.getElementById('btnWildcard').addEventListener('click', async () => {
+        try {
+          const response = await fetch('/use-wildcard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
+          const data = await response.json();
+          
+          if (data.success) {
+            // Update local state
+            userTransfers = data.transfers;
+            wildcardUsed = data.wildcardUsed;
+            
+            // Update UI
+            updateTransferSystem();
+            
+            // Update transfers remaining in modal
+            document.getElementById('transfersRemainingInModal').innerHTML = '<span style="color: var(--warning);">Wildcard Active!</span>';
+            document.getElementById('btnWildcard').disabled = true;
+            document.getElementById('btnWildcard').classList.add('wildcard-active');
+            
+            // Show success message
+            alert(data.message);
+          }
+        } catch (e) {
+          alert("Failed to use wildcard: " + (e.message || ""));
+        }
+      });
     }
 
     function loadPositionPlayers(position) {
@@ -1949,23 +1839,18 @@
         card.addEventListener('click', () => {
           // Clear previous selection
           document.querySelectorAll('.transfer-player-card').forEach(c => {
-            c.classList.remove('selected');
             c.style.backgroundColor = '';
             c.style.transform = '';
             c.style.boxShadow = '';
           });
           
           // Highlight new selection
-          card.classList.add('selected');
           card.style.backgroundColor = 'rgba(0, 195, 255, 0.1)';
           card.style.transform = 'scale(1.03)';
           card.style.boxShadow = '0 4px 12px rgba(0, 195, 255, 0.3)';
           
           // Update transfer button
-          const btnTransfer = document.getElementById('btnTransfer');
-          if (btnTransfer) {
-            btnTransfer.disabled = false;
-          }
+          document.getElementById('btnTransfer').disabled = false;
         });
       });
     }
