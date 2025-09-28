@@ -948,6 +948,28 @@
       color: #000;
       opacity: 0.8;
     }
+
+    .locked-message {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid var(--error);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      color: var(--error);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .unlock-message {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px 0;
+      color: var(--success);
+      font-weight: 600;
+      text-align: center;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1195,6 +1217,7 @@
     let currentPlayerPosition = null;
     let transferSearchInput = null;
     let transferPlayerList = null;
+    let isTeamLocked = false;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1242,6 +1265,7 @@
           
           // If team is LOCKED (submitted), show read-only view
           if (profile.locked) {
+            isTeamLocked = true;
             joinView.style.display = 'none';
             teamView.style.display = 'block';
             loadPlayers().then(() => {
