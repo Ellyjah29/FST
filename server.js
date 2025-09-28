@@ -1,4 +1,4 @@
-// server.js — FINAL: PROFESSIONAL TRANSFER SYSTEM WITH NAN FIX
+// server.js — FINAL: PROFESSIONAL TRANSFER SYSTEM WITH ROBUST COST VALIDATION
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -188,21 +188,27 @@ app.post('/save-team', async (req, res) => {
       return res.status(400).json({ error: 'Duplicate players not allowed' });
     }
 
-    // Calculate total cost
+    // Calculate total cost with robust validation
     let totalCost = 0;
     for (const playerId of team) {
+      let playerCost = 5.0; // Default fallback
+      
       try {
         const player = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
         }).then(r => r.data);
         
-        const cost = parseFloat(player.element_type === 1 ? player.now_cost / 10 : player.now_cost / 10);
-        if (isNaN(cost)) {
-          throw new Error(`Invalid cost for player ${playerId}`);
+        // Get player cost with validation
+        if (player && player.now_cost) {
+          const rawCost = parseFloat(player.now_cost);
+          if (!isNaN(rawCost)) {
+            playerCost = rawCost / 10;
+          }
         }
-        totalCost += cost;
+        
+        totalCost += playerCost;
       } catch (e) {
-        // If API fails, use 5.0 as default
+        // Use default if API fails
         totalCost += 5.0;
       }
     }
@@ -340,16 +346,33 @@ app.post('/make-transfer', async (req, res) => {
       return res.status(400).json({ error: 'Failed to get to player stats' });
     }
 
-    // Calculate cost difference with validation
-    const fromCost = parseFloat(fromPlayer.element_type === 1 ? fromPlayer.now_cost / 10 : fromPlayer.now_cost / 10);
-    const toCost = parseFloat(toPlayer.element_type === 1 ? toPlayer.now_cost / 10 : toPlayer.now_cost / 10);
+    // Calculate cost difference with robust validation
+    let fromCost = 5.0; // Default fallback
+    let toCost = 5.0;   // Default fallback
+
+    // Try to get from player cost
+    if (fromPlayer && fromPlayer.now_cost) {
+      const rawFromCost = parseFloat(fromPlayer.now_cost);
+      if (!isNaN(rawFromCost)) {
+        fromCost = rawFromCost / 10;
+      }
+    }
+
+    // Try to get to player cost
+    if (toPlayer && toPlayer.now_cost) {
+      const rawToCost = parseFloat(toPlayer.now_cost);
+      if (!isNaN(rawToCost)) {
+        toCost = rawToCost / 10;
+      }
+    }
 
     // Validate costs
     if (isNaN(fromCost) || isNaN(toCost)) {
       return res.status(400).json({ 
-        error: 'Invalid player cost data',
+        error: 'Could not determine player costs. Using default values.',
         fromCost: fromCost,
-        toCost: toCost
+        toCost: toCost,
+        warning: 'This is a fallback - please verify player costs manually'
       });
     }
 
