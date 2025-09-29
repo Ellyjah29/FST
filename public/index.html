@@ -1209,7 +1209,7 @@
 
       teamGrid.innerHTML = html;
 
-      // ✅ FIXED: PROPER CLICK HANDLER FOR STATS
+      // Click handler for player stats
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
@@ -1244,7 +1244,7 @@
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
       
-      // ✅ HIDE FORMATION FOR SUBMITTED TEAMS
+      // Hide formation for submitted teams
       const isSubmitted = submitTeamBtn.style.display === 'none';
       const formationContainer = document.getElementById('formationSelectorContainer');
       if (formationContainer) {
@@ -1725,6 +1725,16 @@
         alert("Failed to transfer player: " + (e.message || ""));
       }
     }
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-update live scores every 5 minutes
+      setInterval(() => {
+        if (submitTeamBtn.style.display === 'none') {
+          updateLiveScores();
+        }
+      }, 300000);
+    });
   </script>
 </body>
 </html>
