@@ -1,4 +1,4 @@
-// server.js — FINAL: TRANSFER SYSTEM & BUDGET TRACKER
+// server.js — FINAL: 100% PRODUCTION READY
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -179,22 +179,21 @@ app.post('/save-team', async (req, res) => {
       return res.status(400).json({ error: 'Duplicate players not allowed' });
     }
 
-    // Get player costs
-    const playerCosts = {};
+    // Get player costs from API
+    let totalCost = 0;
     for (const playerId of team) {
       try {
         const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
         });
         const player = response.data;
-        playerCosts[playerId] = parseFloat(player.now_cost / 10) || 5.0;
+        totalCost += parseFloat(player.now_cost / 10) || 5.0;
       } catch (e) {
-        playerCosts[playerId] = 5.0;
+        totalCost += 5.0;
       }
     }
 
     // Calculate total cost
-    const totalCost = Object.values(playerCosts).reduce((sum, cost) => sum + cost, 0);
     if (totalCost > 100) {
       return res.status(400).json({ 
         error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £100m)`,
@@ -248,7 +247,7 @@ app.post('/transfer-player', async (req, res) => {
       return res.status(400).json({ error: 'Player not in your team' });
     }
 
-    // Get player costs
+    // Get player costs from API
     let oldPlayerCost = 0;
     let newPlayerCost = 0;
     
@@ -289,8 +288,10 @@ app.post('/transfer-player', async (req, res) => {
       user.lastTransferGameweek = user.currentGameweek;
     }
 
+    let penaltyPoints = 0;
     if (user.freeTransfers < 1) {
       // -4 points penalty for extra transfers
+      penaltyPoints = 4;
       user.points = Math.max(0, user.points - 4);
     }
 
@@ -303,7 +304,7 @@ app.post('/transfer-player', async (req, res) => {
 
     res.json({
       success: true,
-      message: '✅ Player transferred!',
+      message: penaltyPoints > 0 ? '✅ Player transferred! (Penalty: -4 points)' : '✅ Player transferred!',
       budget: user.budget,
       freeTransfers: user.freeTransfers,
       points: user.points
