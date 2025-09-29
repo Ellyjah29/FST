@@ -1476,8 +1476,12 @@
           currentTransferPlayer = player;
           document.getElementById('statsModal').style.display = 'none';
           
+          // FIX: Map element_type to positionType string
+          const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
+          const positionType = positionMap[player.element_type] || 'fwd';
+          
           // Open player selection for the same position
-          openPlayerModal(player.element_type, selectedTeam.indexOf(player));
+          openPlayerModal(positionType, selectedTeam.indexOf(player));
         });
       }
     }
