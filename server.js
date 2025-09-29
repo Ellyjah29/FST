@@ -1,4 +1,4 @@
-// server.js — FINAL: 100% PRODUCTION READY
+// server.js — FINAL: TRANSFER SYSTEM & BUDGET TRACKER
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -298,7 +298,12 @@ app.post('/transfer-player', async (req, res) => {
     // Perform transfer
     user.team[oldPlayerIndex] = parseInt(newPlayerId);
     user.budget = newBudget;
-    user.freeTransfers = user.freeTransfers > 0 ? user.freeTransfers - 1 : 0;
+    
+    // Only decrement free transfers if we're not applying a penalty
+    if (user.freeTransfers > 0) {
+      user.freeTransfers -= 1;
+    }
+    
     user.lastUpdated = new Date();
     await user.save();
 
