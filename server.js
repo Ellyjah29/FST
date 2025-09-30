@@ -304,6 +304,9 @@ app.post('/transfer-player', async (req, res) => {
       user.freeTransfers -= 1;
     }
     
+    // CRITICAL FIX: Explicitly mark freeTransfers as modified
+    user.markModified('freeTransfers');
+    
     user.lastUpdated = new Date();
     await user.save();
 
