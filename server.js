@@ -1,10 +1,9 @@
-// server.js — FST FANTASY PRO: PROFESSIONAL FANTASY FOOTBALL PLATFORM
+// server.js — FINAL: WILDCARD SYSTEM INTEGRATED
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const mongoose = require('mongoose');
-const { DateTime } = require('luxon');
 
 const app = express();
 
@@ -18,10 +17,10 @@ app.use(express.static('public', {
 // MongoDB
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/fst_fantasy';
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ FST Fantasy PRO - Connected to MongoDB'))
+  .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// Advanced User Schema
+// User Schema - UPDATED WITH WILDCARD FIELDS
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -32,105 +31,33 @@ const userSchema = new mongoose.Schema({
     maxlength: 20
   },
   solWallet: { type: String },
-  team: {
-    players: [{ 
-      playerId: Number,
-      position: String,
-      captain: Boolean,
-      viceCaptain: Boolean
-    }],
-    formation: { type: String, default: "4-3-3" },
-    budget: { type: Number, default: 100.0 },
-    points: { type: Number, default: 0 }
-  },
-  stats: {
-    totalPoints: { type: Number, default: 0 },
-    seasonPosition: { type: Number, default: 10000 },
-    weeklyPosition: { type: Number, default: 10000 },
-    highestPoints: { type: Number, default: 0 },
-    lastUpdated: { type: Date, default: Date.now }
-  },
-  settings: {
-    darkMode: { type: Boolean, default: true },
-    notifications: {
-      transfers: { type: Boolean, default: true },
-      liveUpdates: { type: Boolean, default: true },
-      leagueUpdates: { type: Boolean, default: true }
-    }
-  },
-  gameweek: {
-    current: { type: Number, default: 1 },
-    lastTransfer: { type: Number, default: 1 },
-    transfers: {
-      free: { type: Number, default: 1 },
-      used: { type: Number, default: 0 },
-      wildcardUsed: { type: Boolean, default: false },
-      wildcardAvailable: { type: Boolean, default: true }
-    },
-    status: { type: String, default: "OPEN" } // OPEN, LOCKED, LIVE
-  },
-  leagues: {
-    public: [{ type: mongoose.Schema.Types.ObjectId, ref: 'League' }],
-    private: [{ type: mongoose.Schema.Types.ObjectId, ref: 'League' }],
-    tournament: [{ type: mongoose.Schema.Types.ObjectId, ref: 'League' }]
-  },
-  tokens: {
-    fst: { type: Number, default: 100 },
-    nft: [{
-      tokenId: String,
-      playerId: Number,
-      rarity: { type: String, enum: ['COMMON', 'RARE', 'EPIC', 'LEGENDARY'] },
-      level: { type: Number, default: 1 },
-      power: { type: Number, default: 1.0 }
-    }]
-  },
-  createdAt: { type: Date, default: Date.now },
-  joined: { type: Boolean, default: false }
-});
-
-const User = mongoose.model('User', userSchema);
-
-// League Schema
-const leagueSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  type: { type: String, enum: ['PUBLIC', 'PRIVATE', 'TOURNAMENT'], required: true },
-  code: { type: String, unique: true },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  settings: {
-    scoring: {
-      goals: { type: Number, default: 4 },
-      assists: { type: Number, default: 3 },
-      cleanSheets: { type: Number, default: 4 },
-      goalsConceded: { type: Number, default: -1 },
-      yellowCards: { type: Number, default: -1 },
-      redCards: { type: Number, default: -2 },
-      minutes: { type: Number, default: 1 }
-    },
-    rules: {
-      transfersPerWeek: { type: Number, default: 2 },
-      wildcards: { type: Number, default: 1 },
-      benchBoost: { type: Number, default: 1 },
-      tripleCaptain: { type: Number, default: 1 },
-      freeTransfers: { type: Number, default: 1 }
-    }
-  },
-  gameweek: {
-    current: { type: Number, default: 1 },
-    status: { type: String, default: "OPEN" }
-  },
+  team: [{ type: Number, length: 11 }], // 11 players max
+  points: { type: Number, default: 0 }, // Current gameweek points
+  totalPoints: { type: Number, default: 0 }, // Season total points
+  entries: { type: Number, default: 0 },
+  joined: { type: Boolean, default: false },
+  locked: { type: Boolean, default: false },
+  currentGameweek: { type: Number, default: 1 },
+  lastUpdated: { type: Date, default: Date.now },
+  budget: { type: Number, default: 100.0 }, // Budget tracking
+  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
+  lastTransferGameweek: { type: Number, default: 1 },
+  
+  // WILDCARD SYSTEM
+  wildcardUsed: { type: Boolean, default: false }, // Has user used wildcard this season?
+  wildcardGameweek: { type: Number, default: null }, // Which gameweek was wildcard used?
+  
   createdAt: { type: Date, default: Date.now }
 });
 
-const League = mongoose.model('League', leagueSchema);
+const User = mongoose.model('User', userSchema);
 
 // Health check
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     db: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
-    timestamp: new Date().toISOString(),
-    version: 'FST Fantasy PRO v2.0.0'
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -140,55 +67,34 @@ app.post('/connect-wallet', async (req, res) => {
     const { userId, managerName = "FST Manager", solWallet } = req.body;
     if (!userId) return res.status(400).json({ error: 'Telegram ID required' });
 
-    let user = await User.findOne({ telegramId: userId });
-    if (!user) {
-      // Create new user with PRO features
-      user = new User({
-        telegramId: userId,
+    const existingUser = await User.findOne({ telegramId: userId });
+    if (existingUser && existingUser.locked) {
+      return res.status(400).json({ error: 'Already joined. Team is locked.' });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
         managerName: managerName.trim().substring(0, 20) || "FST Manager",
         solWallet: solWallet || undefined,
         joined: true,
-        gameweek: {
-          current: 1,
-          lastTransfer: 1,
-          transfers: {
-            free: 1,
-            used: 0,
-            wildcardUsed: false,
-            wildcardAvailable: true
-          }
-        },
-        tokens: {
-          fst: 100,
-          nft: []
-        },
-        team: {
-          players: [],
-          formation: "4-3-3",
-          budget: 100.0,
-          points: 0
-        }
-      });
-      await user.save();
-    } else {
-      // Update existing user
-      user.managerName = managerName.trim().substring(0, 20) || "FST Manager";
-      user.solWallet = solWallet || user.solWallet;
-      user.joined = true;
-      await user.save();
-    }
+        currentGameweek: 1,
+        budget: 100.0,
+        freeTransfers: 1,
+        lastTransferGameweek: 1,
+        wildcardUsed: false, // Initialize wildcard as unused
+        wildcardGameweek: null
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
 
     res.json({
       success: true,
       userId: user.telegramId,
       managerName: user.managerName,
-      budget: user.team.budget,
-      freeTransfers: user.gameweek.transfers.free,
-      wildcardAvailable: user.gameweek.transfers.wildcardAvailable,
-      tokens: {
-        fst: user.tokens.fst,
-        nftCount: user.tokens.nft.length
-      }
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      wildcardUsed: user.wildcardUsed
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -196,7 +102,7 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// Get Players — PROFESSIONAL DATA
+// Get Players — WITH DETAILED STATS
 app.get('/players', async (req, res) => {
   try {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
@@ -210,45 +116,25 @@ app.get('/players', async (req, res) => {
       teamMap[team.id] = team.name;
     });
 
-    // Advanced player data with professional insights
-    const formatted = players.map(p => {
-      const currentForm = parseFloat(p.form) || 0;
-      const last5Form = p.selected_by_percent > 10 ? currentForm * 1.2 : currentForm;
-      
-      return {
-        id: p.id,
-        web_name: p.web_name,
-        team: p.team,
-        team_name: teamMap[p.team] || 'Unknown',
-        element_type: p.element_type,
-        position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
-        now_cost: (p.now_cost / 10).toFixed(1),
-        total_points: p.total_points || 0,
-        goals_scored: p.goals_scored || 0,
-        assists: p.assists || 0,
-        clean_sheets: p.clean_sheets || 0,
-        minutes: p.minutes || 0,
-        bonus: p.bonus || 0,
-        form: p.form || "0.0",
-        points_per_game: p.points_per_game || "0.0",
-        selected_by_percent: p.selected_by_percent || "0.0",
-        photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`,
-        // Professional insights
-        performance: {
-          formTrend: Math.random() > 0.5 ? 'UP' : 'DOWN',
-          formTrendValue: Math.random() * 2,
-          injuryRisk: p.injuries > 0 ? 'HIGH' : 'LOW',
-          fixtureDifficulty: Math.floor(Math.random() * 5) + 1,
-          nextFixture: {
-            opponent: "MAN UTD",
-            difficulty: 3,
-            date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
-          },
-          predictedPoints: (parseFloat(p.points_per_game) * 1.1).toFixed(1),
-          confidence: Math.min(95, Math.max(50, p.selected_by_percent * 0.75))
-        }
-      };
-    });
+    const formatted = players.map(p => ({
+      id: p.id,
+      web_name: p.web_name,
+      team: p.team,
+      team_name: teamMap[p.team] || 'Unknown',
+      element_type: p.element_type,
+      position: ["GK", "DEF", "MID", "FWD"][p.element_type - 1] || "UNK",
+      now_cost: (p.now_cost / 10).toFixed(1),
+      total_points: p.total_points || 0,
+      goals_scored: p.goals_scored || 0,
+      assists: p.assists || 0,
+      clean_sheets: p.clean_sheets || 0,
+      minutes: p.minutes || 0,
+      bonus: p.bonus || 0,
+      form: p.form || "0.0",
+      points_per_game: p.points_per_game || "0.0",
+      selected_by_percent: p.selected_by_percent || "0.0",
+      photo_url: `https://resources.premierleague.com/premierleague/photos/players/110x140/p${p.photo.split('.')[0]}.png`
+    }));
 
     res.json(formatted);
   } catch (error) {
@@ -257,478 +143,371 @@ app.get('/players', async (req, res) => {
   }
 });
 
-// Transfer Player - PROFESSIONAL ENGINE
+// Get Player Gameweek Stats
+app.get('/player-stats/:playerId', async (req, res) => {
+  try {
+    const { playerId } = req.params;
+    const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+      timeout: 5000
+    });
+
+    const data = response.data;
+    
+    // Return most recent gameweek stats
+    const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
+    
+    res.json({
+      success: true,
+      player_id: playerId,
+      gameweek: latestGW?.round || 0,
+      points: latestGW?.total_points || 0,
+      minutes: latestGW?.minutes || 0,
+      goals: latestGW?.goals_scored || 0,
+      assists: latestGW?.assists || 0,
+      clean_sheets: latestGW?.clean_sheets || 0,
+      bonus: latestGW?.bonus || 0,
+      form: latestGW?.form || "0.0"
+    });
+  } catch (error) {
+    console.error('Player stats error:', error.message);
+    res.status(500).json({ error: 'Failed to load player stats' });
+  }
+});
+
+// Save Team — WITH BUDGET CHECK
+app.post('/save-team', async (req, res) => {
+  try {
+    const { userId, team } = req.body;
+    if (!userId || !Array.isArray(team) || team.length !== 11) {
+      return res.status(400).json({ error: 'Team must have 11 players' });
+    }
+
+    const uniquePlayers = new Set(team);
+    if (uniquePlayers.size !== team.length) {
+      return res.status(400).json({ error: 'Duplicate players not allowed' });
+    }
+
+    // Get player costs from API
+    let totalCost = 0;
+    for (const playerId of team) {
+      try {
+        const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+          timeout: 5000
+        });
+        const player = response.data;
+        totalCost += parseFloat(player.now_cost / 10) || 5.0;
+      } catch (e) {
+        totalCost += 5.0;
+      }
+    }
+
+    // Calculate total cost
+    if (totalCost > 100) {
+      return res.status(400).json({ 
+        error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £100m)`,
+        remaining: (100 - totalCost).toFixed(1)
+      });
+    }
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'Join contest first' });
+    if (user.locked) return res.status(400).json({ error: 'Team already submitted' });
+
+    user.team = team;
+    user.locked = true;
+    user.entries += 1;
+    user.points = 0;
+    user.budget = 100.0 - totalCost;
+    user.lastUpdated = new Date();
+    await user.save();
+
+    res.json({ 
+      success: true, 
+      message: '✅ Team locked in!',
+      budget: user.budget
+    });
+  } catch (error) {
+    console.error('Save error:', error.message);
+    res.status(500).json({ error: 'Failed to save team' });
+  }
+});
+
+// Transfer Player - UPDATED WITH WILDCARD LOGIC
 app.post('/transfer-player', async (req, res) => {
   try {
-    const { userId, oldPlayerId, newPlayerId, wildCard } = req.body;
+    const { userId, oldPlayerId, newPlayerId } = req.body;
+    if (!userId || !oldPlayerId || !newPlayerId) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
     const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.locked) return res.status(400).json({ error: 'Team not submitted' });
+
+    // Check if team is complete
+    if (!user.team || user.team.length !== 11) {
+      return res.status(400).json({ error: 'Team not complete' });
+    }
+
+    // Check if player is in team
+    const oldPlayerIndex = user.team.indexOf(parseInt(oldPlayerId));
+    if (oldPlayerIndex === -1) {
+      return res.status(400).json({ error: 'Player not in your team' });
+    }
+
+    // Get player costs from API
+    let oldPlayerCost = 0;
+    let newPlayerCost = 0;
     
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // 1. Validate transfer rules
-    const currentGameweek = user.gameweek.current;
-    const transferRules = {
-      maxTransfers: user.gameweek.transfers.free,
-      wildcardAvailable: user.gameweek.transfers.wildcardAvailable,
-      wildcardUsed: user.gameweek.transfers.wildcardUsed
-    };
-
-    // 2. Check if wildcard is being used
-    if (wildCard && transferRules.wildcardUsed) {
-      return res.status(400).json({
-        error: 'You already used your wildcard this season',
-        code: 'WILDCARD_USED',
-        solution: 'Use your regular transfers'
+    try {
+      const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${oldPlayerId}/`, {
+        timeout: 5000
       });
+      oldPlayerCost = parseFloat(response.data.now_cost / 10) || 5.0;
+    } catch (e) {
+      oldPlayerCost = 5.0;
     }
-
-    // 3. Calculate transfer impact
-    const oldPlayer = user.team.players.find(p => p.playerId === parseInt(oldPlayerId));
-    const newPlayer = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${newPlayerId}/`);
     
-    if (!oldPlayer) {
-      return res.status(400).json({ 
-        error: 'Player not in your team',
-        code: 'PLAYER_NOT_FOUND',
-        solution: 'Select a different player to replace'
+    try {
+      const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${newPlayerId}/`, {
+        timeout: 5000
       });
+      newPlayerCost = parseFloat(response.data.now_cost / 10) || 5.0;
+    } catch (e) {
+      newPlayerCost = 5.0;
     }
 
-    // 4. Validate budget
-    const oldPlayerCost = parseFloat(oldPlayer.now_cost) || 5.0;
-    const newPlayerCost = parseFloat(newPlayer.data.now_cost / 10) || 5.0;
+    // Calculate new budget
     const budgetChange = newPlayerCost - oldPlayerCost;
+    const newBudget = user.budget - budgetChange;
     
-    if (user.team.budget - budgetChange < 0) {
+    // Check budget
+    if (newBudget < 0) {
       return res.status(400).json({ 
-        error: `Cannot afford this transfer! Need £${(-budgetChange).toFixed(1)}m more`,
-        code: 'BUDGET_EXCEEDED',
-        solution: 'Try a cheaper player or use wildcard'
+        error: `Cannot afford this transfer! Need £${(-newBudget).toFixed(1)}m more`,
+        remaining: newBudget.toFixed(1)
       });
     }
 
-    // 5. Process transfer
-    const transferResult = {
-      success: true,
-      message: wildCard ? 'Wildcard transfer successful!' : 'Transfer successful!',
-      transferImpact: {
-        points: Math.random() * 5,
-        form: Math.random() * 2,
-        fixture: Math.random() * 2,
-        confidence: Math.floor(Math.random() * 40) + 60
-      },
-      newBudget: user.team.budget - budgetChange,
-      freeTransfers: wildCard ? 0 : transferRules.maxTransfers - 1,
-      wildcardUsed: wildCard ? true : transferRules.wildcardUsed,
-      transferAnalysis: {
-        description: "This transfer gains +2.5 points on average",
-        confidence: "85%",
-        recommendation: "STRONG BUY",
-        reason: "New player has easier fixtures and better form"
-      }
-    };
-
-    // 6. Update user data
-    user.team.budget -= budgetChange;
-    user.team.players = user.team.players.map(p => 
-      p.playerId === parseInt(oldPlayerId) 
-        ? { 
-            playerId: parseInt(newPlayerId), 
-            position: newPlayer.data.element_type,
-            captain: p.captain,
-            viceCaptain: p.viceCaptain
-          } 
-        : p
-    );
-    
-    // Update transfer count
-    if (wildCard) {
-      user.gameweek.transfers.wildcardUsed = true;
-      user.gameweek.transfers.wildcardAvailable = false;
-    } else {
-      user.gameweek.transfers.free = Math.max(0, user.gameweek.transfers.free - 1);
+    // Check transfer rules
+    if (user.currentGameweek !== user.lastTransferGameweek) {
+      // Reset transfers at new gameweek
+      user.freeTransfers = 1;
+      user.lastTransferGameweek = user.currentGameweek;
     }
+
+    // WILDCARD CHECK
+    const isWildcardActive = user.wildcardUsed && user.wildcardGameweek === user.currentGameweek;
     
-    user.gameweek.transfers.used += 1;
-    user.gameweek.lastTransfer = currentGameweek;
+    let penaltyPoints = 0;
+    let transferMade = true;
+    
+    // Only apply free transfer logic if wildcard is NOT active
+    if (!isWildcardActive) {
+      if (user.freeTransfers < 1) {
+        // -4 points penalty for extra transfers
+        penaltyPoints = 4;
+        user.points = Math.max(0, user.points - 4);
+      }
+    } else {
+      // Wildcard is active - unlimited transfers
+      // No penalty, no free transfer deduction needed
+      user.freeTransfers = 1; // Keep free transfers at 1 to show active wildcard
+    }
+
+    // Perform transfer
+    user.team[oldPlayerIndex] = parseInt(newPlayerId);
+    user.budget = newBudget;
+    
+    // Only decrement free transfers if wildcard is NOT active
+    if (!isWildcardActive) {
+      if (user.freeTransfers > 0) {
+        user.freeTransfers -= 1;
+      }
+    }
+
+    // CRITICAL FIX: Explicitly mark freeTransfers as modified
+    user.markModified('freeTransfers');
+    
+    user.lastUpdated = new Date();
     await user.save();
 
-    res.json(transferResult);
+    res.json({
+      success: true,
+      message: penaltyPoints > 0 ? 
+        '✅ Player transferred! (Penalty: -4 points)' : 
+        isWildcardActive ? 
+          '✅ Player transferred! (Wildcard active)' : 
+          '✅ Player transferred!',
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      points: user.points,
+      wildcardActive: isWildcardActive
+    });
   } catch (error) {
     console.error('Transfer error:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to process transfer',
-      code: 'TRANSFER_FAILED',
-      solution: 'Please try again later or contact support'
-    });
+    res.status(500).json({ error: 'Failed to transfer player' });
   }
 });
 
-// Live Match Processing
-app.post('/update-live-games', async (req, res) => {
+// ACTIVATE WILDCARD - NEW ENDPOINT
+app.post('/activate-wildcard', async (req, res) => {
   try {
     const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+
     const user = await User.findOne({ telegramId: userId });
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.wildcardUsed) return res.status(400).json({ error: 'Wildcard already used' });
+    if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
 
-    // 1. Get live game data
-    const liveGames = await getLiveMatches();
-    
-    // 2. Calculate real-time points
-    const realTimePoints = calculateRealTimePoints(user.team, liveGames);
-    
-    // 3. Identify key moments
-    const keyMoments = identifyKeyMoments(user.team, liveGames);
-    
-    // 4. Generate live insights
-    const liveInsights = generateLiveInsights(user.team, realTimePoints, keyMoments);
-    
-    // 5. Update user stats
-    user.stats.points = realTimePoints;
-    user.stats.seasonPosition = Math.floor(Math.random() * 10000) + 1;
-    user.stats.weeklyPosition = Math.floor(Math.random() * 1000) + 1;
-    user.stats.lastUpdated = new Date();
+    // Activate wildcard for current gameweek
+    user.wildcardUsed = true;
+    user.wildcardGameweek = user.currentGameweek;
     await user.save();
 
     res.json({
       success: true,
-      points: realTimePoints,
-      keyMoments,
-      liveInsights,
-      gametime: Date.now()
+      message: '✅ Wildcard activated! Unlimited transfers for this gameweek',
+      wildcardActive: true
     });
   } catch (error) {
-    res.status(400).json({
-      error: "Failed to get live data",
-      code: "LIVE_001",
-      solution: "Please check your connection and try again"
-    });
+    console.error('Wildcard error:', error.message);
+    res.status(500).json({ error: 'Failed to activate wildcard' });
   }
 });
 
-// Create League
-app.post('/create-league', async (req, res) => {
+// Update Team Points (Real-time scoring)
+app.post('/update-points', async (req, res) => {
   try {
-    const { userId, name, type } = req.body;
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (!user.team || user.team.length !== 11) {
+      return res.status(400).json({ error: 'Team not complete' });
     }
 
-    // Create league with professional settings
-    const league = new League({
-      name,
-      type,
-      code: generateLeagueCode(),
-      owner: userId,
-      members: [userId],
-      settings: {
-        scoring: {
-          goals: 4,
-          assists: 3,
-          cleanSheets: 4,
-          goalsConceded: -1,
-          yellowCards: -1,
-          redCards: -2,
-          minutes: 1
-        },
-        rules: {
-          transfersPerWeek: 2,
-          wildcards: 1,
-          benchBoost: 1,
-          tripleCaptain: 1,
-          freeTransfers: 1
-        }
-      }
-    });
-    await league.save();
+    let totalPoints = 0;
+    const playerStats = [];
 
-    // Add league to user
-    user.leagues[type.toLowerCase()] = [...user.leagues[type.toLowerCase()], league._id];
+    // Fetch stats for each player
+    for (const playerId of user.team) {
+      try {
+        const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
+          timeout: 5000
+        });
+        
+        const data = response.data;
+        const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
+        
+        const points = latestGW?.total_points || 0;
+        totalPoints += points;
+        
+        playerStats.push({
+          player_id: playerId,
+          points: points,
+          minutes: latestGW?.minutes || 0,
+          goals: latestGW?.goals_scored || 0,
+          assists: latestGW?.assists || 0,
+          clean_sheets: latestGW?.clean_sheets || 0,
+          bonus: latestGW?.bonus || 0
+        });
+      } catch (e) {
+        // If API fails, use 0 points for this player
+        playerStats.push({
+          player_id: playerId,
+          points: 0,
+          minutes: 0,
+          goals: 0,
+          assists: 0,
+          clean_sheets: 0,
+          bonus: 0
+        });
+      }
+    }
+
+    // Update user points
+    user.points = totalPoints;
+    user.totalPoints = totalPoints;
+    user.lastUpdated = new Date();
     await user.save();
 
     res.json({
       success: true,
-      league: {
-        id: league._id,
-        name: league.name,
-        type: league.type,
-        code: league.code,
-        members: 1
-      }
+      points: totalPoints,
+      playerStats: playerStats
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create league' });
+    console.error('Update points error:', error.message);
+    res.status(500).json({ error: 'Failed to update points' });
   }
 });
 
-// Join League
-app.post('/join-league', async (req, res) => {
-  try {
-    const { userId, code } = req.body;
-    const user = await User.findById(userId);
-    const league = await League.findOne({ code });
-    
-    if (!league) {
-      return res.status(404).json({ error: 'League not found' });
-    }
-
-    if (league.members.includes(user._id)) {
-      return res.status(400).json({ error: 'You are already in this league' });
-    }
-
-    // Add user to league
-    league.members.push(user._id);
-    await league.save();
-
-    // Add league to user
-    user.leagues[league.type.toLowerCase()] = [...user.leagues[league.type.toLowerCase()], league._id];
-    await user.save();
-
-    res.json({
-      success: true,
-      league: {
-        id: league._id,
-        name: league.name,
-        type: league.type,
-        members: league.members.length
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to join league' });
-  }
-});
-
-// Get User Profile - PROFESSIONAL
+// Get User Profile - UPDATED WITH WILDCARD DATA
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
-    const user = await User.findOne({ telegramId: userId })
-      .populate('leagues.public', 'name type members')
-      .populate('leagues.private', 'name type members')
-      .populate('leagues.tournament', 'name type members');
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Calculate league positions
-    const publicLeagues = await calculateLeaguePositions(user.leagues.public);
-    const privateLeagues = await calculateLeaguePositions(user.leagues.private);
-    const tournamentLeagues = await calculateLeaguePositions(user.leagues.tournament);
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
     res.json({
       managerName: user.managerName,
       solWallet: user.solWallet,
-      stats: {
-        totalPoints: user.stats.totalPoints,
-        seasonPosition: user.stats.seasonPosition,
-        weeklyPosition: user.stats.weeklyPosition,
-        highestPoints: user.stats.highestPoints,
-        lastUpdated: user.stats.lastUpdated
-      },
-      team: {
-        players: user.team.players,
-        formation: user.team.formation,
-        budget: user.team.budget,
-        points: user.stats.points
-      },
-      gameweek: {
-        current: user.gameweek.current,
-        status: user.gameweek.status,
-        transfers: {
-          free: user.gameweek.transfers.free,
-          used: user.gameweek.transfers.used,
-          wildcardAvailable: user.gameweek.transfers.wildcardAvailable,
-          wildcardUsed: user.gameweek.transfers.wildcardUsed
-        }
-      },
-      tokens: {
-        fst: user.tokens.fst,
-        nft: user.tokens.nft
-      },
-      leagues: {
-        public: publicLeagues,
-        private: privateLeagues,
-        tournament: tournamentLeagues
-      },
-      settings: user.settings
+      team: user.team,
+      points: user.points,
+      totalPoints: user.totalPoints,
+      entries: user.entries,
+      locked: user.locked,
+      joined: user.joined,
+      currentGameweek: user.currentGameweek,
+      lastUpdated: user.lastUpdated,
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      wildcardUsed: user.wildcardUsed,
+      wildcardGameweek: user.wildcardGameweek
     });
   } catch (error) {
+    console.error('Profile error:', error.message);
     res.status(500).json({ error: 'Failed to load profile' });
   }
 });
 
-// HELPER FUNCTIONS
-function getLiveMatches() {
-  // In production, connect to a live sports API
-  return [
-    {
-      id: 1,
-      homeTeam: "MUN",
-      awayTeam: "CHE",
-      status: "LIVE",
-      minute: 62,
-      score: { home: 1, away: 1 },
-      events: [
-        { minute: 12, type: "GOAL", player: "Rashford" },
-        { minute: 45, type: "YELLOW", player: "Fernandes" },
-        { minute: 60, type: "SUB", player: "Sancho", replace: "Greenwood" }
-      ]
-    }
-  ];
-}
+// Leaderboard
+app.get('/leaderboard', async (req, res) => {
+  try {
+    const users = await User.find({ locked: true })
+      .sort({ points: -1 })
+      .limit(10)
+      .select('managerName points');
 
-function calculateRealTimePoints(team, liveGames) {
-  let points = 0;
-  
-  team.players.forEach(player => {
-    const game = liveGames.find(g => 
-      g.homeTeam === player.team || g.awayTeam === player.team
-    );
-    
-    if (game && game.status === 'LIVE') {
-      const gamePoints = calculateGamePoints(player, game);
-      points += gamePoints;
-    }
-  });
-  
-  return points;
-}
+    const leaderboard = users.map((user, i) => ({
+      rank: i + 1,
+      managerName: user.managerName,
+      points: user.points
+    }));
 
-function calculateGamePoints(player, game) {
-  let points = 0;
-  
-  // Basic points calculation
-  game.events.forEach(event => {
-    if (event.player === player.web_name) {
-      switch (event.type) {
-        case "GOAL":
-          points += 4;
-          break;
-        case "ASSIST":
-          points += 3;
-          break;
-        case "CLEAN_SHEET":
-          if (player.position === "GK" || player.position === "DEF") {
-            points += 4;
-          }
-          break;
-        case "YELLOW":
-          points -= 1;
-          break;
-        case "RED":
-          points -= 2;
-          break;
-        case "MINUTES":
-          points += 1;
-          break;
-      }
-    }
-  });
-  
-  // Captain bonus
-  if (player.captain) {
-    points *= 2;
+    res.json(leaderboard);
+  } catch (error) {
+    console.error('Leaderboard error:', error.message);
+    res.status(500).json({ error: 'Failed to load leaderboard' });
   }
-  
-  return points;
-}
+});
 
-function identifyKeyMoments(team, liveGames) {
-  return liveGames.map(game => ({
-    game: `${game.homeTeam} vs ${game.awayTeam}`,
-    keyEvents: game.events
-      .filter(event => team.players.some(p => p.web_name === event.player))
-      .map(event => ({
-        minute: event.minute,
-        type: event.type,
-        player: event.player,
-        points: calculateEventPoints(event)
-      }))
-  }));
-}
-
-function calculateEventPoints(event) {
-  switch (event.type) {
-    case "GOAL": return 4;
-    case "ASSIST": return 3;
-    case "CLEAN_SHEET": return 4;
-    case "YELLOW": return -1;
-    case "RED": return -2;
-    case "MINUTES": return 1;
-    default: return 0;
+// Prize Pool
+app.get('/prize-pool', async (req, res) => {
+  try {
+    const totalEntries = await User.countDocuments({ locked: true });
+    res.json({ fst: totalEntries * 10, entries: totalEntries });
+  } catch (error) {
+    console.error('Prize error:', error.message);
+    res.status(500).json({ error: 'Failed to calculate prize pool' });
   }
-}
-
-function generateLiveInsights(team, realTimePoints, keyMoments) {
-  const insights = [];
-  
-  // Captain performance
-  const captain = team.players.find(p => p.captain);
-  if (captain) {
-    insights.push({
-      type: "CAPTAIN",
-      title: `${captain.web_name} is performing well!`,
-      description: `+${realTimePoints * 2} points (captain x2)`,
-      impact: "POSITIVE",
-      confidence: 90
-    });
-  }
-  
-  // Key moments
-  keyMoments.forEach(m => {
-    m.keyEvents.forEach(event => {
-      if (event.points > 0) {
-        insights.push({
-          type: event.type,
-          title: `${event.player} has scored!`,
-          description: `+${event.points} points`,
-          impact: "POSITIVE",
-          confidence: 95
-        });
-      }
-    });
-  });
-  
-  // Fixture difficulty
-  const nextFixture = team.players[0]?.nextFixture;
-  if (nextFixture) {
-    insights.push({
-      type: "FIXTURE",
-      title: `Next match against ${nextFixture.opponent}`,
-      description: `Difficulty: ${nextFixture.difficulty}/5`,
-      impact: nextFixture.difficulty > 3 ? "CAUTION" : "POSITIVE",
-      confidence: 85
-    });
-  }
-  
-  return insights;
-}
-
-function calculateLeaguePositions(leagues) {
-  return leagues.map(league => ({
-    ...league,
-    position: Math.floor(Math.random() * 100) + 1,
-    totalMembers: league.members.length,
-    points: Math.floor(Math.random() * 150) + 100
-  }));
-}
-
-function generateLeagueCode() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
+});
 
 // Catch-all
 app.get('*', (req, res) => {
@@ -737,5 +516,5 @@ app.get('*', (req, res) => {
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🌟 FST Fantasy PRO running on port ${PORT}`);
+  console.log(`✅ FST Fantasy running on port ${PORT}`);
 });
