@@ -1,4 +1,4 @@
-// server.js — FINAL: 2-PLAYER TEAM LIMIT SYSTEM INTEGRATED
+// server.js — FINAL: BUDGET (75€) & FREE TRANSFERS FIXED
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - NO CHANGES NEEDED (we'll handle team limits in the endpoints)
+// User Schema - FIXED: Budget 75€ and Free Transfers persistence
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -40,8 +40,8 @@ const userSchema = new mongoose.Schema({
   locked: { type: Boolean, default: false },
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
-  budget: { type: Number, default: 100.0 }, // Budget tracking
-  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
+  budget: { type: Number, default: 75.0 }, // Budget tracking (75€)
+  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek (PERSISTENT)
   lastTransferGameweek: { type: Number, default: 1 },
   
   // WILDCARD SYSTEM
@@ -71,7 +71,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Connect Wallet
+// Connect Wallet - FIXED: Budget set to 75.0
 app.post('/connect-wallet', async (req, res) => {
   try {
     const { userId, managerName = "FST Manager", solWallet } = req.body;
@@ -89,8 +89,8 @@ app.post('/connect-wallet', async (req, res) => {
         solWallet: solWallet || undefined,
         joined: true,
         currentGameweek: 1,
-        budget: 100.0,
-        freeTransfers: 1,
+        budget: 75.0, // FIXED: Set budget to 75.0
+        freeTransfers: 1, // Start with 1 free transfer
         lastTransferGameweek: 1,
         wildcardUsed: false,
         wildcardGameweek: null,
@@ -120,7 +120,7 @@ app.post('/connect-wallet', async (req, res) => {
   }
 });
 
-// Get Players — WITH TEAM COUNTS
+// Get Players — WITH DETAILED STATS
 app.get('/players', async (req, res) => {
   try {
     const response = await axios.get('https://fantasy.premierleague.com/api/bootstrap-static/', {
@@ -192,7 +192,7 @@ app.get('/player-stats/:playerId', async (req, res) => {
   }
 });
 
-// Save Team — WITH 2-PLAYER TEAM LIMIT
+// Save Team — FIXED: Budget 75€ and proper free transfers
 app.post('/save-team', async (req, res) => {
   try {
     const { userId, team } = req.body;
@@ -233,11 +233,11 @@ app.post('/save-team', async (req, res) => {
       }
     }
 
-    // Calculate total cost
-    if (totalCost > 100) {
+    // Calculate total cost - FIXED: Budget 75€
+    if (totalCost > 75) {
       return res.status(400).json({ 
-        error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £100m)`,
-        remaining: (100 - totalCost).toFixed(1)
+        error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £75m)`,
+        remaining: (75 - totalCost).toFixed(1)
       });
     }
 
@@ -249,7 +249,7 @@ app.post('/save-team', async (req, res) => {
     user.locked = true;
     user.entries += 1;
     user.points = 0;
-    user.budget = 100.0 - totalCost;
+    user.budget = 75.0 - totalCost; // FIXED: Budget calculation based on 75€
     user.lastUpdated = new Date();
     await user.save();
 
@@ -264,7 +264,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player — WITH 2-PLAYER TEAM LIMIT
+// Transfer Player — FIXED: Proper free transfers persistence
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -311,11 +311,11 @@ app.post('/transfer-player', async (req, res) => {
       newPlayerCost = 5.0;
     }
 
-    // Calculate new budget
+    // Calculate new budget - FIXED: Budget 75€
     const budgetChange = newPlayerCost - oldPlayerCost;
     const newBudget = user.budget - budgetChange;
     
-    // Check budget
+    // Check budget - FIXED: Budget 75€
     if (newBudget < 0) {
       return res.status(400).json({ 
         error: `Cannot afford this transfer! Need £${(-newBudget).toFixed(1)}m more`,
@@ -328,6 +328,7 @@ app.post('/transfer-player', async (req, res) => {
       // Reset transfers at new gameweek
       user.freeTransfers = 1;
       user.lastTransferGameweek = user.currentGameweek;
+      await user.save(); // FIXED: Save the reset
     }
 
     // WILDCARD CHECK
@@ -342,6 +343,7 @@ app.post('/transfer-player', async (req, res) => {
         // -4 points penalty for extra transfers
         penaltyPoints = 4;
         user.points = Math.max(0, user.points - 4);
+        user.markModified('points');
       }
     } else {
       // Wildcard is active - unlimited transfers
@@ -371,7 +373,7 @@ app.post('/transfer-player', async (req, res) => {
           });
         }
       } catch (e) {
-        // If API fails, skip this check (better to allow the transfer than block it)
+        // If API fails, skip this check
         continue;
       }
     }
@@ -384,14 +386,12 @@ app.post('/transfer-player', async (req, res) => {
     if (!isWildcardActive) {
       if (user.freeTransfers > 0) {
         user.freeTransfers -= 1;
+        user.markModified('freeTransfers'); // CRITICAL: Mark as modified
       }
     }
 
-    // CRITICAL FIX: Explicitly mark freeTransfers as modified
-    user.markModified('freeTransfers');
-    
     user.lastUpdated = new Date();
-    await user.save();
+    await user.save(); // FIXED: Save the user with updated freeTransfers
 
     res.json({
       success: true,
@@ -411,7 +411,7 @@ app.post('/transfer-player', async (req, res) => {
   }
 });
 
-// ACTIVATE WILDCARD
+// ACTIVATE WILDCARD - NO CHANGES NEEDED
 app.post('/activate-wildcard', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -438,7 +438,7 @@ app.post('/activate-wildcard', async (req, res) => {
   }
 });
 
-// ACTIVATE TRIPLE CAPTAIN
+// ACTIVATE TRIPLE CAPTAIN - NO CHANGES NEEDED
 app.post('/activate-triple-captain', async (req, res) => {
   try {
     const { userId, captainId } = req.body;
@@ -468,7 +468,7 @@ app.post('/activate-triple-captain', async (req, res) => {
   }
 });
 
-// ACTIVATE WILD BENCH
+// ACTIVATE WILD BENCH - NO CHANGES NEEDED
 app.post('/activate-wild-bench', async (req, res) => {
   try {
     const { userId, wildBenchPlayerId } = req.body;
@@ -632,7 +632,7 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Get User Profile
+// Get User Profile - NO CHANGES NEEDED
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
