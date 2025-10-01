@@ -933,10 +933,10 @@
           <i class="fas fa-users"></i> Build Your Dream Team
         </h2>
         
-        <!-- BUDGET TRACKER -->
+        <!-- BUDGET TRACKER - FIXED: 75€ -->
         <div class="budget-container">
           <div class="budget-label">Budget Remaining:</div>
-          <div id="budgetRemaining" class="budget-value">£100.0m</div>
+          <div id="budgetRemaining" class="budget-value">£75.0m</div>
         </div>
         
         <!-- FORMATION CONTAINER -->
@@ -972,7 +972,7 @@
         <div class="team-stats-grid">
           <div class="team-stat-card">
             <div class="team-stat-label">Budget Remaining</div>
-            <div id="budgetStats" class="team-stat-value stat-budget">£100.0m</div>
+            <div id="budgetStats" class="team-stat-value stat-budget">£75.0m</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Free Transfers</div>
@@ -1174,7 +1174,7 @@
     let wildBenchPlayer = null;
     let allPlayers = [];
     let liveScores = {};
-    let userBudget = 100.0;
+    let userBudget = 75.0; // FIXED: Budget is now 75.0
     let freeTransfers = 1;
     let currentTransferPlayer = null; // Track which player we're transferring out
     let wildcardUsed = false;
@@ -1239,8 +1239,8 @@
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               wildBenchPlayer = profile.wildBenchPlayer;
-              userBudget = profile.budget || 100.0;
-              freeTransfers = profile.freeTransfers || 1;
+              userBudget = profile.budget || 75.0; // FIXED: Budget is 75.0
+              freeTransfers = profile.freeTransfers || 1; // FIXED: Free transfers
               wildcardUsed = profile.wildcardUsed || false;
               wildcardGameweek = profile.wildcardGameweek;
               tripleCaptainUsed = profile.tripleCaptainUsed || false;
@@ -1289,8 +1289,8 @@
             );
             wildBenchPlayer = profile.wildBenchPlayer;
           }
-          userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1;
+          userBudget = profile.budget || 75.0; // FIXED: Budget is 75.0
+          freeTransfers = profile.freeTransfers || 1; // FIXED: Free transfers
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
           tripleCaptainUsed = profile.tripleCaptainUsed || false;
@@ -1337,8 +1337,8 @@
           teamView.style.display = 'block';
           loadPlayers();
           renderTeamGrid();
-          userBudget = data.budget || 100.0;
-          freeTransfers = data.freeTransfers || 1;
+          userBudget = data.budget || 75.0; // FIXED: Budget is 75.0
+          freeTransfers = data.freeTransfers || 1; // FIXED: Free transfers
           wildcardUsed = false;
           wildcardGameweek = null;
           tripleCaptainUsed = false;
@@ -1507,7 +1507,7 @@
 
     function calculateRemainingBudget() {
       const teamValue = calculateTeamValue();
-      return (100.0 - teamValue).toFixed(1);
+      return (75.0 - teamValue).toFixed(1); // FIXED: Budget is 75.0
     }
 
     function renderTeamGrid() {
@@ -1630,7 +1630,7 @@
       }
       
       // Update budget
-      userBudget = 100.0 - calculateTeamValue();
+      userBudget = 75.0 - calculateTeamValue(); // FIXED: Budget is 75.0
       updateBudgetDisplay();
     }
 
@@ -2175,8 +2175,8 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           wildBenchPlayer = profile.wildBenchPlayer;
-          userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1;
+          userBudget = profile.budget || 75.0; // FIXED: Budget is 75.0
+          freeTransfers = profile.freeTransfers || 1; // FIXED: Free transfers
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
           tripleCaptainUsed = profile.tripleCaptainUsed || false;
@@ -2214,13 +2214,13 @@
 
     function checkSubmitButton() {
       const isComplete = !selectedTeam.some(p => p === null);
-      const isOverBudget = calculateTeamValue() > 100;
+      const isOverBudget = calculateTeamValue() > 75; // FIXED: Budget is 75
       const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
       
       submitTeamBtn.disabled = !isComplete || isOverBudget || hasTeamLimitExceeded;
       
       if (isOverBudget) {
-        submitTeamBtn.title = "Team budget exceeds £100m";
+        submitTeamBtn.title = "Team budget exceeds £75m";
       } else if (hasTeamLimitExceeded) {
         submitTeamBtn.title = "Exceeds 2-player limit for a team";
       } else {
