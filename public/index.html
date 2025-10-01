@@ -3,988 +3,1930 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>FST Fantasy PRO</title>
+  <title>FST Fantasy ⚽</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #00c3ff;
+      --primary-dark: #00a8e8;
+      --accent: #4ecdc4;
+      --accent-dark: #3ab8b0;
+      --success: #4ade80;
+      --success-dark: #22c55e;
+      --warning: #fbbf24;
+      --error: #f87171;
+      --bg: #0f1923;
+      --surface: #1a2a3a;
+      --surface-hover: #25384d;
+      --border: #2c3e50;
+      --text: #ffffff;
+      --text-secondary: #a0b3c6;
+      --text-tertiary: #6b7d95;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      --radius: 16px;
+      --transition: all 0.2s ease;
+    }
+
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     body {
-      background: #1c2634;
-      color: #e1e8ed;
-      font-size: 14px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      font-size: 15px;
       line-height: 1.5;
-      overflow-x: hidden;
       height: 100vh;
       display: flex;
       flex-direction: column;
-      touch-action: manipulation;
     }
 
-    /* TELEGRAM NATIVE DESIGN */
-    .tg-bg {
-      background: #1c2634;
-      color: #e1e8ed;
-    }
-
-    .tg-card {
-      background: #222e3c;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    .tg-button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin: 8px 0;
-      background: #007AFF;
-      color: white;
-    }
-
-    .tg-button:active {
-      background: #005BB5;
-    }
-
-    .tg-button.secondary {
-      background: #2c3e50;
-      color: #e1e8ed;
-    }
-
-    .tg-button:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-
-    .tg-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 12px 16px;
-      color: #e1e8ed;
-    }
-
-    .tg-subtitle {
-      font-size: 14px;
-      color: #a0b3c6;
-      margin: 4px 16px;
-    }
-
-    /* GAME-LIKE DESIGN ELEMENTS */
-    .game-container {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      position: relative;
-      background: #1c2634;
-    }
-
-    .game-header {
-      padding: 12px 16px;
-      background: #1c2634;
-      border-bottom: 1px solid #2c3e50;
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 1000;
     }
 
-    .logo {
-      font-weight: 700;
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+
+    .user-name {
+      font-weight: 600;
       font-size: 16px;
-      color: #00c3ff;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-title {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .section {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .section-title {
+      font-weight: 700;
+      font-size: 18px;
+      margin: 0 0 16px;
+      color: var(--primary);
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .logo-icon {
-      width: 24px;
-      height: 24px;
-      background: #00c3ff;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #000;
-      font-size: 12px;
+    .input-group {
+      margin-bottom: 16px;
     }
 
-    .game-stats {
-      display: flex;
-      gap: 12px;
-      align-items: center;
+    .input-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text);
+      font-size: 14px;
     }
 
-    .stat-card {
-      background: #222e3c;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 12px;
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(26, 42, 58, 0.7);
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      transition: var(--transition);
     }
 
-    .stat-value {
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.3);
+    }
+
+    input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
       font-weight: 600;
-      color: #00c3ff;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      letter-spacing: 0.3px;
     }
 
-    /* TEAM VIEW */
-    .team-view {
-      display: flex;
-      flex-direction: column;
-      height: calc(100% - 110px);
-      overflow-y: auto;
-      padding: 12px 0;
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #000;
+      box-shadow: 0 4px 12px rgba(0, 195, 255, 0.3);
     }
 
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 195, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #000;
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(78, 205, 196, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* FORMATION GRID */
     .formation-selector {
       display: flex;
-      gap: 8px;
-      padding: 8px 16px;
-      overflow-x: auto;
-      margin-bottom: 8px;
+      gap: 10px;
+      margin: 16px 0;
+      flex-wrap: wrap;
     }
 
     .formation-btn {
-      padding: 6px 12px;
-      background: #222e3c;
-      border-radius: 6px;
-      font-size: 12px;
-      white-space: nowrap;
-      color: #a0b3c6;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .formation-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .formation-btn.active {
-      background: #00c3ff;
+      background: var(--primary);
       color: #000;
+      box-shadow: 0 4px 8px rgba(0, 195, 255, 0.3);
     }
 
-    .player-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      padding: 0 16px;
-    }
-
-    .player-card {
-      background: #222e3c;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .player-card:hover {
-      transform: scale(1.03);
-      z-index: 1;
-    }
-
-    .player-card:active {
-      transform: scale(0.98);
-    }
-
-    .player-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #2c3e50;
-      margin: 0 auto 6px;
-      border: 2px solid #00c3ff;
-    }
-
-    .player-name {
-      font-weight: 600;
-      font-size: 12px;
-      color: #e1e8ed;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-
-    .player-team {
-      font-size: 10px;
-      color: #a0b3c6;
-      margin: 2px 0;
-    }
-
-    .player-stats {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 4px;
-      margin-top: 8px;
-    }
-
-    .stat {
-      font-size: 10px;
-      color: #a0b3c6;
-    }
-
-    .stat-value {
-      font-weight: 600;
-      color: #00c3ff;
-    }
-
-    .player-card.captain {
-      border: 2px solid #4ade80;
-    }
-
-    .player-card.vice-captain {
-      border: 2px solid #fbbf24;
-    }
-
-    .captain-label {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: #4ade80;
-      color: #000;
-      font-size: 8px;
-      font-weight: 700;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
+    .team-grid {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+      margin: 20px 0;
+      min-height: 300px;
       justify-content: center;
     }
 
-    /* TRANSFER MODE */
-    .transfer-mode {
-      background: rgba(0, 195, 255, 0.1);
-      border: 2px solid #00c3ff;
-      border-radius: 8px;
+    .line {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
     }
 
-    .transfer-highlight {
-      background: rgba(0, 195, 255, 0.15);
-      border-radius: 8px;
-      border: 2px solid #00c3ff;
+    .slot {
+      width: 64px;
+      height: 80px;
+      border: 2px dashed var(--text-tertiary);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
     }
 
-    /* MODAL SYSTEM */
-    .modal {
+    .slot:hover {
+      border-color: var(--text-secondary);
+    }
+
+    .slot.filled {
+      border-style: solid;
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .slot-label {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+    }
+
+    .player-modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.92);
       display: none;
-      justify-content: center;
+      flex-direction: column;
+      z-index: 2000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      z-index: 200;
-      padding: 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .close-modal:hover {
+      background: rgba(255, 255, 255, 0.1);
     }
 
     .modal-content {
-      background: #222e3c;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 320px;
-      overflow: hidden;
-      transform: translateY(20px);
-      animation: fadeInUp 0.3s forwards;
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
     }
 
+    .player-card {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .player-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 195, 255, 0.3);
+    }
+
+    .player-photo {
+      width: 60px;
+      height: 75px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    .player-info {
+      flex: 1;
+    }
+
+    .player-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .player-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .price-tag { color: var(--accent); font-weight: 600; }
+    .points-tag { color: var(--success); font-weight: 600; }
+
+    #status {
+      text-align: center;
+      margin: 16px 0;
+      font-size: 14px;
+      color: var(--text-secondary);
+      min-height: 24px;
+    }
+
+    .retry-btn {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .retry-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* TEAM STATS */
+    .team-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .team-stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .team-stat-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .team-stat-value {
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .stat-total-points { color: var(--success); }
+    .stat-team-value { color: var(--accent); }
+    .stat-avg-form { color: var(--primary); }
+    .stat-avg-ppg { color: var(--warning); }
+    .stat-budget { color: var(--accent); }
+
+    /* SUBMISSION BANNER */
+    .submission-banner {
+      text-align: center;
+      padding: 16px;
+      background: rgba(78, 205, 196, 0.12);
+      border-radius: 14px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(78, 205, 196, 0.3);
+    }
+
+    .banner-title {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 17px;
+      margin: 0 0 8px;
+    }
+
+    .banner-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* LOADING INDICATOR */
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--text);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: var(--text-tertiary);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    /* PROGRESS BAR */
+    .progress-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    /* ANIMATIONS */
     @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100%);
+      }
       to {
         transform: translateY(0);
       }
     }
 
-    .modal-header {
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #2c3e50;
-    }
-
-    .modal-title {
-      font-weight: 600;
-      font-size: 16px;
-      color: #e1e8ed;
-    }
-
-    .close-modal {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #2c3e50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #a0b3c6;
-      font-size: 12px;
-    }
-
-    .modal-body {
-      padding: 16px;
-    }
-
-    .player-detail {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-
-    .player-image {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #00c3ff;
-      margin: 0 auto 8px;
-      background: #2c3e50;
-    }
-
-    .player-name-modal {
-      font-weight: 700;
-      font-size: 16px;
-      color: #e1e8ed;
-      margin: 4px 0;
-    }
-
-    .player-team-modal {
-      font-size: 12px;
-      color: #a0b3c6;
-    }
-
-    .player-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin: 16px 0;
-    }
-
-    .stat-item {
-      background: #2c3e50;
-      border-radius: 6px;
-      padding: 8px;
-      text-align: center;
-    }
-
-    .stat-value-modal {
-      font-weight: 700;
-      color: #00c3ff;
-      font-size: 14px;
-    }
-
-    .stat-label-modal {
-      font-size: 10px;
-      color: #a0b3c6;
-    }
-
-    .transfer-options {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin: 16px 0;
-    }
-
-    .transfer-option {
-      background: #2c3e50;
-      border-radius: 8px;
-      padding: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .transfer-option:hover {
-      background: #34495e;
-    }
-
-    .option-icon {
-      font-size: 20px;
-      color: #00c3ff;
-      margin-bottom: 4px;
-    }
-
-    .option-label {
-      font-size: 12px;
-      color: #e1e8ed;
-    }
-
-    /* ANIMATIONS */
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
 
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .slide-in-up {
+      animation: slideInUp 0.3s ease-out forwards;
+    }
+
     .pulse {
-      animation: pulse 1.5s infinite;
+      animation: pulse 0.6s ease-in-out;
     }
 
-    /* BOTTOM NAVIGATION */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: #1c2634;
-      border-top: 1px solid #2c3e50;
-      display: flex;
-      justify-content: space-around;
-      padding: 8px 0;
-      z-index: 100;
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #00c3ff;
+      opacity: 0;
     }
 
-    .nav-item {
+    /* SKELETON LOADING */
+    .skeleton {
+      background: linear-gradient(90deg, #1a2a3a 25%, #25384d 50%, #1a2a3a 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 12px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* STAGGERED ANIMATIONS */
+    .team-stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* LIVE SCORING BADGE */
+    .live-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: var(--success);
+      border-radius: 50%;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      color: #a0b3c6;
-      font-size: 10px;
-      transition: all 0.2s;
-      padding: 4px;
-      border-radius: 8px;
-    }
-
-    .nav-item.active {
-      color: #00c3ff;
-    }
-
-    .nav-icon {
-      font-size: 16px;
-      margin-bottom: 2px;
-    }
-
-    /* WILDCARD BANNER */
-    .wildcard-banner {
-      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-      color: #000;
-      text-align: center;
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 12px;
-      margin: 12px;
-      border-radius: 8px;
-      animation: pulse 2s infinite;
-    }
-
-    /* GAME ANIMATIONS */
-    .player-entrance {
-      animation: playerEntrance 0.5s forwards;
-    }
-
-    @keyframes playerEntrance {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    /* LOADING */
-    .loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #1c2634;
-      display: flex;
       justify-content: center;
-      align-items: center;
-      z-index: 300;
+      font-size: 10px;
+      font-weight: 600;
+      color: #000;
     }
 
-    .spinner {
+    .live-indicator {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    .live-update {
+      color: var(--success);
+      font-weight: 600;
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    /* BUDGET TRACKER */
+    .budget-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: rgba(26, 42, 58, 0.7);
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+
+    .budget-label {
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .budget-value {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--success);
+    }
+
+    .budget-warning {
+      color: var(--warning);
+    }
+
+    .budget-critical {
+      color: var(--error);
+      font-weight: 700;
+    }
+
+    /* TRANSFER SYSTEM */
+    .transfer-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .transfer-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .transfer-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .transfer-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .transfer-btn.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .transfer-info {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    .transfer-penalty {
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    .free-transfers {
+      color: var(--success);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .transfer-cooldown {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    /* WILDCARD SYSTEM */
+    .wildcard-container {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .wildcard-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wildcard-icon {
+      background: var(--accent);
+      color: #000;
       width: 24px;
       height: 24px;
-      border: 2px solid rgba(0, 195, 255, 0.3);
-      border-top: 2px solid #00c3ff;
       border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* TRANSFER ANIMATION */
-    .transfer-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: transparent;
-      z-index: 1000;
-      pointer-events: none;
-      display: none;
-    }
-
-    .transfer-visual {
-      position: absolute;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #00c3ff;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #000;
-      font-weight: 700;
       font-size: 12px;
-      transform: translate(-50%, -50%);
-      z-index: 1001;
+      margin-right: 8px;
+    }
+
+    .wildcard-active {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .wildcard-inactive {
+      color: var(--text-tertiary);
+    }
+
+    .wildcard-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .wildcard-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .wildcard-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .wildcard-usage {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .wildcard-usage i {
+      color: var(--success);
+      margin-right: 8px;
+    }
+
+    .wildcard-warning {
+      color: var(--warning);
+      font-weight: 600;
     }
   </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="tg-bg">
-  <div class="game-container">
-    <!-- LOADING SCREEN -->
-    <div class="loading" id="loadingScreen">
-      <div class="spinner"></div>
+<body>
+  <div class="top-bar">
+    <div class="app-title">⚽ FST Fantasy</div>
+    <div class="user-info">
+      <img id="topUserAvatar" 
+           src="https://via.placeholder.com/40x40?text=👤" 
+           class="user-avatar" 
+           onerror="this.src='https://via.placeholder.com/40x40?text=👤'">
+      <div class="user-name" id="topUserName">FST Manager</div>
     </div>
+  </div>
 
-    <!-- TRANSFER ANIMATION LAYER -->
-    <div class="transfer-animation" id="transferAnimation">
-      <div class="transfer-visual">T</div>
-    </div>
-
-    <!-- GAME HEADER -->
-    <div class="game-header">
-      <div class="logo">
-        <div class="logo-icon">F</div>
-        <span>FST Fantasy PRO</span>
-      </div>
-      <div class="game-stats">
-        <div class="stat-card">
-          <div class="stat">GW</div>
-          <div class="stat-value">12</div>
+  <div class="main-content">
+    <!-- JOIN VIEW -->
+    <div id="joinView" class="view">
+      <div class="section">
+        <h2 class="section-title">
+          <i class="fas fa-trophy"></i> Join Free Contest
+        </h2>
+        
+        <div class="input-group">
+          <label class="input-label">Manager Name</label>
+          <input type="text" 
+                 id="managerNameInput" 
+                 placeholder="Choose your fantasy manager name"
+                 maxlength="20">
         </div>
-        <div class="stat-card">
-          <div class="stat">Points</div>
-          <div class="stat-value">5,428</div>
+
+        <button id="joinContest" class="btn-primary">
+          <i class="fas fa-play-circle"></i> Start Building Your Team
+        </button>
+        
+        <div style="text-align: center; padding: 12px; background: rgba(78, 205, 196, 0.1); border-radius: 12px; margin-top: 16px;">
+          <div style="color: var(--accent); font-weight: 600; font-size: 14px;">
+            🎁 Entry is <strong>FREE</strong> this week!
+          </div>
+          <div style="color: var(--text-tertiary); font-size: 13px; margin-top: 6px;">
+            Win FST tokens in our weekly contest
+          </div>
         </div>
       </div>
     </div>
 
     <!-- TEAM VIEW -->
-    <div class="team-view" id="teamView">
-      <!-- WILDCARD BANNER -->
-      <div class="wildcard-banner" id="wildcardBanner" style="display: none;">
-        <i class="fas fa-star"></i> Use Wild Card for unlimited transfers!
-      </div>
-
-      <!-- FORMATION SELECTOR -->
-      <div class="formation-selector">
-        <div class="formation-btn active" data-formation="4-3-3">4-3-3</div>
-        <div class="formation-btn" data-formation="3-5-2">3-5-2</div>
-        <div class="formation-btn" data-formation="4-4-2">4-4-2</div>
-        <div class="formation-btn" data-formation="5-3-2">5-3-2</div>
-      </div>
-
-      <!-- PLAYER GRID -->
-      <div class="player-grid" id="playerGrid">
-        <!-- Players will be populated here -->
-      </div>
-    </div>
-
-    <!-- BOTTOM NAVIGATION -->
-    <div class="bottom-nav">
-      <div class="nav-item active" data-tab="team">
-        <i class="nav-icon fas fa-users"></i>
-        <span>Team</span>
-      </div>
-      <div class="nav-item" data-tab="transfers">
-        <i class="nav-icon fas fa-sync-alt"></i>
-        <span>Transfers</span>
-      </div>
-      <div class="nav-item" data-tab="leagues">
-        <i class="nav-icon fas fa-trophy"></i>
-        <span>Leagues</span>
-      </div>
-      <div class="nav-item" data-tab="profile">
-        <i class="nav-icon fas fa-user"></i>
-        <span>Profile</span>
-      </div>
-    </div>
-
-    <!-- PLAYER MODAL -->
-    <div class="modal" id="playerModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-title">Player Details</div>
-          <button class="close-modal" id="closePlayerModal">&times;</button>
+    <div id="teamView" class="view" style="display:none;">
+      <div class="section">
+        <h2 class="section-title">
+          <i class="fas fa-users"></i> Build Your Dream Team
+        </h2>
+        
+        <!-- BUDGET TRACKER -->
+        <div class="budget-container">
+          <div class="budget-label">Budget Remaining:</div>
+          <div id="budgetRemaining" class="budget-value">£100.0m</div>
         </div>
-        <div class="modal-body">
-          <div class="player-detail">
-            <div class="player-image"></div>
-            <div class="player-name-modal">Erling Haaland</div>
-            <div class="player-team-modal">Manchester City</div>
-          </div>
-
-          <div class="player-stats-grid">
-            <div class="stat-item">
-              <div class="stat-value-modal">135</div>
-              <div class="stat-label-modal">Total</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value-modal">15</div>
-              <div class="stat-label-modal">Goals</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value-modal">88%</div>
-              <div class="stat-label-modal">Ownership</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value-modal">9.2</div>
-              <div class="stat-label-modal">Form</div>
-            </div>
-          </div>
-
-          <div class="transfer-options">
-            <div class="transfer-option" id="setCaptain">
-              <div class="option-icon">C</div>
-              <div class="option-label">Set Captain</div>
-            </div>
-            <div class="transfer-option" id="transferPlayer">
-              <div class="option-icon"><i class="fas fa-sync-alt"></i></div>
-              <div class="option-label">Transfer</div>
-            </div>
+        
+        <!-- FORMATION CONTAINER -->
+        <div id="formationSelectorContainer" class="input-group">
+          <label class="input-label">Choose Formation</label>
+          <div class="formation-selector">
+            <button class="formation-btn active" data-formation="4-3-3">4-3-3</button>
+            <button class="formation-btn" data-formation="3-5-2">3-5-2</button>
+            <button class="formation-btn" data-formation="4-4-2">4-4-2</button>
+            <button class="formation-btn" data-formation="5-3-2">5-3-2</button>
           </div>
         </div>
+
+        <div class="team-grid" id="teamGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="progress-container">
+          <div class="progress-bar" id="teamProgress"></div>
+        </div>
+        <div style="text-align: center; color: var(--text-tertiary); font-size: 13px; margin-bottom: 16px;">
+          <span id="teamProgressText">0/11 players selected</span>
+        </div>
+
+        <button id="submitTeam" class="btn-secondary" disabled>
+          <i class="fas fa-lock"></i> Lock In Team & Join Contest
+        </button>
       </div>
-    </div>
 
-    <!-- TRANSFER MODAL -->
-    <div class="modal" id="transferModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-title">Make a Transfer</div>
-          <button class="close-modal" id="closeTransferModal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="player-detail">
-            <div class="player-image"></div>
-            <div class="player-name-modal">Erling Haaland</div>
-            <div class="player-team-modal">Manchester City</div>
+      <!-- TEAM STATS SECTION -->
+      <div id="teamStats" class="section" style="display:none;">
+        <h3 class="section-title">💰 Your Team Budget</h3>
+        <div class="team-stats-grid">
+          <div class="team-stat-card">
+            <div class="team-stat-label">Budget Remaining</div>
+            <div id="budgetStats" class="team-stat-value stat-budget">£100.0m</div>
           </div>
-
-          <div class="player-stats-grid">
-            <div class="stat-item">
-              <div class="stat-value-modal">135</div>
-              <div class="stat-label-modal">Total</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value-modal">15</div>
-              <div class="stat-label-modal">Goals</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value-modal">88%</div>
-              <div class="stat-label-modal">Ownership</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value-modal">9.2</div>
-              <div class="stat-label-modal">Form</div>
-            </div>
+          <div class="team-stat-card">
+            <div class="team-stat-label">Free Transfers</div>
+            <div id="freeTransfers" class="team-stat-value free-transfers">1</div>
           </div>
-
-          <div class="transfer-options">
-            <div class="transfer-option" id="confirmTransfer">
-              <div class="option-icon"><i class="fas fa-check"></i></div>
-              <div class="option-label">Confirm</div>
-            </div>
-            <div class="transfer-option" id="cancelTransfer">
-              <div class="option-icon"><i class="fas fa-times"></i></div>
-              <div class="option-label">Cancel</div>
-            </div>
+          <div class="team-stat-card">
+            <div class="team-stat-label">Season Total</div>
+            <div id="seasonTotal" class="team-stat-value stat-team-value">0</div>
+          </div>
+          <div class="team-stat-card">
+            <div class="team-stat-label">Avg. Form</div>
+            <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- WILDCARD MODAL -->
-    <div class="modal" id="wildcardModal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <div class="modal-title">Use Wild Card</div>
-          <button class="close-modal" id="closeWildcardModal">&times;</button>
+        <!-- WILDCARD SYSTEM -->
+        <div class="wildcard-container">
+          <div class="wildcard-title">
+            <div class="wildcard-icon">W</div>
+            Wildcard
+          </div>
+          <div class="wildcard-status">
+            <span id="wildcardStatus" class="wildcard-inactive">Not activated</span>
+          </div>
+          <button id="activateWildcardBtn" class="wildcard-btn">
+            <i class="fas fa-bolt"></i> Activate Wildcard
+          </button>
+          <div class="wildcard-usage">
+            <i class="fas fa-check"></i>
+            <span id="wildcardUsage">1 per season</span>
+          </div>
         </div>
-        <div class="modal-body">
-          <div style="text-align: center; padding: 16px 0;">
-            <div style="font-size: 40px; color: #4ade80; margin-bottom: 12px;">⭐</div>
-            <div style="font-weight: 600; margin-bottom: 8px;">Unlimited Transfers</div>
-            <div style="color: #a0b3c6; font-size: 12px; margin-bottom: 16px;">Use your Wild Card for unlimited transfers this gameweek</div>
-            
-            <button class="tg-button" id="activateWildcard">
-              <i class="fas fa-star"></i> Activate Wild Card
-            </button>
+        
+        <!-- LIVE SCORING BUTTON -->
+        <div style="margin-top: 20px; text-align: center;">
+          <button id="updatePointsBtn" class="btn-outline" style="padding: 12px 24px; font-size: 14px;">
+            <i class="fas fa-sync-alt"></i> Update Live Scores
+          </button>
+          <div id="lastUpdated" style="margin-top: 8px; color: var(--text-tertiary); font-size: 12px;">
+            Last updated: Never
           </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- PLAYER MODAL -->
+  <div class="player-modal" id="playerModal">
+    <div class="modal-header">
+      <div class="modal-title">Select <span id="modalPosition">Player</span></div>
+      <button class="close-modal" id="closeModal">&times;</button>
+    </div>
+    
+    <!-- SEARCH & FILTERS -->
+    <div style="padding: 0 20px 15px;">
+      <div class="input-group">
+        <label class="input-label">Search Players</label>
+        <input type="text" 
+               id="playerSearch" 
+               placeholder="Search by name or team..."
+               style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 14px;">
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+        <div class="input-group">
+          <label class="input-label">Price Range (£m)</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <input type="number" 
+                   id="minPrice" 
+                   placeholder="Min"
+                   min="0" 
+                   max="20"
+                   step="0.1"
+                   style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+            <input type="number" 
+                   id="maxPrice" 
+                   placeholder="Max"
+                   min="0" 
+                   max="20"
+                   step="0.1"
+                   style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label">Points Range</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <input type="number" 
+                   id="minPoints" 
+                   placeholder="Min"
+                   min="0" 
+                   style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+            <input type="number" 
+                   id="maxPoints" 
+                   placeholder="Max"
+                   min="0" 
+                   style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
+          </div>
+        </div>
+      </div>
+      
+      <button id="resetFilters" class="btn-outline" style="margin-top: 16px;">
+        🔄 Reset Filters
+      </button>
+    </div>
+    
+    <div class="modal-content" id="playerList"></div>
+  </div>
+
+  <!-- PLAYER STATS MODAL -->
+  <div class="player-modal" id="statsModal" style="display:none;">
+    <div class="modal-header">
+      <div class="modal-title">Player Stats</div>
+      <button class="close-modal" id="closeStatsModal">&times;</button>
+    </div>
+    <div class="modal-content" id="statsContent" style="padding: 20px;">
+      <!-- Stats will be populated here -->
+    </div>
+  </div>
+
   <script>
-    // Initialize Telegram Web App
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
-    tg.setHeaderColor('#1c2634');
 
-    // Game state
-    const gameState = {
-      currentTab: 'team',
-      selectedPlayer: null,
-      transferMode: false,
-      wildcardAvailable: true,
-      players: []
-    };
+    const initData = tg.initDataUnsafe;
+    const telegramUser = initData?.user;
+    const userId = telegramUser ? telegramUser.id.toString() : 'guest_' + Date.now();
 
-    // Initialize UI
-    document.addEventListener('DOMContentLoaded', function() {
-      // Hide loading screen after 1.5s (simulating API loading)
-      setTimeout(() => {
-        document.getElementById('loadingScreen').style.display = 'none';
-        loadPlayers();
-      }, 1500);
+    const topUserAvatar = document.getElementById('topUserAvatar');
+    const topUserName = document.getElementById('topUserName');
+    const joinView = document.getElementById('joinView');
+    const teamView = document.getElementById('teamView');
+    const joinContestBtn = document.getElementById('joinContest');
+    const submitTeamBtn = document.getElementById('submitTeam');
+    const playerModal = document.getElementById('playerModal');
+    const closeModal = document.getElementById('closeModal');
+    const playerList = document.getElementById('playerList');
+    const teamGrid = document.getElementById('teamGrid');
+    const managerNameInput = document.getElementById('managerNameInput');
 
-      // Initialize navigation
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function() {
-          const tab = this.getAttribute('data-tab');
-          switchTab(tab);
-        });
-      });
-
-      // Initialize modal close buttons
-      document.getElementById('closePlayerModal').addEventListener('click', () => {
-        document.getElementById('playerModal').style.display = 'none';
-      });
-
-      document.getElementById('closeTransferModal').addEventListener('click', () => {
-        document.getElementById('transferModal').style.display = 'none';
-      });
-
-      document.getElementById('closeWildcardModal').addEventListener('click', () => {
-        document.getElementById('wildcardModal').style.display = 'none';
-      });
-
-      // Initialize transfer actions
-      document.getElementById('transferPlayer').addEventListener('click', function() {
-        document.getElementById('playerModal').style.display = 'none';
-        document.getElementById('transferModal').style.display = 'flex';
-      });
-
-      document.getElementById('cancelTransfer').addEventListener('click', function() {
-        document.getElementById('transferModal').style.display = 'none';
-      });
-
-      document.getElementById('confirmTransfer').addEventListener('click', function() {
-        document.getElementById('transferModal').style.display = 'none';
-        showTransferSuccess();
-      });
-
-      document.getElementById('activateWildcard').addEventListener('click', function() {
-        document.getElementById('wildcardModal').style.display = 'none';
-        gameState.wildcardAvailable = false;
-        document.getElementById('wildcardBanner').style.display = 'none';
-        showToast('Wild Card activated! Unlimited transfers available');
-      });
-    });
-
-    // Load players (simulating API response)
-    function loadPlayers() {
-      // In production, this would come from /players API
-      const mockPlayers = [
-        { id: 1, name: "Alisson", team: "Liverpool", position: "GK", points: 120, minutes: 1080, goals: 0, assists: 0, cleanSheets: 8, form: 8.2 },
-        { id: 2, name: "Van Dijk", team: "Liverpool", position: "DEF", points: 98, minutes: 1080, goals: 3, assists: 2, cleanSheets: 8, form: 7.5 },
-        { id: 3, name: "Trent", team: "Liverpool", position: "DEF", points: 102, minutes: 1080, goals: 5, assists: 7, cleanSheets: 6, form: 8.8 },
-        { id: 4, name: "Robertson", team: "Liverpool", position: "DEF", points: 95, minutes: 1080, goals: 1, assists: 6, cleanSheets: 6, form: 7.9 },
-        { id: 5, name: "Salah", team: "Liverpool", position: "MID", points: 145, minutes: 1080, goals: 12, assists: 6, cleanSheets: 0, form: 9.5 },
-        { id: 6, name: "Fabinho", team: "Liverpool", position: "MID", points: 92, minutes: 990, goals: 1, assists: 1, cleanSheets: 7, form: 6.8 },
-        { id: 7, name: "KDB", team: "Man City", position: "MID", points: 110, minutes: 1080, goals: 8, assists: 12, cleanSheets: 0, form: 8.9 },
-        { id: 8, name: "Haaland", team: "Man City", position: "FWD", points: 135, minutes: 1080, goals: 15, assists: 2, cleanSheets: 0, form: 9.2 },
-        { id: 9, name: "Son", team: "Tottenham", position: "FWD", points: 120, minutes: 1080, goals: 10, assists: 5, cleanSheets: 0, form: 8.7 },
-        { id: 10, name: "Kane", team: "Tottenham", position: "FWD", points: 105, minutes: 900, goals: 9, assists: 3, cleanSheets: 0, form: 7.5 },
-        { id: 11, name: "Mats", team: "Man City", position: "DEF", points: 90, minutes: 1080, goals: 1, assists: 1, cleanSheets: 8, form: 7.2 }
-      ];
-
-      gameState.players = mockPlayers;
-      renderTeamView();
-    }
-
-    // Render team view
-    function renderTeamView() {
-      const grid = document.getElementById('playerGrid');
-      grid.innerHTML = '';
-      
-      gameState.players.forEach((player, index) => {
-        const playerCard = document.createElement('div');
-        playerCard.className = 'player-card';
-        playerCard.dataset.id = player.id;
-        
-        // Add captain/vice-captain indicators
-        if (index === 4) { // Salah is captain
-          playerCard.classList.add('captain');
-        } else if (index === 7) { // Haaland is vice-captain
-          playerCard.classList.add('vice-captain');
-        }
-        
-        playerCard.innerHTML = `
-          <div class="player-avatar" style="background: #${index % 2 === 0 ? '2c3e50' : '34495e'}">
-            <span style="color: #00c3ff; font-weight: 700;">${player.name.charAt(0)}</span>
-          </div>
-          <div class="player-name">${player.name}</div>
-          <div class="player-team">${player.team}</div>
-          <div class="player-stats">
-            <div class="stat">
-              <span class="stat-value">${player.goals}</span>
-              <span>G</span>
-            </div>
-            <div class="stat">
-              <span class="stat-value">${player.assists}</span>
-              <span>A</span>
-            </div>
-          </div>
-        `;
-        
-        playerCard.addEventListener('click', function() {
-          const playerId = parseInt(this.dataset.id);
-          gameState.selectedPlayer = gameState.players.find(p => p.id === playerId);
-          showPlayerDetails();
-        });
-        
-        grid.appendChild(playerCard);
-      });
-    }
-
-    // Show player details
-    function showPlayerDetails() {
-      const modal = document.getElementById('playerModal');
-      const player = gameState.selectedPlayer;
-      
-      // Update modal content
-      modal.querySelector('.player-image').innerHTML = `<span style="color: #00c3ff; font-weight: 700; font-size: 20px;">${player.name.charAt(0)}</span>`;
-      modal.querySelector('.player-name-modal').textContent = player.name;
-      modal.querySelector('.player-team-modal').textContent = player.team;
-      
-      // Update stats
-      modal.querySelector('.stat-value-modal:nth-of-type(1)').textContent = player.points;
-      modal.querySelector('.stat-value-modal:nth-of-type(2)').textContent = player.goals;
-      modal.querySelector('.stat-value-modal:nth-of-type(3)').textContent = `${player.cleanSheets}%`;
-      modal.querySelector('.stat-value-modal:nth-of-type(4)').textContent = player.form;
-      
-      modal.style.display = 'flex';
-    }
-
-    // Show transfer success animation
-    function showTransferSuccess() {
-      const animation = document.getElementById('transferAnimation');
-      const visual = document.getElementById('transferAnimation').querySelector('.transfer-visual');
-      const playerCard = document.querySelector(`.player-card[data-id="${gameState.selectedPlayer.id}"]`);
-      
-      // Get player card position
-      const rect = playerCard.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-      
-      // Set transfer animation position
-      visual.style.left = `${x}px`;
-      visual.style.top = `${y}px`;
-      
-      // Start animation
-      animation.style.display = 'block';
-      visual.style.display = 'flex';
-      
-      // Animate to new position
-      setTimeout(() => {
-        visual.style.left = '50%';
-        visual.style.top = '50%';
-        
-        // Show success message
-        setTimeout(() => {
-          animation.style.display = 'none';
-          showToast('Transfer successful!');
-          renderTeamView();
-        }, 1000);
-      }, 10);
-    }
-
-    // Show toast notification
-    function showToast(message, duration = 2500) {
-      const toast = document.createElement('div');
-      toast.style.position = 'fixed';
-      toast.style.bottom = '20px';
-      toast.style.left = '50%';
-      toast.style.transform = 'translateX(-50%)';
-      toast.style.backgroundColor = '#2c3e50';
-      toast.style.color = '#e1e8ed';
-      toast.style.padding = '10px 16px';
-      toast.style.borderRadius = '8px';
-      toast.style.fontWeight = '500';
-      toast.style.fontSize = '14px';
-      toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.3s';
-      toast.textContent = message;
-      
-      document.body.appendChild(toast);
-      
-      // Fade in
-      setTimeout(() => {
-        toast.style.opacity = '1';
-      }, 100);
-      
-      // Fade out
-      setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-          document.body.removeChild(toast);
-        }, 300);
-      }, duration);
-    }
-
-    // Switch between tabs
-    function switchTab(tab) {
-      // Update UI
-      document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      
-      document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-      
-      // Update state
-      gameState.currentTab = tab;
-      
-      // Show wildcard banner if needed
-      if (tab === 'transfers' && gameState.wildcardAvailable) {
-        document.getElementById('wildcardBanner').style.display = 'block';
-      } else {
-        document.getElementById('wildcardBanner').style.display = 'none';
+    if (telegramUser) {
+      topUserName.innerText = telegramUser.first_name || "FST Manager";
+      if (telegramUser.photo_url) {
+        topUserAvatar.src = telegramUser.photo_url;
       }
     }
 
-    // Initialize with team tab active
-    switchTab('team');
+    const formations = {
+      "4-3-3": [1, 4, 3, 3],
+      "3-5-2": [1, 3, 5, 2],
+      "4-4-2": [1, 4, 4, 2],
+      "5-3-2": [1, 5, 3, 2]
+    };
+
+    let currentFormation = "4-3-3";
+    let selectedTeam = Array(11).fill(null);
+    let allPlayers = [];
+    let liveScores = {};
+    let userBudget = 100.0;
+    let freeTransfers = 1;
+    let currentTransferPlayer = null; // Track which player we're transferring out
+    let wildcardUsed = false;
+    let wildcardGameweek = null;
+
+    managerNameInput.value = telegramUser?.first_name || "FST Manager";
+
+    // CONFETTI FUNCTION
+    function createConfetti() {
+      const confettiContainer = document.createElement('div');
+      confettiContainer.style.position = 'fixed';
+      confettiContainer.style.top = '0';
+      confettiContainer.style.left = '0';
+      confettiContainer.style.width = '100%';
+      confettiContainer.style.height = '100%';
+      confettiContainer.style.pointerEvents = 'none';
+      confettiContainer.style.zIndex = '3000';
+      document.body.appendChild(confettiContainer);
+
+      const colors = ['#00c3ff', '#4ecdc4', '#4ade80', '#fbbf24', '#f87171'];
+      const pieces = 150;
+
+      for (let i = 0; i < pieces; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = Math.random() * 10 + 5 + 'px';
+        piece.style.height = Math.random() * 10 + 5 + 'px';
+        piece.style.animation = `confetti ${Math.random() * 3 + 2}s linear forwards`;
+        piece.style.animationDelay = Math.random() * 2 + 's';
+        confettiContainer.appendChild(piece);
+      }
+
+      // Remove after animation
+      setTimeout(() => {
+        document.body.removeChild(confettiContainer);
+      }, 5000);
+    }
+
+    // Check existing user on load
+    async function checkExistingUser() {
+      try {
+        const response = await fetch(`/user-profile?userId=${userId}`);
+        const profile = await response.json();
+        
+        if (profile.managerName && profile.joined) {
+          topUserName.innerText = profile.managerName;
+          
+          // If team is LOCKED (submitted), show read-only view
+          if (profile.locked) {
+            joinView.style.display = 'none';
+            teamView.style.display = 'block';
+            loadPlayers().then(() => {
+              selectedTeam = profile.team.map(id => 
+                allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+              );
+              userBudget = profile.budget || 100.0;
+              freeTransfers = profile.freeTransfers || 1;
+              wildcardUsed = profile.wildcardUsed || false;
+              wildcardGameweek = profile.wildcardGameweek;
+              updateBudgetDisplay();
+              updateWildcardDisplay();
+              renderTeamGrid();
+              calculateTeamStats(); // Show team stats
+              // Only reduce opacity (don't disable pointer events)
+              document.querySelectorAll('.slot').forEach(slot => {
+                slot.style.opacity = '0.7';
+              });
+              submitTeamBtn.style.display = 'none';
+              document.getElementById('formationSelectorContainer').style.display = 'none';
+              
+              // Show "Already Submitted" banner
+              const banner = document.createElement('div');
+              banner.innerHTML = `
+                <div class="submission-banner">
+                  <div class="banner-title">✅ Team Submitted!</div>
+                  <div class="banner-text">Your team is locked for this contest.</div>
+                </div>
+              `;
+              const firstSection = document.querySelector('.section');
+              firstSection.insertBefore(banner, firstSection.firstChild);
+              
+              // Load live scores
+              updateLiveScores();
+            });
+            return;
+          }
+          
+          // If joined but not submitted, show team builder
+          joinView.style.display = 'none';
+          teamView.style.display = 'block';
+          loadPlayers();
+          if (profile.team && profile.team.length > 0) {
+            selectedTeam = profile.team.map(id => 
+              allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+            );
+          }
+          userBudget = profile.budget || 100.0;
+          freeTransfers = profile.freeTransfers || 1;
+          wildcardUsed = profile.wildcardUsed || false;
+          wildcardGameweek = profile.wildcardGameweek;
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+          renderTeamGrid();
+          calculateTeamStats(); // Show team stats
+          return;
+        }
+      } catch (e) {
+        // Continue to join view
+      }
+      
+      managerNameInput.value = telegramUser?.first_name || "FST Manager";
+    }
+
+    // Initialize
+    checkExistingUser();
+
+    joinContestBtn.addEventListener('click', async () => {
+      const managerName = managerNameInput.value.trim() || "FST Manager";
+      if (managerName.length < 2) {
+        alert("Manager name must be at least 2 characters");
+        return;
+      }
+
+      try {
+        const response = await fetch('/connect-wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, managerName })
+        });
+        const data = await response.json();
+        if (data.success) {
+          topUserName.innerText = data.managerName;
+          joinView.style.display = 'none';
+          teamView.style.display = 'block';
+          loadPlayers();
+          renderTeamGrid();
+          userBudget = data.budget || 100.0;
+          freeTransfers = data.freeTransfers || 1;
+          wildcardUsed = false;
+          wildcardGameweek = null;
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+        } else {
+          throw new Error(data.error || 'Failed to join');
+        }
+      } catch (e) {
+        alert("Error: " + (e.message || "Failed to join contest"));
+      }
+    });
+
+    async function loadPlayers() {
+      const statusDiv = document.getElementById('status') || document.createElement('div');
+      if (!document.getElementById('status')) {
+        const firstSection = document.querySelector('.section');
+        firstSection.insertBefore(statusDiv, firstSection.firstChild);
+        statusDiv.id = 'status';
+      }
+
+      // Show skeleton loading
+      teamGrid.innerHTML = `
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px;">
+          ${Array(8).fill().map(() => `
+            <div class="skeleton" style="height:80px; border-radius:14px;"></div>
+          `).join('')}
+        </div>
+      `;
+
+      try {
+        const response = await fetch('/players');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load players');
+        }
+        const players = await response.json();
+        allPlayers = players;
+        statusDiv.innerText = "";
+        renderTeamGrid(); // This will replace skeleton with real data
+      } catch (e) {
+        teamGrid.innerHTML = ''; // Clear skeleton on error
+        statusDiv.innerHTML = `
+          ❌ ${e.message}<br>
+          <button class="retry-btn" id="retryBtn">
+            <i class="fas fa-redo"></i> Retry
+          </button>
+        `;
+        document.getElementById('retryBtn').addEventListener('click', loadPlayers);
+      }
+    }
+
+    function updateBudgetDisplay() {
+      const budgetContainer = document.getElementById('budgetRemaining');
+      const budgetStats = document.getElementById('budgetStats');
+      if (!budgetContainer || !budgetStats) return;
+      
+      // Format budget with color based on value
+      let budgetClass = 'budget-value';
+      if (userBudget < 10) {
+        budgetClass = 'budget-critical';
+      } else if (userBudget < 20) {
+        budgetClass = 'budget-warning';
+      }
+      
+      budgetContainer.className = budgetClass;
+      budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
+      budgetStats.className = budgetClass;
+      budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
+      
+      // Update free transfers display
+      const transfersElement = document.getElementById('freeTransfers');
+      if (transfersElement) {
+        if (freeTransfers > 0) {
+          transfersElement.className = 'free-transfers';
+          transfersElement.innerText = `${freeTransfers} left`;
+        } else {
+          transfersElement.className = 'transfer-penalty';
+          transfersElement.innerText = '0 (Penalty: -4 points)';
+        }
+      }
+    }
+
+    function updateWildcardDisplay() {
+      const wildcardStatus = document.getElementById('wildcardStatus');
+      const wildcardUsage = document.getElementById('wildcardUsage');
+      const activateBtn = document.getElementById('activateWildcardBtn');
+      
+      if (wildcardUsed) {
+        wildcardStatus.className = 'wildcard-active';
+        wildcardStatus.innerText = 'Activated!';
+        wildcardUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${wildcardGameweek}`;
+        activateBtn.disabled = true;
+        activateBtn.title = "Wildcard already used this season";
+      } else {
+        wildcardStatus.className = 'wildcard-inactive';
+        wildcardStatus.innerText = 'Not activated';
+        wildcardUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
+        activateBtn.disabled = false;
+        activateBtn.title = "Activate for unlimited transfers this gameweek";
+      }
+    }
+
+    function calculateTeamValue() {
+      return selectedTeam
+        .filter(p => p !== null)
+        .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
+    }
+
+    function calculateRemainingBudget() {
+      const teamValue = calculateTeamValue();
+      return (100.0 - teamValue).toFixed(1);
+    }
+
+    function renderTeamGrid() {
+      const [gk, def, mid, fwd] = formations[currentFormation];
+      const slots = [];
+      
+      for (let i = 0; i < gk; i++) slots.push({ type: 'gk', label: 'GK' });
+      for (let i = 0; i < def; i++) slots.push({ type: 'def', label: 'DEF' });
+      for (let i = 0; i < mid; i++) slots.push({ type: 'mid', label: 'MID' });
+      for (let i = 0; i < fwd; i++) slots.push({ type: 'fwd', label: 'FWD' });
+
+      let html = '';
+      const lines = [
+        slots.slice(-fwd),
+        slots.slice(-(fwd+mid), -fwd),
+        slots.slice(-(fwd+mid+def), -(fwd+mid)),
+        slots.slice(0, gk)
+      ];
+
+      lines.forEach(line => {
+        if (line.length === 0) return;
+        html += `<div class="line">`;
+        line.forEach((slot, idx) => {
+          const slotIndex = slots.indexOf(slot);
+          const player = selectedTeam[slotIndex];
+          html += `
+            <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
+                 data-index="${slotIndex}" 
+                 data-type="${slot.type}">
+              ${player ? 
+                `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
+                 ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
+                 ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
+                ` : 
+                `<span class="slot-label">${slot.label}</span>`
+              }
+            </div>
+          `;
+        });
+        html += `</div>`;
+      });
+
+      teamGrid.innerHTML = html;
+
+      // Click handler for player stats
+      document.querySelectorAll('.slot').forEach(slot => {
+        slot.addEventListener('click', () => {
+          const index = slot.dataset.index;
+          const player = selectedTeam[index];
+          
+          // If team is submitted and player exists, show stats
+          if (player && player.id && submitTeamBtn.style.display === 'none') {
+            showPlayerStats(player);
+            return;
+          }
+          
+          // For non-submitted teams, allow selection on empty slots
+          if (submitTeamBtn.style.display !== 'none' && !player) {
+            const type = slot.dataset.type;
+            openPlayerModal(type, index);
+            
+            // Add selection animation
+            slot.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              slot.style.transform = '';
+            }, 150);
+          }
+        });
+      });
+
+      checkSubmitButton();
+      calculateTeamStats(); // Update team stats
+      
+      // Update progress bar
+      const filledCount = selectedTeam.filter(p => p !== null).length;
+      const progressPercent = (filledCount / 11) * 100;
+      document.getElementById('teamProgress').style.width = `${progressPercent}%`;
+      document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
+      
+      // Hide formation for submitted teams
+      const isSubmitted = submitTeamBtn.style.display === 'none';
+      const formationContainer = document.getElementById('formationSelectorContainer');
+      if (formationContainer) {
+        formationContainer.style.display = isSubmitted ? 'none' : 'block';
+      }
+      
+      // Update budget
+      userBudget = 100.0 - calculateTeamValue();
+      updateBudgetDisplay();
+    }
+
+    function openPlayerModal(positionType, slotIndex) {
+      const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
+      const fplType = positionMap[positionType];
+      const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
+
+      document.getElementById('modalPosition').innerText = positionName;
+
+      const selectedIds = new Set(
+        selectedTeam
+          .filter(p => p !== null)
+          .map(p => p.id)
+      );
+
+      let availablePlayers = allPlayers
+        .filter(p => p.element_type === fplType)
+        .filter(p => !selectedIds.has(p.id));
+
+      const originalPlayers = [...availablePlayers];
+      renderPlayerList(availablePlayers, slotIndex);
+      setupFilters(originalPlayers, slotIndex);
+      playerModal.style.display = 'flex';
+      playerModal.classList.add('slide-in-up');
+    }
+
+    function setupFilters(originalPlayers, slotIndex) {
+      const searchInput = document.getElementById('playerSearch');
+      const minPriceInput = document.getElementById('minPrice');
+      const maxPriceInput = document.getElementById('maxPrice');
+      const minPointsInput = document.getElementById('minPoints');
+      const maxPointsInput = document.getElementById('maxPoints');
+      const resetBtn = document.getElementById('resetFilters');
+
+      const applyFilters = () => {
+        let filtered = [...originalPlayers];
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+          filtered = filtered.filter(player => 
+            player.web_name.toLowerCase().includes(searchTerm) ||
+            player.team_name.toLowerCase().includes(searchTerm)
+          );
+        }
+        const minPrice = parseFloat(minPriceInput.value);
+        const maxPrice = parseFloat(maxPriceInput.value);
+        if (!isNaN(minPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) >= minPrice);
+        }
+        if (!isNaN(maxPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
+        }
+        const minPoints = parseInt(minPointsInput.value);
+        const maxPoints = parseInt(maxPointsInput.value);
+        if (!isNaN(minPoints)) {
+          filtered = filtered.filter(player => player.total_points >= minPoints);
+        }
+        if (!isNaN(maxPoints)) {
+          filtered = filtered.filter(player => player.total_points <= maxPoints);
+        }
+        renderPlayerList(filtered, slotIndex);
+      };
+
+      searchInput.addEventListener('input', applyFilters);
+      minPriceInput.addEventListener('input', applyFilters);
+      maxPriceInput.addEventListener('input', applyFilters);
+      minPointsInput.addEventListener('input', applyFilters);
+      maxPointsInput.addEventListener('input', applyFilters);
+      
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        minPriceInput.value = '';
+        maxPriceInput.value = '';
+        minPointsInput.value = '';
+        maxPointsInput.value = '';
+        renderPlayerList(originalPlayers, slotIndex);
+      });
+    }
+
+    function renderPlayerList(players, slotIndex) {
+      let html = '';
+      players.forEach(player => {
+        // Check if adding this player would exceed budget
+        const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
+        const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
+        
+        html += `
+          <div class="${playerClass}" data-id="${player.id}">
+            <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
+            <div class="player-info">
+              <div class="player-name">${player.web_name}</div>
+              <div class="player-meta">
+                <span>${player.team_name}</span>
+                <span class="price-tag">£${player.now_cost}m</span>
+                <span class="points-tag">${player.total_points} pts</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (players.length === 0) {
+        html = '<div class="empty-state"><i class="fas fa-search"></i><p>No players match your filters</p></div>';
+      }
+
+      playerList.innerHTML = html;
+
+      document.querySelectorAll('.player-card').forEach(card => {
+        card.addEventListener('click', async () => {
+          const playerId = parseInt(card.dataset.id);
+          const player = allPlayers.find(p => p.id === playerId);
+          
+          // If this is a transfer (replacing a player)
+          if (currentTransferPlayer) {
+            const oldPlayerId = currentTransferPlayer.id;
+            
+            try {
+              const response = await fetch('/transfer-player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  userId, 
+                  oldPlayerId, 
+                  newPlayerId: playerId 
+                })
+              });
+              const data = await response.json();
+              
+              if (data.success) {
+                // Update UI
+                const oldPlayerIndex = selectedTeam.indexOf(parseInt(oldPlayerId));
+                selectedTeam[oldPlayerIndex] = playerId;
+                userBudget = data.budget;
+                freeTransfers = data.freeTransfers;
+                const wildcardActive = data.wildcardActive;
+                
+                // Show success message
+                const successBanner = document.createElement('div');
+                successBanner.innerHTML = `
+                  <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+                    <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Player Transferred!</div>
+                    <div style="color:var(--text-secondary); margin-top:6px;">Free transfers left: ${freeTransfers}</div>
+                    ${wildcardActive ? '<div class="wildcard-active">Wildcard active - unlimited transfers</div>' : ''}
+                  </div>
+                `;
+                const firstSection = document.querySelector('.section');
+                firstSection.insertBefore(successBanner, firstSection.firstChild);
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => {
+                  if (successBanner.parentNode) {
+                    successBanner.parentNode.removeChild(successBanner);
+                  }
+                }, 3000);
+                
+                // Update UI
+                renderTeamGrid();
+                calculateTeamStats();
+                
+                // Reset transfer state
+                currentTransferPlayer = null;
+                document.getElementById('statsModal').style.display = 'none';
+              } else {
+                alert(data.error || "Failed to transfer player");
+              }
+            } catch (e) {
+              alert("Failed to transfer player: " + (e.message || ""));
+            }
+            
+            // Close the modal after transfer
+            playerModal.style.display = 'none';
+            return;
+          }
+          
+          // If this is a regular selection (not a transfer)
+          for (let i = 0; i < selectedTeam.length; i++) {
+            if (selectedTeam[i] && selectedTeam[i].id === playerId) {
+              selectedTeam[i] = null;
+            }
+          }
+          
+          // Check if adding this player would exceed budget
+          const playerCost = parseFloat(player.now_cost);
+          if (userBudget < playerCost) {
+            alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
+            return;
+          }
+          
+          selectedTeam[slotIndex] = player;
+          renderTeamGrid();
+          playerModal.style.display = 'none';
+        });
+      });
+    }
+
+    function showPlayerStats(player) {
+      const statsContent = document.getElementById('statsContent');
+      
+      // Position-specific stats
+      let positionStats = '';
+      if (player.element_type === 1 || player.element_type === 2) { // GK/DEF
+        positionStats = `
+          <div class="stat-row">
+            <span>Clean Sheets:</span>
+            <span>${player.clean_sheets}</span>
+          </div>
+        `;
+      }
+      
+      // Transfer section HTML
+      let transferSection = '';
+      if (submitTeamBtn.style.display === 'none') {
+        transferSection = `
+          <div class="transfer-section">
+            <div class="transfer-title">🔄 Transfer Options</div>
+            <button id="transferOutBtn" class="transfer-btn">
+              <i class="fas fa-exchange-alt"></i> Replace this player
+            </button>
+            <div class="transfer-info">
+              ${freeTransfers > 0 ? 
+                `You have ${freeTransfers} free transfer${freeTransfers > 1 ? 's' : ''} left.` : 
+                `No free transfers left. -4 points penalty for extra transfers.`}
+            </div>
+          </div>
+        `;
+      }
+
+      statsContent.innerHTML = `
+        <div style="text-align:center; margin-bottom:20px;">
+          <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
+          <h3 style="margin:10px 0; color: var(--text);">${player.web_name}</h3>
+          <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
+          <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
+        </div>
+        
+        <div class="stat-grid">
+          <div class="stat-row">
+            <span>Form:</span>
+            <span>${player.form}</span>
+          </div>
+          <div class="stat-row">
+            <span>Pts/Game:</span>
+            <span>${player.points_per_game}</span>
+          </div>
+          <div class="stat-row">
+            <span>Selected By:</span>
+            <span>${player.selected_by_percent}%</span>
+          </div>
+          <div class="stat-row">
+            <span>Minutes:</span>
+            <span>${player.minutes}</span>
+          </div>
+          <div class="stat-row">
+            <span>Goals:</span>
+            <span>${player.goals_scored}</span>
+          </div>
+          <div class="stat-row">
+            <span>Assists:</span>
+            <span>${player.assists}</span>
+          </div>
+          <div class="stat-row">
+            <span>Bonus:</span>
+            <span>${player.bonus}</span>
+          </div>
+          ${positionStats}
+        </div>
+        
+        ${transferSection}
+        
+        <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
+          <div style="color:var(--text-tertiary); font-size:13px;">
+            * Stats updated after each gameweek
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('statsModal').style.display = 'flex';
+      document.getElementById('statsModal').classList.add('slide-in-up');
+      
+      // Add transfer button event listener
+      const transferBtn = document.getElementById('transferOutBtn');
+      if (transferBtn) {
+        transferBtn.addEventListener('click', () => {
+          currentTransferPlayer = player;
+          document.getElementById('statsModal').style.display = 'none';
+          
+          // FIX: Map element_type to positionType string
+          const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
+          const positionType = positionMap[player.element_type] || 'fwd';
+          
+          // Open player selection for the same position
+          openPlayerModal(positionType, selectedTeam.indexOf(player));
+        });
+      }
+    }
+
+    function calculateTeamStats() {
+      if (selectedTeam.some(p => p === null)) {
+        document.getElementById('teamStats').style.display = 'none';
+        return;
+      }
+      
+      const validPlayers = selectedTeam.filter(p => p !== null);
+      const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
+      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
+      const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
+      
+      // Add fade-in animation to stats cards
+      const statsContainer = document.getElementById('teamStats');
+      statsContainer.style.display = 'block';
+      
+      // Animate stat values
+      animateValue('seasonTotal', 0, seasonTotal, 1000);
+      animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
+      animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
+      
+      // Update budget stats
+      updateBudgetDisplay();
+    }
+
+    function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
+      const element = document.getElementById(id);
+      const range = end - start;
+      let current = start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= end) {
+          clearInterval(timer);
+          element.innerText = formatter(end);
+        } else {
+          element.innerText = formatter(current);
+        }
+      }, stepTime);
+    }
+
+    // UPDATE LIVE SCORES
+    async function updateLiveScores() {
+      if (selectedTeam.every(p => p === null)) return;
+      
+      try {
+        const response = await fetch('/update-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update liveScores object
+          data.playerStats.forEach(stat => {
+            liveScores[stat.player_id] = stat;
+          });
+          
+          // Update UI
+          renderTeamGrid();
+          calculateTeamStats();
+          
+          // Update last updated time
+          const lastUpdated = document.getElementById('lastUpdated');
+          lastUpdated.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
+          
+          // Show live update indicator
+          const updateBtn = document.getElementById('updatePointsBtn');
+          updateBtn.innerHTML = `<i class="fas fa-check"></i> Live Scores Updated!`;
+          updateBtn.style.backgroundColor = 'rgba(74, 222, 128, 0.1)';
+          updateBtn.style.color = '#000';
+          
+          // Reset button after 3 seconds
+          setTimeout(() => {
+            updateBtn.innerHTML = `<i class="fas fa-sync-alt"></i> Update Live Scores`;
+            updateBtn.style.backgroundColor = '';
+            updateBtn.style.color = '';
+          }, 3000);
+        }
+      } catch (e) {
+        console.error('Failed to update scores:', e.message);
+      }
+    }
+
+    // Auto-update every 5 minutes (for demo)
+    setInterval(() => {
+      if (submitTeamBtn.style.display === 'none') {
+        updateLiveScores();
+      }
+    }, 300000); // 5 minutes
+
+    // Manual update button
+    document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
+
+    closeModal.addEventListener('click', () => {
+      playerModal.classList.remove('slide-in-up');
+      setTimeout(() => {
+        playerModal.style.display = 'none';
+      }, 300);
+    });
+
+    document.getElementById('closeStatsModal').addEventListener('click', () => {
+      document.getElementById('statsModal').classList.remove('slide-in-up');
+      setTimeout(() => {
+        document.getElementById('statsModal').style.display = 'none';
+      }, 300);
+    });
+
+    document.querySelectorAll('.formation-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFormation = btn.dataset.formation;
+        selectedTeam = Array(11).fill(null);
+        renderTeamGrid();
+      });
+    });
+
+    submitTeamBtn.addEventListener('click', async () => {
+      if (selectedTeam.some(p => p === null)) {
+        alert("Please fill all 11 slots");
+        return;
+      }
+
+      const teamIds = selectedTeam.map(p => p.id);
+      try {
+        const response = await fetch('/save-team', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, team: teamIds })
+        });
+        const data = await response.json();
+        if (data.success) {
+          // Create confetti celebration
+          createConfetti();
+          
+          // Show success message with animation
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:20px; background:rgba(74, 222, 128, 0.15); border-radius:16px; margin:16px 0; animation: fadeInUp 0.5s ease-out;">
+              <div style="font-size:24px; margin-bottom:8px;">🎉</div>
+              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Submitted!</div>
+              <div style="color:var(--text-secondary);">Good luck in the contest!</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Rest of your existing code...
+          const response = await fetch(`/user-profile?userId=${userId}`);
+          const profile = await response.json();
+          selectedTeam = profile.team.map(id => 
+            allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+          );
+          userBudget = profile.budget || 100.0;
+          freeTransfers = profile.freeTransfers || 1;
+          wildcardUsed = profile.wildcardUsed || false;
+          wildcardGameweek = profile.wildcardGameweek;
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+          renderTeamGrid();
+          calculateTeamStats();
+          document.querySelectorAll('.slot').forEach(slot => {
+            slot.style.opacity = '0.7';
+          });
+          submitTeamBtn.style.display = 'none';
+          document.getElementById('formationSelectorContainer').style.display = 'none';
+          
+          // Auto-hide success banner after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Start live scoring updates
+          updateLiveScores();
+        }
+      } catch (e) {
+        alert("Failed to submit team: " + (e.message || ""));
+      }
+    });
+
+    function checkSubmitButton() {
+      const isComplete = !selectedTeam.some(p => p === null);
+      const isOverBudget = calculateTeamValue() > 100;
+      
+      submitTeamBtn.disabled = !isComplete || isOverBudget;
+      
+      if (isOverBudget) {
+        submitTeamBtn.title = "Team budget exceeds £100m";
+      } else {
+        submitTeamBtn.title = "";
+      }
+    }
+
+    // WILDCARD ACTIVATION
+    document.getElementById('activateWildcardBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/activate-wildcard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          wildcardUsed = true;
+          wildcardGameweek = 1; // In a real app, this would be current gameweek
+          updateWildcardDisplay();
+          
+          // Show success message
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Wildcard Activated!</div>
+              <div style="color:var(--text-secondary); margin-top:6px;">Unlimited transfers for this gameweek</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Update UI
+          freeTransfers = 1; // Set to 1 to show wildcard is active
+          document.getElementById('freeTransfers').className = 'free-transfers';
+          document.getElementById('freeTransfers').innerText = 'Unlimited';
+        }
+      } catch (e) {
+        alert("Failed to activate wildcard: " + (e.message || ""));
+      }
+    });
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-update live scores every 5 minutes
+      setInterval(() => {
+        if (submitTeamBtn.style.display === 'none') {
+          updateLiveScores();
+        }
+      }, 300000);
+    });
   </script>
 </body>
 </html>
