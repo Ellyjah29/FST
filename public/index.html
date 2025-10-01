@@ -711,8 +711,8 @@
       margin-top: 4px;
     }
 
-    /* TRIPLE CAPTAIN SYSTEM */
-    .triple-captain-container {
+    /* WILD BENCH SYSTEM */
+    .wild-bench-container {
       margin-top: 20px;
       padding: 16px;
       background: rgba(255, 255, 255, 0.05);
@@ -720,7 +720,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .triple-captain-title {
+    .wild-bench-title {
       font-weight: 600;
       margin-bottom: 12px;
       color: var(--text);
@@ -729,7 +729,7 @@
       gap: 8px;
     }
 
-    .triple-captain-icon {
+    .wild-bench-icon {
       background: var(--accent);
       color: #000;
       width: 24px;
@@ -742,16 +742,16 @@
       margin-right: 8px;
     }
 
-    .triple-captain-active {
+    .wild-bench-active {
       color: var(--success);
       font-weight: 700;
     }
 
-    .triple-captain-inactive {
+    .wild-bench-inactive {
       color: var(--text-tertiary);
     }
 
-    .triple-captain-btn {
+    .wild-bench-btn {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
@@ -764,16 +764,16 @@
       transition: var(--transition);
     }
 
-    .triple-captain-btn:hover {
+    .wild-bench-btn:hover {
       background: rgba(255, 255, 255, 0.12);
     }
 
-    .triple-captain-btn:disabled {
+    .wild-bench-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .triple-captain-usage {
+    .wild-bench-usage {
       font-size: 13px;
       color: var(--text-tertiary);
       margin-top: 8px;
@@ -781,21 +781,58 @@
       align-items: center;
     }
 
-    .triple-captain-usage i {
+    .wild-bench-usage i {
       color: var(--success);
       margin-right: 8px;
     }
 
-    .triple-captain-warning {
+    .wild-bench-warning {
       color: var(--warning);
       font-weight: 600;
     }
 
-    /* CAPTAIN INDICATOR */
-    .captain-badge {
+    /* WILD BENCH SLOT */
+    .wild-bench-slot {
+      width: 64px;
+      height: 80px;
+      border: 2px dashed var(--text-tertiary);
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent);
+    }
+
+    .wild-bench-slot:hover {
+      border-color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .wild-bench-slot.filled {
+      border-style: solid;
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .wild-bench-label {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-tertiary);
+      color: var(--accent);
+    }
+
+    .wild-bench-badge {
       position: absolute;
       top: -6px;
-      left: -6px;
+      right: -6px;
       width: 20px;
       height: 20px;
       background: var(--accent);
@@ -915,24 +952,6 @@
           </div>
         </div>
 
-        <!-- TRIPLE CAPTAIN SYSTEM -->
-        <div class="triple-captain-container">
-          <div class="triple-captain-title">
-            <div class="triple-captain-icon">3x</div>
-            Triple Captain
-          </div>
-          <div class="triple-captain-status">
-            <span id="tripleCaptainStatus" class="triple-captain-inactive">Not activated</span>
-          </div>
-          <button id="activateTripleCaptainBtn" class="triple-captain-btn">
-            <i class="fas fa-star"></i> Activate Triple Captain
-          </button>
-          <div class="triple-captain-usage">
-            <i class="fas fa-check"></i>
-            <span id="tripleCaptainUsage">1 per season</span>
-          </div>
-        </div>
-
         <!-- WILDCARD SYSTEM -->
         <div class="wildcard-container">
           <div class="wildcard-title">
@@ -951,21 +970,39 @@
           </div>
         </div>
         
-        <!-- BENCH BOOST SYSTEM -->
-        <div class="bench-boost-container">
-          <div class="bench-boost-title">
-            <div class="bench-boost-icon">B</div>
-            Bench Boost
+        <!-- TRIPLE CAPTAIN SYSTEM -->
+        <div class="triple-captain-container">
+          <div class="triple-captain-title">
+            <div class="triple-captain-icon">3x</div>
+            Triple Captain
           </div>
-          <div class="bench-boost-status">
-            <span id="benchBoostStatus" class="bench-boost-inactive">Not activated</span>
+          <div class="triple-captain-status">
+            <span id="tripleCaptainStatus" class="triple-captain-inactive">Not activated</span>
           </div>
-          <button id="activateBenchBoostBtn" class="bench-boost-btn">
-            <i class="fas fa-chart-line"></i> Activate Bench Boost
+          <button id="activateTripleCaptainBtn" class="triple-captain-btn">
+            <i class="fas fa-star"></i> Activate Triple Captain
           </button>
-          <div class="bench-boost-usage">
+          <div class="triple-captain-usage">
             <i class="fas fa-check"></i>
-            <span id="benchBoostUsage">1 per season</span>
+            <span id="tripleCaptainUsage">1 per season</span>
+          </div>
+        </div>
+        
+        <!-- WILD BENCH SYSTEM -->
+        <div class="wild-bench-container">
+          <div class="wild-bench-title">
+            <div class="wild-bench-icon">12</div>
+            Wild Bench
+          </div>
+          <div class="wild-bench-status">
+            <span id="wildBenchStatus" class="wild-bench-inactive">Not activated</span>
+          </div>
+          <button id="activateWildBenchBtn" class="wild-bench-btn">
+            <i class="fas fa-plus"></i> Activate Wild Bench
+          </button>
+          <div class="wild-bench-usage">
+            <i class="fas fa-check"></i>
+            <span id="wildBenchUsage">1 per season</span>
           </div>
         </div>
         
@@ -1093,6 +1130,7 @@
 
     let currentFormation = "4-3-3";
     let selectedTeam = Array(11).fill(null);
+    let wildBenchPlayer = null;
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
@@ -1100,11 +1138,11 @@
     let currentTransferPlayer = null; // Track which player we're transferring out
     let wildcardUsed = false;
     let wildcardGameweek = null;
-    let benchBoostUsed = false;
-    let benchBoostGameweek = null;
     let tripleCaptainUsed = false;
     let tripleCaptainGameweek = null;
     let captainId = null;
+    let wildBenchUsed = false;
+    let wildBenchGameweek = null;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1158,1027 +1196,8 @@
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
+              wildBenchPlayer = profile.wildBenchPlayer;
               userBudget = profile.budget || 100.0;
               freeTransfers = profile.freeTransfers || 1;
               wildcardUsed = profile.wildcardUsed || false;
-              wildcardGameweek = profile.wildcardGameweek;
-              benchBoostUsed = profile.benchBoostUsed || false;
-              benchBoostGameweek = profile.benchBoostGameweek;
-              tripleCaptainUsed = profile.tripleCaptainUsed || false;
-              tripleCaptainGameweek = profile.tripleCaptainGameweek;
-              captainId = profile.captainId;
-              updateBudgetDisplay();
-              updateWildcardDisplay();
-              updateBenchBoostDisplay();
-              updateTripleCaptainDisplay();
-              renderTeamGrid();
-              calculateTeamStats(); // Show team stats
-              // Only reduce opacity (don't disable pointer events)
-              document.querySelectorAll('.slot').forEach(slot => {
-                slot.style.opacity = '0.7';
-              });
-              submitTeamBtn.style.display = 'none';
-              document.getElementById('formationSelectorContainer').style.display = 'none';
-              
-              // Show "Already Submitted" banner
-              const banner = document.createElement('div');
-              banner.innerHTML = `
-                <div class="submission-banner">
-                  <div class="banner-title">✅ Team Submitted!</div>
-                  <div class="banner-text">Your team is locked for this contest.</div>
-                </div>
-              `;
-              const firstSection = document.querySelector('.section');
-              firstSection.insertBefore(banner, firstSection.firstChild);
-              
-              // Load live scores
-              updateLiveScores();
-            });
-            return;
-          }
-          
-          // If joined but not submitted, show team builder
-          joinView.style.display = 'none';
-          teamView.style.display = 'block';
-          loadPlayers();
-          if (profile.team && profile.team.length > 0) {
-            selectedTeam = profile.team.map(id => 
-              allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
-            );
-          }
-          userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1;
-          wildcardUsed = profile.wildcardUsed || false;
-          wildcardGameweek = profile.wildcardGameweek;
-          benchBoostUsed = profile.benchBoostUsed || false;
-          benchBoostGameweek = profile.benchBoostGameweek;
-          tripleCaptainUsed = profile.tripleCaptainUsed || false;
-          tripleCaptainGameweek = profile.tripleCaptainGameweek;
-          captainId = profile.captainId;
-          updateBudgetDisplay();
-          updateWildcardDisplay();
-          updateBenchBoostDisplay();
-          updateTripleCaptainDisplay();
-          renderTeamGrid();
-          calculateTeamStats(); // Show team stats
-          return;
-        }
-      } catch (e) {
-        // Continue to join view
-      }
-      
-      managerNameInput.value = telegramUser?.first_name || "FST Manager";
-    }
-
-    // Initialize
-    checkExistingUser();
-
-    joinContestBtn.addEventListener('click', async () => {
-      const managerName = managerNameInput.value.trim() || "FST Manager";
-      if (managerName.length < 2) {
-        alert("Manager name must be at least 2 characters");
-        return;
-      }
-
-      try {
-        const response = await fetch('/connect-wallet', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, managerName })
-        });
-        const data = await response.json();
-        if (data.success) {
-          topUserName.innerText = data.managerName;
-          joinView.style.display = 'none';
-          teamView.style.display = 'block';
-          loadPlayers();
-          renderTeamGrid();
-          userBudget = data.budget || 100.0;
-          freeTransfers = data.freeTransfers || 1;
-          wildcardUsed = false;
-          wildcardGameweek = null;
-          benchBoostUsed = false;
-          benchBoostGameweek = null;
-          tripleCaptainUsed = false;
-          tripleCaptainGameweek = null;
-          captainId = null;
-          updateBudgetDisplay();
-          updateWildcardDisplay();
-          updateBenchBoostDisplay();
-          updateTripleCaptainDisplay();
-        } else {
-          throw new Error(data.error || 'Failed to join');
-        }
-      } catch (e) {
-        alert("Error: " + (e.message || "Failed to join contest"));
-      }
-    });
-
-    async function loadPlayers() {
-      const statusDiv = document.getElementById('status') || document.createElement('div');
-      if (!document.getElementById('status')) {
-        const firstSection = document.querySelector('.section');
-        firstSection.insertBefore(statusDiv, firstSection.firstChild);
-        statusDiv.id = 'status';
-      }
-
-      // Show skeleton loading
-      teamGrid.innerHTML = `
-        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px;">
-          ${Array(8).fill().map(() => `
-            <div class="skeleton" style="height:80px; border-radius:14px;"></div>
-          `).join('')}
-        </div>
-      `;
-
-      try {
-        const response = await fetch('/players');
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to load players');
-        }
-        const players = await response.json();
-        allPlayers = players;
-        statusDiv.innerText = "";
-        renderTeamGrid(); // This will replace skeleton with real data
-      } catch (e) {
-        teamGrid.innerHTML = ''; // Clear skeleton on error
-        statusDiv.innerHTML = `
-          ❌ ${e.message}<br>
-          <button class="retry-btn" id="retryBtn">
-            <i class="fas fa-redo"></i> Retry
-          </button>
-        `;
-        document.getElementById('retryBtn').addEventListener('click', loadPlayers);
-      }
-    }
-
-    function updateBudgetDisplay() {
-      const budgetContainer = document.getElementById('budgetRemaining');
-      const budgetStats = document.getElementById('budgetStats');
-      if (!budgetContainer || !budgetStats) return;
-      
-      // Format budget with color based on value
-      let budgetClass = 'budget-value';
-      if (userBudget < 10) {
-        budgetClass = 'budget-critical';
-      } else if (userBudget < 20) {
-        budgetClass = 'budget-warning';
-      }
-      
-      budgetContainer.className = budgetClass;
-      budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
-      budgetStats.className = budgetClass;
-      budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
-      
-      // Update free transfers display
-      const transfersElement = document.getElementById('freeTransfers');
-      if (transfersElement) {
-        if (freeTransfers > 0) {
-          transfersElement.className = 'free-transfers';
-          transfersElement.innerText = `${freeTransfers} left`;
-        } else {
-          transfersElement.className = 'transfer-penalty';
-          transfersElement.innerText = '0 (Penalty: -4 points)';
-        }
-      }
-    }
-
-    function updateWildcardDisplay() {
-      const wildcardStatus = document.getElementById('wildcardStatus');
-      const wildcardUsage = document.getElementById('wildcardUsage');
-      const activateBtn = document.getElementById('activateWildcardBtn');
-      
-      if (wildcardUsed) {
-        wildcardStatus.className = 'wildcard-active';
-        wildcardStatus.innerText = 'Activated!';
-        wildcardUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${wildcardGameweek}`;
-        activateBtn.disabled = true;
-        activateBtn.title = "Wildcard already used this season";
-      } else {
-        wildcardStatus.className = 'wildcard-inactive';
-        wildcardStatus.innerText = 'Not activated';
-        wildcardUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        activateBtn.disabled = false;
-        activateBtn.title = "Activate for unlimited transfers this gameweek";
-      }
-    }
-
-    function updateBenchBoostDisplay() {
-      const benchBoostStatus = document.getElementById('benchBoostStatus');
-      const benchBoostUsage = document.getElementById('benchBoostUsage');
-      const activateBtn = document.getElementById('activateBenchBoostBtn');
-      
-      if (benchBoostUsed) {
-        benchBoostStatus.className = 'bench-boost-active';
-        benchBoostStatus.innerText = 'Activated!';
-        benchBoostUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${benchBoostGameweek}`;
-        activateBtn.disabled = true;
-        activateBtn.title = "Bench Boost already used this season";
-      } else {
-        benchBoostStatus.className = 'bench-boost-inactive';
-        benchBoostStatus.innerText = 'Not activated';
-        benchBoostUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        activateBtn.disabled = false;
-        activateBtn.title = "Activate to score bench players this gameweek";
-      }
-    }
-
-    function updateTripleCaptainDisplay() {
-      const tripleCaptainStatus = document.getElementById('tripleCaptainStatus');
-      const tripleCaptainUsage = document.getElementById('tripleCaptainUsage');
-      const activateBtn = document.getElementById('activateTripleCaptainBtn');
-      
-      if (tripleCaptainUsed) {
-        tripleCaptainStatus.className = 'triple-captain-active';
-        tripleCaptainStatus.innerText = 'Activated!';
-        tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${tripleCaptainGameweek}`;
-        activateBtn.disabled = true;
-        activateBtn.title = "Triple Captain already used this season";
-      } else {
-        tripleCaptainStatus.className = 'triple-captain-inactive';
-        tripleCaptainStatus.innerText = 'Not activated';
-        tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        activateBtn.disabled = false;
-        activateBtn.title = "Activate to triple captain points this gameweek";
-      }
-    }
-
-    function calculateTeamValue() {
-      return selectedTeam
-        .filter(p => p !== null)
-        .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
-    }
-
-    function calculateRemainingBudget() {
-      const teamValue = calculateTeamValue();
-      return (100.0 - teamValue).toFixed(1);
-    }
-
-    function renderTeamGrid() {
-      const [gk, def, mid, fwd] = formations[currentFormation];
-      const slots = [];
-      
-      for (let i = 0; i < gk; i++) slots.push({ type: 'gk', label: 'GK' });
-      for (let i = 0; i < def; i++) slots.push({ type: 'def', label: 'DEF' });
-      for (let i = 0; i < mid; i++) slots.push({ type: 'mid', label: 'MID' });
-      for (let i = 0; i < fwd; i++) slots.push({ type: 'fwd', label: 'FWD' });
-
-      let html = '';
-      const lines = [
-        slots.slice(-fwd),
-        slots.slice(-(fwd+mid), -fwd),
-        slots.slice(-(fwd+mid+def), -(fwd+mid)),
-        slots.slice(0, gk)
-      ];
-
-      lines.forEach(line => {
-        if (line.length === 0) return;
-        html += `<div class="line">`;
-        line.forEach((slot, idx) => {
-          const slotIndex = slots.indexOf(slot);
-          const player = selectedTeam[slotIndex];
-          const isCaptain = captainId === player?.id;
-          html += `
-            <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
-                 data-index="${slotIndex}" 
-                 data-type="${slot.type}">
-              ${player ? 
-                `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
-                 ${isCaptain ? '<div class="captain-badge">C</div>' : ''}
-                 ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
-                 ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
-                ` : 
-                `<span class="slot-label">${slot.label}</span>`
-              }
-            </div>
-          `;
-        });
-        html += `</div>`;
-      });
-
-      teamGrid.innerHTML = html;
-
-      // Click handler for player stats
-      document.querySelectorAll('.slot').forEach(slot => {
-        slot.addEventListener('click', () => {
-          const index = slot.dataset.index;
-          const player = selectedTeam[index];
-          
-          // If team is submitted and player exists, show stats
-          if (player && player.id && submitTeamBtn.style.display === 'none') {
-            showPlayerStats(player);
-            return;
-          }
-          
-          // For non-submitted teams, allow selection on empty slots
-          if (submitTeamBtn.style.display !== 'none' && !player) {
-            const type = slot.dataset.type;
-            openPlayerModal(type, index);
-            
-            // Add selection animation
-            slot.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-              slot.style.transform = '';
-            }, 150);
-          }
-        });
-      });
-
-      checkSubmitButton();
-      calculateTeamStats(); // Update team stats
-      
-      // Update progress bar
-      const filledCount = selectedTeam.filter(p => p !== null).length;
-      const progressPercent = (filledCount / 11) * 100;
-      document.getElementById('teamProgress').style.width = `${progressPercent}%`;
-      document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
-      
-      // Hide formation for submitted teams
-      const isSubmitted = submitTeamBtn.style.display === 'none';
-      const formationContainer = document.getElementById('formationSelectorContainer');
-      if (formationContainer) {
-        formationContainer.style.display = isSubmitted ? 'none' : 'block';
-      }
-      
-      // Update budget
-      userBudget = 100.0 - calculateTeamValue();
-      updateBudgetDisplay();
-    }
-
-    function openPlayerModal(positionType, slotIndex) {
-      const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
-      const fplType = positionMap[positionType];
-      const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
-
-      document.getElementById('modalPosition').innerText = positionName;
-
-      const selectedIds = new Set(
-        selectedTeam
-          .filter(p => p !== null)
-          .map(p => p.id)
-      );
-
-      let availablePlayers = allPlayers
-        .filter(p => p.element_type === fplType)
-        .filter(p => !selectedIds.has(p.id));
-
-      const originalPlayers = [...availablePlayers];
-      renderPlayerList(availablePlayers, slotIndex);
-      setupFilters(originalPlayers, slotIndex);
-      playerModal.style.display = 'flex';
-      playerModal.classList.add('slide-in-up');
-    }
-
-    function setupFilters(originalPlayers, slotIndex) {
-      const searchInput = document.getElementById('playerSearch');
-      const minPriceInput = document.getElementById('minPrice');
-      const maxPriceInput = document.getElementById('maxPrice');
-      const minPointsInput = document.getElementById('minPoints');
-      const maxPointsInput = document.getElementById('maxPoints');
-      const resetBtn = document.getElementById('resetFilters');
-
-      const applyFilters = () => {
-        let filtered = [...originalPlayers];
-        const searchTerm = searchInput.value.toLowerCase();
-        if (searchTerm) {
-          filtered = filtered.filter(player => 
-            player.web_name.toLowerCase().includes(searchTerm) ||
-            player.team_name.toLowerCase().includes(searchTerm)
-          );
-        }
-        const minPrice = parseFloat(minPriceInput.value);
-        const maxPrice = parseFloat(maxPriceInput.value);
-        if (!isNaN(minPrice)) {
-          filtered = filtered.filter(player => parseFloat(player.now_cost) >= minPrice);
-        }
-        if (!isNaN(maxPrice)) {
-          filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
-        }
-        const minPoints = parseInt(minPointsInput.value);
-        const maxPoints = parseInt(maxPointsInput.value);
-        if (!isNaN(minPoints)) {
-          filtered = filtered.filter(player => player.total_points >= minPoints);
-        }
-        if (!isNaN(maxPoints)) {
-          filtered = filtered.filter(player => player.total_points <= maxPoints);
-        }
-        renderPlayerList(filtered, slotIndex);
-      };
-
-      searchInput.addEventListener('input', applyFilters);
-      minPriceInput.addEventListener('input', applyFilters);
-      maxPriceInput.addEventListener('input', applyFilters);
-      minPointsInput.addEventListener('input', applyFilters);
-      maxPointsInput.addEventListener('input', applyFilters);
-      
-      resetBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        minPriceInput.value = '';
-        maxPriceInput.value = '';
-        minPointsInput.value = '';
-        maxPointsInput.value = '';
-        renderPlayerList(originalPlayers, slotIndex);
-      });
-    }
-
-    function renderPlayerList(players, slotIndex) {
-      let html = '';
-      players.forEach(player => {
-        // Check if adding this player would exceed budget
-        const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
-        const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
-        
-        html += `
-          <div class="${playerClass}" data-id="${player.id}">
-            <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
-            <div class="player-info">
-              <div class="player-name">${player.web_name}</div>
-              <div class="player-meta">
-                <span>${player.team_name}</span>
-                <span class="price-tag">£${player.now_cost}m</span>
-                <span class="points-tag">${player.total_points} pts</span>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      if (players.length === 0) {
-        html = '<div class="empty-state"><i class="fas fa-search"></i><p>No players match your filters</p></div>';
-      }
-
-      playerList.innerHTML = html;
-
-      document.querySelectorAll('.player-card').forEach(card => {
-        card.addEventListener('click', async () => {
-          const playerId = parseInt(card.dataset.id);
-          const player = allPlayers.find(p => p.id === playerId);
-          
-          // If this is a transfer (replacing a player)
-          if (currentTransferPlayer) {
-            const oldPlayerId = currentTransferPlayer.id;
-            
-            try {
-              const response = await fetch('/transfer-player', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                  userId, 
-                  oldPlayerId, 
-                  newPlayerId: playerId 
-                })
-              });
-              const data = await response.json();
-              
-              if (data.success) {
-                // Update UI
-                const oldPlayerIndex = selectedTeam.indexOf(parseInt(oldPlayerId));
-                selectedTeam[oldPlayerIndex] = playerId;
-                userBudget = data.budget;
-                freeTransfers = data.freeTransfers;
-                const wildcardActive = data.wildcardActive;
-                
-                // Show success message
-                const successBanner = document.createElement('div');
-                successBanner.innerHTML = `
-                  <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
-                    <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Player Transferred!</div>
-                    <div style="color:var(--text-secondary); margin-top:6px;">Free transfers left: ${freeTransfers}</div>
-                    ${wildcardActive ? '<div class="wildcard-active">Wildcard active - unlimited transfers</div>' : ''}
-                  </div>
-                `;
-                const firstSection = document.querySelector('.section');
-                firstSection.insertBefore(successBanner, firstSection.firstChild);
-                
-                // Auto-remove after 3 seconds
-                setTimeout(() => {
-                  if (successBanner.parentNode) {
-                    successBanner.parentNode.removeChild(successBanner);
-                  }
-                }, 3000);
-                
-                // Update UI
-                renderTeamGrid();
-                calculateTeamStats();
-                
-                // Reset transfer state
-                currentTransferPlayer = null;
-                document.getElementById('statsModal').style.display = 'none';
-              } else {
-                alert(data.error || "Failed to transfer player");
-              }
-            } catch (e) {
-              alert("Failed to transfer player: " + (e.message || ""));
-            }
-            
-            // Close the modal after transfer
-            playerModal.style.display = 'none';
-            return;
-          }
-          
-          // If this is a regular selection (not a transfer)
-          for (let i = 0; i < selectedTeam.length; i++) {
-            if (selectedTeam[i] && selectedTeam[i].id === playerId) {
-              selectedTeam[i] = null;
-            }
-          }
-          
-          // Check if adding this player would exceed budget
-          const playerCost = parseFloat(player.now_cost);
-          if (userBudget < playerCost) {
-            alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
-            return;
-          }
-          
-          selectedTeam[slotIndex] = player;
-          renderTeamGrid();
-          playerModal.style.display = 'none';
-        });
-      });
-    }
-
-    function showPlayerStats(player) {
-      const statsContent = document.getElementById('statsContent');
-      
-      // Position-specific stats
-      let positionStats = '';
-      if (player.element_type === 1 || player.element_type === 2) { // GK/DEF
-        positionStats = `
-          <div class="stat-row">
-            <span>Clean Sheets:</span>
-            <span>${player.clean_sheets}</span>
-          </div>
-        `;
-      }
-      
-      // Transfer section HTML
-      let transferSection = '';
-      if (submitTeamBtn.style.display === 'none') {
-        transferSection = `
-          <div class="transfer-section">
-            <div class="transfer-title">🔄 Transfer Options</div>
-            <button id="transferOutBtn" class="transfer-btn">
-              <i class="fas fa-exchange-alt"></i> Replace this player
-            </button>
-            <div class="transfer-info">
-              ${freeTransfers > 0 ? 
-                `You have ${freeTransfers} free transfer${freeTransfers > 1 ? 's' : ''} left.` : 
-                `No free transfers left. -4 points penalty for extra transfers.`}
-            </div>
-          </div>
-        `;
-      }
-
-      statsContent.innerHTML = `
-        <div style="text-align:center; margin-bottom:20px;">
-          <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
-          <h3 style="margin:10px 0; color: var(--text);">${player.web_name}</h3>
-          <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
-          <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
-        </div>
-        
-        <div class="stat-grid">
-          <div class="stat-row">
-            <span>Form:</span>
-            <span>${player.form}</span>
-          </div>
-          <div class="stat-row">
-            <span>Pts/Game:</span>
-            <span>${player.points_per_game}</span>
-          </div>
-          <div class="stat-row">
-            <span>Selected By:</span>
-            <span>${player.selected_by_percent}%</span>
-          </div>
-          <div class="stat-row">
-            <span>Minutes:</span>
-            <span>${player.minutes}</span>
-          </div>
-          <div class="stat-row">
-            <span>Goals:</span>
-            <span>${player.goals_scored}</span>
-          </div>
-          <div class="stat-row">
-            <span>Assists:</span>
-            <span>${player.assists}</span>
-          </div>
-          <div class="stat-row">
-            <span>Bonus:</span>
-            <span>${player.bonus}</span>
-          </div>
-          ${positionStats}
-        </div>
-        
-        ${transferSection}
-        
-        <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
-          <div style="color:var(--text-tertiary); font-size:13px;">
-            * Stats updated after each gameweek
-          </div>
-        </div>
-      `;
-      
-      document.getElementById('statsModal').style.display = 'flex';
-      document.getElementById('statsModal').classList.add('slide-in-up');
-      
-      // Add transfer button event listener
-      const transferBtn = document.getElementById('transferOutBtn');
-      if (transferBtn) {
-        transferBtn.addEventListener('click', () => {
-          currentTransferPlayer = player;
-          document.getElementById('statsModal').style.display = 'none';
-          
-          // FIX: Map element_type to positionType string
-          const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
-          const positionType = positionMap[player.element_type] || 'fwd';
-          
-          // Open player selection for the same position
-          openPlayerModal(positionType, selectedTeam.indexOf(player));
-        });
-      }
-    }
-
-    function calculateTeamStats() {
-      if (selectedTeam.some(p => p === null)) {
-        document.getElementById('teamStats').style.display = 'none';
-        return;
-      }
-      
-      const validPlayers = selectedTeam.filter(p => p !== null);
-      const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
-      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
-      const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
-      
-      // Add fade-in animation to stats cards
-      const statsContainer = document.getElementById('teamStats');
-      statsContainer.style.display = 'block';
-      
-      // Animate stat values
-      animateValue('seasonTotal', 0, seasonTotal, 1000);
-      animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
-      animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
-      
-      // Update budget stats
-      updateBudgetDisplay();
-    }
-
-    function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
-      const element = document.getElementById(id);
-      const range = end - start;
-      let current = start;
-      const increment = end > start ? 1 : -1;
-      const stepTime = Math.abs(Math.floor(duration / range));
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= end) {
-          clearInterval(timer);
-          element.innerText = formatter(end);
-        } else {
-          element.innerText = formatter(current);
-        }
-      }, stepTime);
-    }
-
-    // UPDATE LIVE SCORES
-    async function updateLiveScores() {
-      if (selectedTeam.every(p => p === null)) return;
-      
-      try {
-        const response = await fetch('/update-points', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          // Update liveScores object
-          data.playerStats.forEach(stat => {
-            liveScores[stat.player_id] = stat;
-          });
-          
-          // Update UI
-          renderTeamGrid();
-          calculateTeamStats();
-          
-          // Update last updated time
-          const lastUpdated = document.getElementById('lastUpdated');
-          lastUpdated.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
-          
-          // Show live update indicator
-          const updateBtn = document.getElementById('updatePointsBtn');
-          updateBtn.innerHTML = `<i class="fas fa-check"></i> Live Scores Updated!`;
-          updateBtn.style.backgroundColor = 'rgba(74, 222, 128, 0.1)';
-          updateBtn.style.color = '#000';
-          
-          // Reset button after 3 seconds
-          setTimeout(() => {
-            updateBtn.innerHTML = `<i class="fas fa-sync-alt"></i> Update Live Scores`;
-            updateBtn.style.backgroundColor = '';
-            updateBtn.style.color = '';
-          }, 3000);
-        }
-      } catch (e) {
-        console.error('Failed to update scores:', e.message);
-      }
-    }
-
-    // Auto-update every 5 minutes (for demo)
-    setInterval(() => {
-      if (submitTeamBtn.style.display === 'none') {
-        updateLiveScores();
-      }
-    }, 300000); // 5 minutes
-
-    // Manual update button
-    document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
-
-    closeModal.addEventListener('click', () => {
-      playerModal.classList.remove('slide-in-up');
-      setTimeout(() => {
-        playerModal.style.display = 'none';
-      }, 300);
-    });
-
-    document.getElementById('closeStatsModal').addEventListener('click', () => {
-      document.getElementById('statsModal').classList.remove('slide-in-up');
-      setTimeout(() => {
-        document.getElementById('statsModal').style.display = 'none';
-      }, 300);
-    });
-
-    document.querySelectorAll('.formation-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFormation = btn.dataset.formation;
-        selectedTeam = Array(11).fill(null);
-        renderTeamGrid();
-      });
-    });
-
-    submitTeamBtn.addEventListener('click', async () => {
-      if (selectedTeam.some(p => p === null)) {
-        alert("Please fill all 11 slots");
-        return;
-      }
-
-      const teamIds = selectedTeam.map(p => p.id);
-      try {
-        const response = await fetch('/save-team', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, team: teamIds })
-        });
-        const data = await response.json();
-        if (data.success) {
-          // Create confetti celebration
-          createConfetti();
-          
-          // Show success message with animation
-          const successBanner = document.createElement('div');
-          successBanner.innerHTML = `
-            <div style="text-align:center; padding:20px; background:rgba(74, 222, 128, 0.15); border-radius:16px; margin:16px 0; animation: fadeInUp 0.5s ease-out;">
-              <div style="font-size:24px; margin-bottom:8px;">🎉</div>
-              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Submitted!</div>
-              <div style="color:var(--text-secondary);">Good luck in the contest!</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
-          // Rest of your existing code...
-          const response = await fetch(`/user-profile?userId=${userId}`);
-          const profile = await response.json();
-          selectedTeam = profile.team.map(id => 
-            allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
-          );
-          userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1;
-          wildcardUsed = profile.wildcardUsed || false;
-          wildcardGameweek = profile.wildcardGameweek;
-          benchBoostUsed = profile.benchBoostUsed || false;
-          benchBoostGameweek = profile.benchBoostGameweek;
-          tripleCaptainUsed = profile.tripleCaptainUsed || false;
-          tripleCaptainGameweek = profile.tripleCaptainGameweek;
-          captainId = profile.captainId;
-          updateBudgetDisplay();
-          updateWildcardDisplay();
-          updateBenchBoostDisplay();
-          updateTripleCaptainDisplay();
-          renderTeamGrid();
-          calculateTeamStats();
-          document.querySelectorAll('.slot').forEach(slot => {
-            slot.style.opacity = '0.7';
-          });
-          submitTeamBtn.style.display = 'none';
-          document.getElementById('formationSelectorContainer').style.display = 'none';
-          
-          // Auto-hide success banner after 3 seconds
-          setTimeout(() => {
-            if (successBanner.parentNode) {
-              successBanner.parentNode.removeChild(successBanner);
-            }
-          }, 3000);
-          
-          // Start live scoring updates
-          updateLiveScores();
-        }
-      } catch (e) {
-        alert("Failed to submit team: " + (e.message || ""));
-      }
-    });
-
-    function checkSubmitButton() {
-      const isComplete = !selectedTeam.some(p => p === null);
-      const isOverBudget = calculateTeamValue() > 100;
-      
-      submitTeamBtn.disabled = !isComplete || isOverBudget;
-      
-      if (isOverBudget) {
-        submitTeamBtn.title = "Team budget exceeds £100m";
-      } else {
-        submitTeamBtn.title = "";
-      }
-    }
-
-    // WILDCARD ACTIVATION
-    document.getElementById('activateWildcardBtn').addEventListener('click', async () => {
-      try {
-        const response = await fetch('/activate-wildcard', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          wildcardUsed = true;
-          wildcardGameweek = 1; // In a real app, this would be current gameweek
-          updateWildcardDisplay();
-          
-          // Show success message
-          const successBanner = document.createElement('div');
-          successBanner.innerHTML = `
-            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
-              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Wildcard Activated!</div>
-              <div style="color:var(--text-secondary); margin-top:6px;">Unlimited transfers for this gameweek</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
-          // Auto-remove after 3 seconds
-          setTimeout(() => {
-            if (successBanner.parentNode) {
-              successBanner.parentNode.removeChild(successBanner);
-            }
-          }, 3000);
-          
-          // Update UI
-          freeTransfers = 1; // Set to 1 to show wildcard is active
-          document.getElementById('freeTransfers').className = 'free-transfers';
-          document.getElementById('freeTransfers').innerText = 'Unlimited';
-        }
-      } catch (e) {
-        alert("Failed to activate wildcard: " + (e.message || ""));
-      }
-    });
-
-    // BENCH BOOST ACTIVATION
-    document.getElementById('activateBenchBoostBtn').addEventListener('click', async () => {
-      try {
-        const response = await fetch('/activate-bench-boost', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          benchBoostUsed = true;
-          benchBoostGameweek = 1; // In a real app, this would be current gameweek
-          updateBenchBoostDisplay();
-          
-          // Show success message
-          const successBanner = document.createElement('div');
-          successBanner.innerHTML = `
-            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
-              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Bench Boost Activated!</div>
-              <div style="color:var(--text-secondary); margin-top:6px;">Bench players score this gameweek</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
-          // Auto-remove after 3 seconds
-          setTimeout(() => {
-            if (successBanner.parentNode) {
-              successBanner.parentNode.removeChild(successBanner);
-            }
-          }, 3000);
-          
-          // Update UI
-          document.getElementById('benchBoostStatus').className = 'bench-boost-active';
-          document.getElementById('benchBoostStatus').innerText = 'Activated!';
-        }
-      } catch (e) {
-        alert("Failed to activate Bench Boost: " + (e.message || ""));
-      }
-    });
-
-    // TRIPLE CAPTAIN ACTIVATION
-    document.getElementById('activateTripleCaptainBtn').addEventListener('click', async () => {
-      try {
-        // Check if there's a captain
-        if (!captainId) {
-          alert("Please select a captain first by adding one to your team");
-          return;
-        }
-        
-        const response = await fetch('/activate-triple-captain', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            userId,
-            captainId
-          })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          tripleCaptainUsed = true;
-          tripleCaptainGameweek = 1; // In a real app, this would be current gameweek
-          updateTripleCaptainDisplay();
-          
-          // Show success message
-          const successBanner = document.createElement('div');
-          successBanner.innerHTML = `
-            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
-              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Triple Captain Activated!</div>
-              <div style="color:var(--text-secondary); margin-top:6px;">Captain points will be tripled this gameweek</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
-          // Auto-remove after 3 seconds
-          setTimeout(() => {
-            if (successBanner.parentNode) {
-              successBanner.parentNode.removeChild(successBanner);
-            }
-          }, 3000);
-          
-          // Update UI
-          document.getElementById('tripleCaptainStatus').className = 'triple-captain-active';
-          document.getElementById('tripleCaptainStatus').innerText = 'Activated!';
-        }
-      } catch (e) {
-        alert("Failed to activate Triple Captain: " + (e.message || ""));
-      }
-    });
-
-    // Initial setup
-    document.addEventListener('DOMContentLoaded', () => {
-      // Auto-update live scores every 5 minutes
-      setInterval(() => {
-        if (submitTeamBtn.style.display === 'none') {
-          updateLiveScores();
-        }
-      }, 300000);
-      
-      // Set up captain selection
-      document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('slot') && submitTeamBtn.style.display === 'none') {
-          const index = e.target.dataset.index;
-          const player = selectedTeam[index];
-          
-          if (player && player.id) {
-            captainId = player.id;
-            renderTeamGrid();
-            
-            // Show captain confirmation
-            const confirmation = document.createElement('div');
-            confirmation.innerHTML = `
-              <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin:16px 0;">
-                <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Captain Selected</div>
-                <div style="color:var(--text-secondary); margin-top:6px;">${player.web_name} is now your captain</div>
-              </div>
-            `;
-            const firstSection = document.querySelector('.section');
-            firstSection.insertBefore(confirmation, firstSection.firstChild);
-            
-            // Auto-remove after 3 seconds
-            setTimeout(() => {
-              if (confirmation.parentNode) {
-                confirmation.parentNode.removeChild(confirmation);
-              }
-            }, 3000);
-          }
-        }
-      });
-    });
-  </script>
-</body>
-</html>
+              wildcardGameweek = prof
