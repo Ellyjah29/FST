@@ -844,6 +844,42 @@
       font-weight: 600;
       color: #000;
     }
+
+    /* TEAM LIMIT INDICATORS */
+    .team-limit-indicator {
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 0, 0, 0.5);
+      border-radius: 2px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .slot:hover .team-limit-indicator {
+      opacity: 0.6;
+    }
+
+    .slot.team-limit-exceeded {
+      border-color: var(--error);
+      transform: scale(1.03);
+      box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
+    }
+
+    .player-card.team-limit-exceeded {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .team-limit-warning {
+      color: var(--error);
+      font-weight: 600;
+      margin-top: 8px;
+      text-align: center;
+      font-size: 12px;
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -950,6 +986,11 @@
             <div class="team-stat-label">Avg. Form</div>
             <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
           </div>
+        </div>
+
+        <!-- TEAM LIMITS WARNING -->
+        <div class="team-limit-warning" id="teamLimitWarning" style="display:none;">
+          <i class="fas fa-exclamation-triangle"></i> Max 2 players per real-world team
         </div>
 
         <!-- WILDCARD SYSTEM -->
@@ -1143,6 +1184,7 @@
     let captainId = null;
     let wildBenchUsed = false;
     let wildBenchGameweek = null;
+    let teamCounts = {}; // Track how many players from each team
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1200,4 +1242,1177 @@
               userBudget = profile.budget || 100.0;
               freeTransfers = profile.freeTransfers || 1;
               wildcardUsed = profile.wildcardUsed || false;
-              wildcardGameweek = prof
+              wildcardGameweek = profile.wildcardGameweek;
+              tripleCaptainUsed = profile.tripleCaptainUsed || false;
+              tripleCaptainGameweek = profile.tripleCaptainGameweek;
+              captainId = profile.captainId;
+              wildBenchUsed = profile.wildBenchUsed || false;
+              wildBenchGameweek = profile.wildBenchGameweek;
+              updateBudgetDisplay();
+              updateWildcardDisplay();
+              updateTripleCaptainDisplay();
+              updateWildBenchDisplay();
+              calculateTeamCounts();
+              renderTeamGrid();
+              calculateTeamStats(); // Show team stats
+              // Only reduce opacity (don't disable pointer events)
+              document.querySelectorAll('.slot').forEach(slot => {
+                slot.style.opacity = '0.7';
+              });
+              submitTeamBtn.style.display = 'none';
+              document.getElementById('formationSelectorContainer').style.display = 'none';
+              
+              // Show "Already Submitted" banner
+              const banner = document.createElement('div');
+              banner.innerHTML = `
+                <div class="submission-banner">
+                  <div class="banner-title">✅ Team Submitted!</div>
+                  <div class="banner-text">Your team is locked for this contest.</div>
+                </div>
+              `;
+              const firstSection = document.querySelector('.section');
+              firstSection.insertBefore(banner, firstSection.firstChild);
+              
+              // Load live scores
+              updateLiveScores();
+            });
+            return;
+          }
+          
+          // If joined but not submitted, show team builder
+          joinView.style.display = 'none';
+          teamView.style.display = 'block';
+          loadPlayers();
+          if (profile.team && profile.team.length > 0) {
+            selectedTeam = profile.team.map(id => 
+              allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+            );
+            wildBenchPlayer = profile.wildBenchPlayer;
+          }
+          userBudget = profile.budget || 100.0;
+          freeTransfers = profile.freeTransfers || 1;
+          wildcardUsed = profile.wildcardUsed || false;
+          wildcardGameweek = profile.wildcardGameweek;
+          tripleCaptainUsed = profile.tripleCaptainUsed || false;
+          tripleCaptainGameweek = profile.tripleCaptainGameweek;
+          captainId = profile.captainId;
+          wildBenchUsed = profile.wildBenchUsed || false;
+          wildBenchGameweek = profile.wildBenchGameweek;
+          calculateTeamCounts();
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+          updateTripleCaptainDisplay();
+          updateWildBenchDisplay();
+          renderTeamGrid();
+          calculateTeamStats(); // Show team stats
+          return;
+        }
+      } catch (e) {
+        // Continue to join view
+      }
+      
+      managerNameInput.value = telegramUser?.first_name || "FST Manager";
+    }
+
+    // Initialize
+    checkExistingUser();
+
+    joinContestBtn.addEventListener('click', async () => {
+      const managerName = managerNameInput.value.trim() || "FST Manager";
+      if (managerName.length < 2) {
+        alert("Manager name must be at least 2 characters");
+        return;
+      }
+
+      try {
+        const response = await fetch('/connect-wallet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, managerName })
+        });
+        const data = await response.json();
+        if (data.success) {
+          topUserName.innerText = data.managerName;
+          joinView.style.display = 'none';
+          teamView.style.display = 'block';
+          loadPlayers();
+          renderTeamGrid();
+          userBudget = data.budget || 100.0;
+          freeTransfers = data.freeTransfers || 1;
+          wildcardUsed = false;
+          wildcardGameweek = null;
+          tripleCaptainUsed = false;
+          tripleCaptainGameweek = null;
+          captainId = null;
+          wildBenchUsed = false;
+          wildBenchGameweek = null;
+          wildBenchPlayer = null;
+          teamCounts = {};
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+          updateTripleCaptainDisplay();
+          updateWildBenchDisplay();
+        } else {
+          throw new Error(data.error || 'Failed to join');
+        }
+      } catch (e) {
+        alert("Error: " + (e.message || "Failed to join contest"));
+      }
+    });
+
+    async function loadPlayers() {
+      const statusDiv = document.getElementById('status') || document.createElement('div');
+      if (!document.getElementById('status')) {
+        const firstSection = document.querySelector('.section');
+        firstSection.insertBefore(statusDiv, firstSection.firstChild);
+        statusDiv.id = 'status';
+      }
+
+      // Show skeleton loading
+      teamGrid.innerHTML = `
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px;">
+          ${Array(8).fill().map(() => `
+            <div class="skeleton" style="height:80px; border-radius:14px;"></div>
+          `).join('')}
+        </div>
+      `;
+
+      try {
+        const response = await fetch('/players');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to load players');
+        }
+        const players = await response.json();
+        allPlayers = players;
+        statusDiv.innerText = "";
+        renderTeamGrid(); // This will replace skeleton with real data
+      } catch (e) {
+        teamGrid.innerHTML = ''; // Clear skeleton on error
+        statusDiv.innerHTML = `
+          ❌ ${e.message}<br>
+          <button class="retry-btn" id="retryBtn">
+            <i class="fas fa-redo"></i> Retry
+          </button>
+        `;
+        document.getElementById('retryBtn').addEventListener('click', loadPlayers);
+      }
+    }
+
+    function calculateTeamCounts() {
+      teamCounts = {};
+      selectedTeam.forEach(player => {
+        if (player && player.team) {
+          teamCounts[player.team] = (teamCounts[player.team] || 0) + 1;
+        }
+      });
+    }
+
+    function updateBudgetDisplay() {
+      const budgetContainer = document.getElementById('budgetRemaining');
+      const budgetStats = document.getElementById('budgetStats');
+      if (!budgetContainer || !budgetStats) return;
+      
+      // Format budget with color based on value
+      let budgetClass = 'budget-value';
+      if (userBudget < 10) {
+        budgetClass = 'budget-critical';
+      } else if (userBudget < 20) {
+        budgetClass = 'budget-warning';
+      }
+      
+      budgetContainer.className = budgetClass;
+      budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
+      budgetStats.className = budgetClass;
+      budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
+      
+      // Update free transfers display
+      const transfersElement = document.getElementById('freeTransfers');
+      if (transfersElement) {
+        if (freeTransfers > 0) {
+          transfersElement.className = 'free-transfers';
+          transfersElement.innerText = `${freeTransfers} left`;
+        } else {
+          transfersElement.className = 'transfer-penalty';
+          transfersElement.innerText = '0 (Penalty: -4 points)';
+        }
+      }
+    }
+
+    function updateWildcardDisplay() {
+      const wildcardStatus = document.getElementById('wildcardStatus');
+      const wildcardUsage = document.getElementById('wildcardUsage');
+      const activateBtn = document.getElementById('activateWildcardBtn');
+      
+      if (wildcardUsed) {
+        wildcardStatus.className = 'wildcard-active';
+        wildcardStatus.innerText = 'Activated!';
+        wildcardUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${wildcardGameweek}`;
+        activateBtn.disabled = true;
+        activateBtn.title = "Wildcard already used this season";
+      } else {
+        wildcardStatus.className = 'wildcard-inactive';
+        wildcardStatus.innerText = 'Not activated';
+        wildcardUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
+        activateBtn.disabled = false;
+        activateBtn.title = "Activate for unlimited transfers this gameweek";
+      }
+    }
+
+    function updateTripleCaptainDisplay() {
+      const tripleCaptainStatus = document.getElementById('tripleCaptainStatus');
+      const tripleCaptainUsage = document.getElementById('tripleCaptainUsage');
+      const activateBtn = document.getElementById('activateTripleCaptainBtn');
+      
+      if (tripleCaptainUsed) {
+        tripleCaptainStatus.className = 'triple-captain-active';
+        tripleCaptainStatus.innerText = 'Activated!';
+        tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${tripleCaptainGameweek}`;
+        activateBtn.disabled = true;
+        activateBtn.title = "Triple Captain already used this season";
+      } else {
+        tripleCaptainStatus.className = 'triple-captain-inactive';
+        tripleCaptainStatus.innerText = 'Not activated';
+        tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
+        activateBtn.disabled = false;
+        activateBtn.title = "Activate to triple captain points this gameweek";
+      }
+    }
+
+    function updateWildBenchDisplay() {
+      const wildBenchStatus = document.getElementById('wildBenchStatus');
+      const wildBenchUsage = document.getElementById('wildBenchUsage');
+      const activateBtn = document.getElementById('activateWildBenchBtn');
+      
+      if (wildBenchUsed) {
+        wildBenchStatus.className = 'wild-bench-active';
+        wildBenchStatus.innerText = 'Activated!';
+        wildBenchUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${wildBenchGameweek}`;
+        activateBtn.disabled = true;
+        activateBtn.title = "Wild Bench already used this season";
+      } else {
+        wildBenchStatus.className = 'wild-bench-inactive';
+        wildBenchStatus.innerText = 'Not activated';
+        wildBenchUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
+        activateBtn.disabled = false;
+        activateBtn.title = "Activate for 12th player this gameweek";
+      }
+    }
+
+    function calculateTeamValue() {
+      return selectedTeam
+        .filter(p => p !== null)
+        .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
+    }
+
+    function calculateRemainingBudget() {
+      const teamValue = calculateTeamValue();
+      return (100.0 - teamValue).toFixed(1);
+    }
+
+    function renderTeamGrid() {
+      const [gk, def, mid, fwd] = formations[currentFormation];
+      const slots = [];
+      
+      for (let i = 0; i < gk; i++) slots.push({ type: 'gk', label: 'GK' });
+      for (let i = 0; i < def; i++) slots.push({ type: 'def', label: 'DEF' });
+      for (let i = 0; i < mid; i++) slots.push({ type: 'mid', label: 'MID' });
+      for (let i = 0; i < fwd; i++) slots.push({ type: 'fwd', label: 'FWD' });
+
+      let html = '';
+      const lines = [
+        slots.slice(-fwd),
+        slots.slice(-(fwd+mid), -fwd),
+        slots.slice(-(fwd+mid+def), -(fwd+mid)),
+        slots.slice(0, gk)
+      ];
+
+      lines.forEach(line => {
+        if (line.length === 0) return;
+        html += `<div class="line">`;
+        line.forEach((slot, idx) => {
+          const slotIndex = slots.indexOf(slot);
+          const player = selectedTeam[slotIndex];
+          const isCaptain = captainId === player?.id;
+          html += `
+            <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
+                 data-index="${slotIndex}" 
+                 data-type="${slot.type}">
+              ${player ? 
+                `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
+                 ${isCaptain ? '<div class="captain-badge">C</div>' : ''}
+                 ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
+                 ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
+                 ${teamCounts[player.team] > 2 ? '<div class="team-limit-indicator" style="opacity:0.6;"></div>' : ''}
+                ` : 
+                `<span class="slot-label">${slot.label}</span>`
+              }
+            </div>
+          `;
+        });
+        html += `</div>`;
+      });
+
+      // Add Wild Bench slot if active
+      if (wildBenchUsed && wildBenchGameweek === 1) {
+        const wildBenchPlayer = allPlayers.find(p => p.id === wildBenchPlayer);
+        html += `
+          <div class="line" style="margin-top: 16px;">
+            <div class="wild-bench-slot ${wildBenchPlayer ? 'filled' : ''}" data-type="wild-bench">
+              ${wildBenchPlayer ? 
+                `<img src="${wildBenchPlayer.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
+                 <div class="wild-bench-badge">12</div>
+                 ${liveScores[wildBenchPlayer.id] ? `<div class="live-indicator"></div>` : ''}
+                 ${liveScores[wildBenchPlayer.id] ? `<div class="live-badge">${liveScores[wildBenchPlayer.id].points}</div>` : ''}
+                 ${teamCounts[wildBenchPlayer.team] > 2 ? '<div class="team-limit-indicator" style="opacity:0.6;"></div>' : ''}
+                ` : 
+                `<span class="wild-bench-label">Wild Bench</span>`
+              }
+            </div>
+          </div>
+        `;
+      }
+
+      teamGrid.innerHTML = html;
+
+      // Click handler for player stats
+      document.querySelectorAll('.slot').forEach(slot => {
+        slot.addEventListener('click', () => {
+          const index = slot.dataset.index;
+          const player = selectedTeam[index];
+          
+          // If team is submitted and player exists, show stats
+          if (player && player.id && submitTeamBtn.style.display === 'none') {
+            showPlayerStats(player);
+            return;
+          }
+          
+          // For non-submitted teams, allow selection on empty slots
+          if (submitTeamBtn.style.display !== 'none' && !player) {
+            const type = slot.dataset.type;
+            openPlayerModal(type, index);
+            
+            // Add selection animation
+            slot.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              slot.style.transform = '';
+            }, 150);
+          }
+        });
+      });
+
+      // Click handler for Wild Bench slot
+      const wildBenchSlot = document.querySelector('.wild-bench-slot');
+      if (wildBenchSlot) {
+        wildBenchSlot.addEventListener('click', () => {
+          if (wildBenchUsed && wildBenchGameweek === 1) {
+            openPlayerModal('wild-bench', 11);
+          }
+        });
+      }
+
+      // Check team limits
+      checkTeamLimits();
+      checkSubmitButton();
+      calculateTeamStats(); // Update team stats
+      
+      // Update progress bar
+      const filledCount = selectedTeam.filter(p => p !== null).length;
+      const progressPercent = (filledCount / 11) * 100;
+      document.getElementById('teamProgress').style.width = `${progressPercent}%`;
+      document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
+      
+      // Hide formation for submitted teams
+      const isSubmitted = submitTeamBtn.style.display === 'none';
+      const formationContainer = document.getElementById('formationSelectorContainer');
+      if (formationContainer) {
+        formationContainer.style.display = isSubmitted ? 'none' : 'block';
+      }
+      
+      // Update budget
+      userBudget = 100.0 - calculateTeamValue();
+      updateBudgetDisplay();
+    }
+
+    function checkTeamLimits() {
+      // Show team limit warning if needed
+      const teamLimitWarning = document.getElementById('teamLimitWarning');
+      if (Object.values(teamCounts).some(count => count > 2)) {
+        teamLimitWarning.style.display = 'block';
+      } else {
+        teamLimitWarning.style.display = 'none';
+      }
+
+      // Highlight slots where teams are over the limit
+      document.querySelectorAll('.slot').forEach((slot, index) => {
+        const player = selectedTeam[index];
+        if (player && teamCounts[player.team] > 2) {
+          slot.classList.add('team-limit-exceeded');
+        } else {
+          slot.classList.remove('team-limit-exceeded');
+        }
+      });
+    }
+
+    function openPlayerModal(positionType, slotIndex) {
+      let positionName = '';
+      let fplType = null;
+      
+      if (positionType === 'wild-bench') {
+        positionName = '12th Player (Wild Bench)';
+        fplType = null; // Wild Bench can be any position
+      } else {
+        const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
+        fplType = positionMap[positionType];
+        positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
+      }
+
+      document.getElementById('modalPosition').innerText = positionName;
+
+      const selectedIds = new Set(
+        selectedTeam
+          .filter(p => p !== null)
+          .map(p => p.id)
+      );
+
+      let availablePlayers = allPlayers;
+      if (positionType !== 'wild-bench') {
+        availablePlayers = allPlayers
+          .filter(p => p.element_type === fplType)
+          .filter(p => !selectedIds.has(p.id));
+      }
+
+      // Filter out players that would exceed team limits
+      availablePlayers = availablePlayers.filter(player => {
+        // If adding this player would exceed the 2-player limit for the team
+        const teamCount = (teamCounts[player.team] || 0) + 1;
+        return teamCount <= 2;
+      });
+
+      const originalPlayers = [...availablePlayers];
+      renderPlayerList(availablePlayers, slotIndex);
+      setupFilters(originalPlayers, slotIndex);
+      playerModal.style.display = 'flex';
+      playerModal.classList.add('slide-in-up');
+    }
+
+    function setupFilters(originalPlayers, slotIndex) {
+      const searchInput = document.getElementById('playerSearch');
+      const minPriceInput = document.getElementById('minPrice');
+      const maxPriceInput = document.getElementById('maxPrice');
+      const minPointsInput = document.getElementById('minPoints');
+      const maxPointsInput = document.getElementById('maxPoints');
+      const resetBtn = document.getElementById('resetFilters');
+
+      const applyFilters = () => {
+        let filtered = [...originalPlayers];
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm) {
+          filtered = filtered.filter(player => 
+            player.web_name.toLowerCase().includes(searchTerm) ||
+            player.team_name.toLowerCase().includes(searchTerm)
+          );
+        }
+        const minPrice = parseFloat(minPriceInput.value);
+        const maxPrice = parseFloat(maxPriceInput.value);
+        if (!isNaN(minPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) >= minPrice);
+        }
+        if (!isNaN(maxPrice)) {
+          filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
+        }
+        const minPoints = parseInt(minPointsInput.value);
+        const maxPoints = parseInt(maxPointsInput.value);
+        if (!isNaN(minPoints)) {
+          filtered = filtered.filter(player => player.total_points >= minPoints);
+        }
+        if (!isNaN(maxPoints)) {
+          filtered = filtered.filter(player => player.total_points <= maxPoints);
+        }
+        
+        // Filter out players that would exceed team limits
+        filtered = filtered.filter(player => {
+          const teamCount = (teamCounts[player.team] || 0) + 1;
+          return teamCount <= 2;
+        });
+        
+        renderPlayerList(filtered, slotIndex);
+      };
+
+      searchInput.addEventListener('input', applyFilters);
+      minPriceInput.addEventListener('input', applyFilters);
+      maxPriceInput.addEventListener('input', applyFilters);
+      minPointsInput.addEventListener('input', applyFilters);
+      maxPointsInput.addEventListener('input', applyFilters);
+      
+      resetBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        minPriceInput.value = '';
+        maxPriceInput.value = '';
+        minPointsInput.value = '';
+        maxPointsInput.value = '';
+        renderPlayerList(originalPlayers, slotIndex);
+      });
+    }
+
+    function renderPlayerList(players, slotIndex) {
+      let html = '';
+      players.forEach(player => {
+        // Check if adding this player would exceed budget
+        const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
+        const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
+        
+        // Check if adding this player would exceed team limit
+        const wouldExceedTeamLimit = (teamCounts[player.team] || 0) >= 2;
+        
+        html += `
+          <div class="${playerClass} ${wouldExceedTeamLimit ? 'team-limit-exceeded' : ''}" data-id="${player.id}">
+            <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
+            <div class="player-info">
+              <div class="player-name">${player.web_name}</div>
+              <div class="player-meta">
+                <span>${player.team_name}</span>
+                <span class="price-tag">£${player.now_cost}m</span>
+                <span class="points-tag">${player.total_points} pts</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      if (players.length === 0) {
+        html = '<div class="empty-state"><i class="fas fa-search"></i><p>No players match your filters</p></div>';
+      }
+
+      playerList.innerHTML = html;
+
+      document.querySelectorAll('.player-card').forEach(card => {
+        card.addEventListener('click', async () => {
+          const playerId = parseInt(card.dataset.id);
+          const player = allPlayers.find(p => p.id === playerId);
+          
+          // If this is a transfer (replacing a player)
+          if (currentTransferPlayer) {
+            const oldPlayerId = currentTransferPlayer.id;
+            
+            try {
+              const response = await fetch('/transfer-player', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  userId, 
+                  oldPlayerId, 
+                  newPlayerId: playerId 
+                })
+              });
+              const data = await response.json();
+              
+              if (data.success) {
+                // Update UI
+                const oldPlayerIndex = selectedTeam.indexOf(parseInt(oldPlayerId));
+                selectedTeam[oldPlayerIndex] = playerId;
+                userBudget = data.budget;
+                freeTransfers = data.freeTransfers;
+                const wildcardActive = data.wildcardActive;
+                
+                // Update team counts
+                if (oldPlayerIndex !== -1) {
+                  const oldPlayer = selectedTeam[oldPlayerIndex];
+                  if (oldPlayer && oldPlayer.team) {
+                    teamCounts[oldPlayer.team] = (teamCounts[oldPlayer.team] || 0) - 1;
+                    if (teamCounts[oldPlayer.team] <= 0) {
+                      delete teamCounts[oldPlayer.team];
+                    }
+                  }
+                }
+                
+                if (player && player.team) {
+                  teamCounts[player.team] = (teamCounts[player.team] || 0) + 1;
+                }
+                
+                // Show success message
+                const successBanner = document.createElement('div');
+                successBanner.innerHTML = `
+                  <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+                    <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Player Transferred!</div>
+                    <div style="color:var(--text-secondary); margin-top:6px;">Free transfers left: ${freeTransfers}</div>
+                    ${wildcardActive ? '<div class="wildcard-active">Wildcard active - unlimited transfers</div>' : ''}
+                  </div>
+                `;
+                const firstSection = document.querySelector('.section');
+                firstSection.insertBefore(successBanner, firstSection.firstChild);
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => {
+                  if (successBanner.parentNode) {
+                    successBanner.parentNode.removeChild(successBanner);
+                  }
+                }, 3000);
+                
+                // Update UI
+                renderTeamGrid();
+                calculateTeamStats();
+                
+                // Reset transfer state
+                currentTransferPlayer = null;
+                document.getElementById('statsModal').style.display = 'none';
+              } else {
+                alert(data.error || "Failed to transfer player");
+              }
+            } catch (e) {
+              alert("Failed to transfer player: " + (e.message || ""));
+            }
+            
+            // Close the modal after transfer
+            playerModal.style.display = 'none';
+            return;
+          }
+          
+          // If this is a regular selection (not a transfer)
+          if (slotIndex === 11) {
+            // Wild Bench selection
+            wildBenchPlayer = player;
+            renderTeamGrid();
+            playerModal.style.display = 'none';
+            return;
+          }
+          
+          for (let i = 0; i < selectedTeam.length; i++) {
+            if (selectedTeam[i] && selectedTeam[i].id === playerId) {
+              selectedTeam[i] = null;
+              
+              // Update team counts
+              const removedPlayer = selectedTeam[i];
+              if (removedPlayer && removedPlayer.team) {
+                teamCounts[removedPlayer.team] = (teamCounts[removedPlayer.team] || 0) - 1;
+                if (teamCounts[removedPlayer.team] <= 0) {
+                  delete teamCounts[removedPlayer.team];
+                }
+              }
+            }
+          }
+          
+          // Check if adding this player would exceed budget
+          const playerCost = parseFloat(player.now_cost);
+          if (userBudget < playerCost) {
+            alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
+            return;
+          }
+          
+          // Check if adding this player would exceed team limit
+          const teamCount = (teamCounts[player.team] || 0) + 1;
+          if (teamCount > 2) {
+            alert(`Cannot select more than 2 players from ${player.team_name}`);
+            return;
+          }
+          
+          // Update team counts
+          if (player && player.team) {
+            teamCounts[player.team] = (teamCounts[player.team] || 0) + 1;
+          }
+          
+          selectedTeam[slotIndex] = player;
+          renderTeamGrid();
+          playerModal.style.display = 'none';
+        });
+      });
+    }
+
+    function showPlayerStats(player) {
+      const statsContent = document.getElementById('statsContent');
+      
+      // Position-specific stats
+      let positionStats = '';
+      if (player.element_type === 1 || player.element_type === 2) { // GK/DEF
+        positionStats = `
+          <div class="stat-row">
+            <span>Clean Sheets:</span>
+            <span>${player.clean_sheets}</span>
+          </div>
+        `;
+      }
+      
+      // Transfer section HTML
+      let transferSection = '';
+      if (submitTeamBtn.style.display === 'none') {
+        transferSection = `
+          <div class="transfer-section">
+            <div class="transfer-title">🔄 Transfer Options</div>
+            <button id="transferOutBtn" class="transfer-btn">
+              <i class="fas fa-exchange-alt"></i> Replace this player
+            </button>
+            <div class="transfer-info">
+              ${freeTransfers > 0 ? 
+                `You have ${freeTransfers} free transfer${freeTransfers > 1 ? 's' : ''} left.` : 
+                `No free transfers left. -4 points penalty for extra transfers.`}
+            </div>
+          </div>
+        `;
+      }
+
+      statsContent.innerHTML = `
+        <div style="text-align:center; margin-bottom:20px;">
+          <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
+          <h3 style="margin:10px 0; color: var(--text);">${player.web_name}</h3>
+          <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
+          <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
+        </div>
+        
+        <div class="stat-grid">
+          <div class="stat-row">
+            <span>Form:</span>
+            <span>${player.form}</span>
+          </div>
+          <div class="stat-row">
+            <span>Pts/Game:</span>
+            <span>${player.points_per_game}</span>
+          </div>
+          <div class="stat-row">
+            <span>Selected By:</span>
+            <span>${player.selected_by_percent}%</span>
+          </div>
+          <div class="stat-row">
+            <span>Minutes:</span>
+            <span>${player.minutes}</span>
+          </div>
+          <div class="stat-row">
+            <span>Goals:</span>
+            <span>${player.goals_scored}</span>
+          </div>
+          <div class="stat-row">
+            <span>Assists:</span>
+            <span>${player.assists}</span>
+          </div>
+          <div class="stat-row">
+            <span>Bonus:</span>
+            <span>${player.bonus}</span>
+          </div>
+          ${positionStats}
+        </div>
+        
+        ${transferSection}
+        
+        <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
+          <div style="color:var(--text-tertiary); font-size:13px;">
+            * Stats updated after each gameweek
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('statsModal').style.display = 'flex';
+      document.getElementById('statsModal').classList.add('slide-in-up');
+      
+      // Add transfer button event listener
+      const transferBtn = document.getElementById('transferOutBtn');
+      if (transferBtn) {
+        transferBtn.addEventListener('click', () => {
+          currentTransferPlayer = player;
+          document.getElementById('statsModal').style.display = 'none';
+          
+          // FIX: Map element_type to positionType string
+          const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
+          const positionType = positionMap[player.element_type] || 'fwd';
+          
+          // Open player selection for the same position
+          openPlayerModal(positionType, selectedTeam.indexOf(player));
+        });
+      }
+    }
+
+    function calculateTeamStats() {
+      if (selectedTeam.some(p => p === null)) {
+        document.getElementById('teamStats').style.display = 'none';
+        return;
+      }
+      
+      const validPlayers = selectedTeam.filter(p => p !== null);
+      const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
+      const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
+      const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
+      
+      // Add fade-in animation to stats cards
+      const statsContainer = document.getElementById('teamStats');
+      statsContainer.style.display = 'block';
+      
+      // Animate stat values
+      animateValue('seasonTotal', 0, seasonTotal, 1000);
+      animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
+      animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
+      
+      // Update budget stats
+      updateBudgetDisplay();
+    }
+
+    function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
+      const element = document.getElementById(id);
+      const range = end - start;
+      let current = start;
+      const increment = end > start ? 1 : -1;
+      const stepTime = Math.abs(Math.floor(duration / range));
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= end) {
+          clearInterval(timer);
+          element.innerText = formatter(end);
+        } else {
+          element.innerText = formatter(current);
+        }
+      }, stepTime);
+    }
+
+    // UPDATE LIVE SCORES
+    async function updateLiveScores() {
+      if (selectedTeam.every(p => p === null)) return;
+      
+      try {
+        const response = await fetch('/update-points', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update liveScores object
+          data.playerStats.forEach(stat => {
+            liveScores[stat.player_id] = stat;
+          });
+          
+          // Update UI
+          renderTeamGrid();
+          calculateTeamStats();
+          
+          // Update last updated time
+          const lastUpdated = document.getElementById('lastUpdated');
+          lastUpdated.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
+          
+          // Show live update indicator
+          const updateBtn = document.getElementById('updatePointsBtn');
+          updateBtn.innerHTML = `<i class="fas fa-check"></i> Live Scores Updated!`;
+          updateBtn.style.backgroundColor = 'rgba(74, 222, 128, 0.1)';
+          updateBtn.style.color = '#000';
+          
+          // Reset button after 3 seconds
+          setTimeout(() => {
+            updateBtn.innerHTML = `<i class="fas fa-sync-alt"></i> Update Live Scores`;
+            updateBtn.style.backgroundColor = '';
+            updateBtn.style.color = '';
+          }, 3000);
+        }
+      } catch (e) {
+        console.error('Failed to update scores:', e.message);
+      }
+    }
+
+    // Auto-update every 5 minutes (for demo)
+    setInterval(() => {
+      if (submitTeamBtn.style.display === 'none') {
+        updateLiveScores();
+      }
+    }, 300000); // 5 minutes
+
+    // Manual update button
+    document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
+
+    closeModal.addEventListener('click', () => {
+      playerModal.classList.remove('slide-in-up');
+      setTimeout(() => {
+        playerModal.style.display = 'none';
+      }, 300);
+    });
+
+    document.getElementById('closeStatsModal').addEventListener('click', () => {
+      document.getElementById('statsModal').classList.remove('slide-in-up');
+      setTimeout(() => {
+        document.getElementById('statsModal').style.display = 'none';
+      }, 300);
+    });
+
+    document.querySelectorAll('.formation-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFormation = btn.dataset.formation;
+        selectedTeam = Array(11).fill(null);
+        renderTeamGrid();
+      });
+    });
+
+    submitTeamBtn.addEventListener('click', async () => {
+      if (selectedTeam.some(p => p === null)) {
+        alert("Please fill all 11 slots");
+        return;
+      }
+
+      const teamIds = selectedTeam.map(p => p.id);
+      try {
+        const response = await fetch('/save-team', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, team: teamIds })
+        });
+        const data = await response.json();
+        if (data.success) {
+          // Create confetti celebration
+          createConfetti();
+          
+          // Show success message with animation
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:20px; background:rgba(74, 222, 128, 0.15); border-radius:16px; margin:16px 0; animation: fadeInUp 0.5s ease-out;">
+              <div style="font-size:24px; margin-bottom:8px;">🎉</div>
+              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Submitted!</div>
+              <div style="color:var(--text-secondary);">Good luck in the contest!</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Rest of your existing code...
+          const response = await fetch(`/user-profile?userId=${userId}`);
+          const profile = await response.json();
+          selectedTeam = profile.team.map(id => 
+            allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+          );
+          wildBenchPlayer = profile.wildBenchPlayer;
+          userBudget = profile.budget || 100.0;
+          freeTransfers = profile.freeTransfers || 1;
+          wildcardUsed = profile.wildcardUsed || false;
+          wildcardGameweek = profile.wildcardGameweek;
+          tripleCaptainUsed = profile.tripleCaptainUsed || false;
+          tripleCaptainGameweek = profile.tripleCaptainGameweek;
+          captainId = profile.captainId;
+          wildBenchUsed = profile.wildBenchUsed || false;
+          wildBenchGameweek = profile.wildBenchGameweek;
+          calculateTeamCounts();
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+          updateTripleCaptainDisplay();
+          updateWildBenchDisplay();
+          renderTeamGrid();
+          calculateTeamStats();
+          document.querySelectorAll('.slot').forEach(slot => {
+            slot.style.opacity = '0.7';
+          });
+          submitTeamBtn.style.display = 'none';
+          document.getElementById('formationSelectorContainer').style.display = 'none';
+          
+          // Auto-hide success banner after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Start live scoring updates
+          updateLiveScores();
+        }
+      } catch (e) {
+        alert("Failed to submit team: " + (e.message || ""));
+      }
+    });
+
+    function checkSubmitButton() {
+      const isComplete = !selectedTeam.some(p => p === null);
+      const isOverBudget = calculateTeamValue() > 100;
+      const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
+      
+      submitTeamBtn.disabled = !isComplete || isOverBudget || hasTeamLimitExceeded;
+      
+      if (isOverBudget) {
+        submitTeamBtn.title = "Team budget exceeds £100m";
+      } else if (hasTeamLimitExceeded) {
+        submitTeamBtn.title = "Exceeds 2-player limit for a team";
+      } else {
+        submitTeamBtn.title = "";
+      }
+    }
+
+    // WILDCARD ACTIVATION
+    document.getElementById('activateWildcardBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/activate-wildcard', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          wildcardUsed = true;
+          wildcardGameweek = 1; // In a real app, this would be current gameweek
+          updateWildcardDisplay();
+          
+          // Show success message
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Wildcard Activated!</div>
+              <div style="color:var(--text-secondary); margin-top:6px;">Unlimited transfers for this gameweek</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Update UI
+          freeTransfers = 1; // Set to 1 to show wildcard is active
+          document.getElementById('freeTransfers').className = 'free-transfers';
+          document.getElementById('freeTransfers').innerText = 'Unlimited';
+        }
+      } catch (e) {
+        alert("Failed to activate wildcard: " + (e.message || ""));
+      }
+    });
+
+    // TRIPLE CAPTAIN ACTIVATION
+    document.getElementById('activateTripleCaptainBtn').addEventListener('click', async () => {
+      try {
+        // Check if there's a captain
+        if (!captainId) {
+          alert("Please select a captain first by adding one to your team");
+          return;
+        }
+        
+        const response = await fetch('/activate-triple-captain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId,
+            captainId
+          })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          tripleCaptainUsed = true;
+          tripleCaptainGameweek = 1; // In a real app, this would be current gameweek
+          updateTripleCaptainDisplay();
+          
+          // Show success message
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Triple Captain Activated!</div>
+              <div style="color:var(--text-secondary); margin-top:6px;">Captain points will be tripled this gameweek</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Update UI
+          document.getElementById('tripleCaptainStatus').className = 'triple-captain-active';
+          document.getElementById('tripleCaptainStatus').innerText = 'Activated!';
+        }
+      } catch (e) {
+        alert("Failed to activate Triple Captain: " + (e.message || ""));
+      }
+    });
+
+    // WILD BENCH ACTIVATION
+    document.getElementById('activateWildBenchBtn').addEventListener('click', async () => {
+      try {
+        // Check if there's a Wild Bench player
+        if (!wildBenchPlayer) {
+          alert("Please select a Wild Bench player first by adding one to your team");
+          return;
+        }
+        
+        const response = await fetch('/activate-wild-bench', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userId,
+            wildBenchPlayerId: wildBenchPlayer.id
+          })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          wildBenchUsed = true;
+          wildBenchGameweek = 1; // In a real app, this would be current gameweek
+          updateWildBenchDisplay();
+          
+          // Show success message
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Wild Bench Activated!</div>
+              <div style="color:var(--text-secondary); margin-top:6px;">12th player will score this gameweek</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Update UI
+          document.getElementById('wildBenchStatus').className = 'wild-bench-active';
+          document.getElementById('wildBenchStatus').innerText = 'Activated!';
+        }
+      } catch (e) {
+        alert("Failed to activate Wild Bench: " + (e.message || ""));
+      }
+    });
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-update live scores every 5 minutes
+      setInterval(() => {
+        if (submitTeamBtn.style.display === 'none') {
+          updateLiveScores();
+        }
+      }, 300000);
+      
+      // Set up captain selection
+      document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('slot') && submitTeamBtn.style.display === 'none') {
+          const index = e.target.dataset.index;
+          const player = selectedTeam[index];
+          
+          if (player && player.id) {
+            captainId = player.id;
+            renderTeamGrid();
+            
+            // Show captain confirmation
+            const confirmation = document.createElement('div');
+            confirmation.innerHTML = `
+              <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin:16px 0;">
+                <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Captain Selected</div>
+                <div style="color:var(--text-secondary); margin-top:6px;">${player.web_name} is now your captain</div>
+              </div>
+            `;
+            const firstSection = document.querySelector('.section');
+            firstSection.insertBefore(confirmation, firstSection.firstChild);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+              if (confirmation.parentNode) {
+                confirmation.parentNode.removeChild(confirmation);
+              }
+            }, 3000);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>
