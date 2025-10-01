@@ -1,4 +1,4 @@
-// server.js — FINAL: BENCH BOOST SYSTEM INTEGRATED
+// server.js — FINAL: TRIPLE CAPTAIN SYSTEM INTEGRATED
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - UPDATED WITH BENCH BOOST FIELDS
+// User Schema - UPDATED WITH TRIPLE CAPTAIN FIELDS
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -44,12 +44,17 @@ const userSchema = new mongoose.Schema({
   lastTransferGameweek: { type: Number, default: 1 },
   
   // WILDCARD SYSTEM
-  wildcardUsed: { type: Boolean, default: false }, // Has user used wildcard this season?
-  wildcardGameweek: { type: Number, default: null }, // Which gameweek was wildcard used?
+  wildcardUsed: { type: Boolean, default: false },
+  wildcardGameweek: { type: Number, default: null },
   
   // BENCH BOOST SYSTEM
-  benchBoostUsed: { type: Boolean, default: false }, // Has user used bench boost this season?
-  benchBoostGameweek: { type: Number, default: null }, // Which gameweek was bench boost used?
+  benchBoostUsed: { type: Boolean, default: false },
+  benchBoostGameweek: { type: Number, default: null },
+  
+  // TRIPLE CAPTAIN SYSTEM
+  tripleCaptainUsed: { type: Boolean, default: false },
+  tripleCaptainGameweek: { type: Number, default: null },
+  captainId: { type: Number, default: null },
   
   createdAt: { type: Date, default: Date.now }
 });
@@ -88,8 +93,11 @@ app.post('/connect-wallet', async (req, res) => {
         lastTransferGameweek: 1,
         wildcardUsed: false,
         wildcardGameweek: null,
-        benchBoostUsed: false, // Initialize bench boost as unused
-        benchBoostGameweek: null
+        benchBoostUsed: false,
+        benchBoostGameweek: null,
+        tripleCaptainUsed: false, // Initialize triple captain as unused
+        tripleCaptainGameweek: null,
+        captainId: null
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -101,7 +109,8 @@ app.post('/connect-wallet', async (req, res) => {
       budget: user.budget,
       freeTransfers: user.freeTransfers,
       wildcardUsed: user.wildcardUsed,
-      benchBoostUsed: user.benchBoostUsed
+      benchBoostUsed: user.benchBoostUsed,
+      tripleCaptainUsed: user.tripleCaptainUsed
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -239,7 +248,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player - UPDATED WITH WILDCARD LOGIC
+// Transfer Player - NO CHANGES NEEDED
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -357,7 +366,7 @@ app.post('/transfer-player', async (req, res) => {
   }
 });
 
-// ACTIVATE WILDCARD - NEW ENDPOINT
+// ACTIVATE WILDCARD - NO CHANGES NEEDED
 app.post('/activate-wildcard', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -384,7 +393,7 @@ app.post('/activate-wildcard', async (req, res) => {
   }
 });
 
-// ACTIVATE BENCH BOOST - NEW ENDPOINT
+// ACTIVATE BENCH BOOST - NO CHANGES NEEDED
 app.post('/activate-bench-boost', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -411,7 +420,37 @@ app.post('/activate-bench-boost', async (req, res) => {
   }
 });
 
-// Update Team Points (Real-time scoring) - UPDATED WITH BENCH BOOST LOGIC
+// ACTIVATE TRIPLE CAPTAIN - NEW ENDPOINT
+app.post('/activate-triple-captain', async (req, res) => {
+  try {
+    const { userId, captainId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+    if (!captainId) return res.status(400).json({ error: 'Captain ID required' });
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.tripleCaptainUsed) return res.status(400).json({ error: 'Triple Captain already used' });
+    if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use Triple Captain' });
+    if (!user.team.includes(captainId)) return res.status(400).json({ error: 'Captain must be in your team' });
+
+    // Set captain and activate Triple Captain for current gameweek
+    user.captainId = captainId;
+    user.tripleCaptainUsed = true;
+    user.tripleCaptainGameweek = user.currentGameweek;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: '✅ Triple Captain activated! Captain points will be tripled this gameweek',
+      tripleCaptainActive: true
+    });
+  } catch (error) {
+    console.error('Triple Captain error:', error.message);
+    res.status(500).json({ error: 'Failed to activate Triple Captain' });
+  }
+});
+
+// Update Team Points (Real-time scoring) - UPDATED WITH TRIPLE CAPTAIN LOGIC
 app.post('/update-points', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -427,14 +466,14 @@ app.post('/update-points', async (req, res) => {
     let totalPoints = 0;
     const playerStats = [];
 
+    // Check if Triple Captain is active
+    const isTripleCaptainActive = user.tripleCaptainUsed && user.tripleCaptainGameweek === user.currentGameweek;
+    
     // Check if Bench Boost is active
     const isBenchBoostActive = user.benchBoostUsed && user.benchBoostGameweek === user.currentGameweek;
     
-    // Get all players (starting 11 + bench)
-    const allPlayerIds = [...user.team, ...user.bench]; // In a real implementation, you'd have a bench array
-    
     // Fetch stats for each player
-    for (const playerId of allPlayerIds) {
+    for (const playerId of user.team) {
       try {
         const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
@@ -443,15 +482,14 @@ app.post('/update-points', async (req, res) => {
         const data = response.data;
         const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
         
-        const points = latestGW?.total_points || 0;
+        let points = latestGW?.total_points || 0;
         
-        // Add points to total if:
-        // 1. Player is in starting 11, OR
-        // 2. Bench Boost is active and player is on bench
-        const isPlayerInStarting11 = user.team.includes(parseInt(playerId));
-        if (isPlayerInStarting11 || (isBenchBoostActive && !isPlayerInStarting11)) {
-          totalPoints += points;
+        // Triple Captain logic
+        if (isTripleCaptainActive && player.id === user.captainId) {
+          points *= 3;
         }
+        
+        totalPoints += points;
         
         playerStats.push({
           player_id: playerId,
@@ -461,8 +499,8 @@ app.post('/update-points', async (req, res) => {
           assists: latestGW?.assists || 0,
           clean_sheets: latestGW?.clean_sheets || 0,
           bonus: latestGW?.bonus || 0,
-          benchBoostActive: isBenchBoostActive,
-          isBenchPlayer: !isPlayerInStarting11
+          tripleCaptainActive: isTripleCaptainActive,
+          isCaptain: player.id === user.captainId
         });
       } catch (e) {
         // If API fails, use 0 points for this player
@@ -474,8 +512,8 @@ app.post('/update-points', async (req, res) => {
           assists: 0,
           clean_sheets: 0,
           bonus: 0,
-          benchBoostActive: isBenchBoostActive,
-          isBenchPlayer: !isPlayerInStarting11
+          tripleCaptainActive: isTripleCaptainActive,
+          isCaptain: false
         });
       }
     }
@@ -490,7 +528,7 @@ app.post('/update-points', async (req, res) => {
       success: true,
       points: totalPoints,
       playerStats: playerStats,
-      benchBoostActive: isBenchBoostActive
+      tripleCaptainActive: isTripleCaptainActive
     });
   } catch (error) {
     console.error('Update points error:', error.message);
@@ -498,7 +536,7 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Get User Profile - UPDATED WITH BENCH BOOST DATA
+// Get User Profile - UPDATED WITH TRIPLE CAPTAIN DATA
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -523,7 +561,10 @@ app.get('/user-profile', async (req, res) => {
       wildcardUsed: user.wildcardUsed,
       wildcardGameweek: user.wildcardGameweek,
       benchBoostUsed: user.benchBoostUsed,
-      benchBoostGameweek: user.benchBoostGameweek
+      benchBoostGameweek: user.benchBoostGameweek,
+      tripleCaptainUsed: user.tripleCaptainUsed,
+      tripleCaptainGameweek: user.tripleCaptainGameweek,
+      captainId: user.captainId
     });
   } catch (error) {
     console.error('Profile error:', error.message);
