@@ -711,8 +711,8 @@
       margin-top: 4px;
     }
 
-    /* WILDCARD SYSTEM */
-    .wildcard-container {
+    /* BENCH BOOST SYSTEM */
+    .bench-boost-container {
       margin-top: 20px;
       padding: 16px;
       background: rgba(255, 255, 255, 0.05);
@@ -720,7 +720,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .wildcard-title {
+    .bench-boost-title {
       font-weight: 600;
       margin-bottom: 12px;
       color: var(--text);
@@ -729,7 +729,7 @@
       gap: 8px;
     }
 
-    .wildcard-icon {
+    .bench-boost-icon {
       background: var(--accent);
       color: #000;
       width: 24px;
@@ -742,16 +742,16 @@
       margin-right: 8px;
     }
 
-    .wildcard-active {
+    .bench-boost-active {
       color: var(--success);
       font-weight: 700;
     }
 
-    .wildcard-inactive {
+    .bench-boost-inactive {
       color: var(--text-tertiary);
     }
 
-    .wildcard-btn {
+    .bench-boost-btn {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
@@ -764,16 +764,16 @@
       transition: var(--transition);
     }
 
-    .wildcard-btn:hover {
+    .bench-boost-btn:hover {
       background: rgba(255, 255, 255, 0.12);
     }
 
-    .wildcard-btn:disabled {
+    .bench-boost-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .wildcard-usage {
+    .bench-boost-usage {
       font-size: 13px;
       color: var(--text-tertiary);
       margin-top: 8px;
@@ -781,12 +781,12 @@
       align-items: center;
     }
 
-    .wildcard-usage i {
+    .bench-boost-usage i {
       color: var(--success);
       margin-right: 8px;
     }
 
-    .wildcard-warning {
+    .bench-boost-warning {
       color: var(--warning);
       font-weight: 600;
     }
@@ -913,6 +913,24 @@
           <div class="wildcard-usage">
             <i class="fas fa-check"></i>
             <span id="wildcardUsage">1 per season</span>
+          </div>
+        </div>
+
+        <!-- BENCH BOOST SYSTEM -->
+        <div class="bench-boost-container">
+          <div class="bench-boost-title">
+            <div class="bench-boost-icon">B</div>
+            Bench Boost
+          </div>
+          <div class="bench-boost-status">
+            <span id="benchBoostStatus" class="bench-boost-inactive">Not activated</span>
+          </div>
+          <button id="activateBenchBoostBtn" class="bench-boost-btn">
+            <i class="fas fa-arrow-down"></i> Activate Bench Boost
+          </button>
+          <div class="bench-boost-usage">
+            <i class="fas fa-check"></i>
+            <span id="benchBoostUsage">1 per season</span>
           </div>
         </div>
         
@@ -1047,6 +1065,8 @@
     let currentTransferPlayer = null; // Track which player we're transferring out
     let wildcardUsed = false;
     let wildcardGameweek = null;
+    let benchBoostUsed = false;
+    let benchBoostGameweek = null;
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1104,8 +1124,11 @@
               freeTransfers = profile.freeTransfers || 1;
               wildcardUsed = profile.wildcardUsed || false;
               wildcardGameweek = profile.wildcardGameweek;
+              benchBoostUsed = profile.benchBoostUsed || false;
+              benchBoostGameweek = profile.benchBoostGameweek;
               updateBudgetDisplay();
               updateWildcardDisplay();
+              updateBenchBoostDisplay();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
               // Only reduce opacity (don't disable pointer events)
@@ -1145,8 +1168,11 @@
           freeTransfers = profile.freeTransfers || 1;
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
+          benchBoostUsed = profile.benchBoostUsed || false;
+          benchBoostGameweek = profile.benchBoostGameweek;
           updateBudgetDisplay();
           updateWildcardDisplay();
+          updateBenchBoostDisplay();
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
           return;
@@ -1185,8 +1211,11 @@
           freeTransfers = data.freeTransfers || 1;
           wildcardUsed = false;
           wildcardGameweek = null;
+          benchBoostUsed = false;
+          benchBoostGameweek = null;
           updateBudgetDisplay();
           updateWildcardDisplay();
+          updateBenchBoostDisplay();
         } else {
           throw new Error(data.error || 'Failed to join');
         }
@@ -1282,6 +1311,26 @@
         wildcardUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
         activateBtn.disabled = false;
         activateBtn.title = "Activate for unlimited transfers this gameweek";
+      }
+    }
+
+    function updateBenchBoostDisplay() {
+      const benchBoostStatus = document.getElementById('benchBoostStatus');
+      const benchBoostUsage = document.getElementById('benchBoostUsage');
+      const activateBtn = document.getElementById('activateBenchBoostBtn');
+      
+      if (benchBoostUsed) {
+        benchBoostStatus.className = 'bench-boost-active';
+        benchBoostStatus.innerText = 'Activated!';
+        benchBoostUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${benchBoostGameweek}`;
+        activateBtn.disabled = true;
+        activateBtn.title = "Bench Boost already used this season";
+      } else {
+        benchBoostStatus.className = 'bench-boost-inactive';
+        benchBoostStatus.innerText = 'Not activated';
+        benchBoostUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
+        activateBtn.disabled = false;
+        activateBtn.title = "Activate for bench players to score this gameweek";
       }
     }
 
@@ -1837,8 +1886,11 @@
           freeTransfers = profile.freeTransfers || 1;
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
+          benchBoostUsed = profile.benchBoostUsed || false;
+          benchBoostGameweek = profile.benchBoostGameweek;
           updateBudgetDisplay();
           updateWildcardDisplay();
+          updateBenchBoostDisplay();
           renderTeamGrid();
           calculateTeamStats();
           document.querySelectorAll('.slot').forEach(slot => {
@@ -1915,6 +1967,48 @@
         }
       } catch (e) {
         alert("Failed to activate wildcard: " + (e.message || ""));
+      }
+    });
+
+    // BENCH BOOST ACTIVATION
+    document.getElementById('activateBenchBoostBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/activate-bench-boost', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          benchBoostUsed = true;
+          benchBoostGameweek = 1; // In a real app, this would be current gameweek
+          updateBenchBoostDisplay();
+          
+          // Show success message
+          const successBanner = document.createElement('div');
+          successBanner.innerHTML = `
+            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
+              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Bench Boost Activated!</div>
+              <div style="color:var(--text-secondary); margin-top:6px;">Bench players score this gameweek</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(successBanner, firstSection.firstChild);
+          
+          // Auto-remove after 3 seconds
+          setTimeout(() => {
+            if (successBanner.parentNode) {
+              successBanner.parentNode.removeChild(successBanner);
+            }
+          }, 3000);
+          
+          // Update UI
+          document.getElementById('benchBoostStatus').className = 'bench-boost-active';
+          document.getElementById('benchBoostStatus').innerText = 'Activated!';
+        }
+      } catch (e) {
+        alert("Failed to activate Bench Boost: " + (e.message || ""));
       }
     });
 
