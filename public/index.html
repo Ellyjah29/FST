@@ -1218,21 +1218,21 @@
       .section {
         padding: 16px;
       }
-      
+
       .team-grid {
         margin: 16px 0;
       }
-      
+
       .slot {
         width: 56px;
         height: 70px;
       }
-      
+
       .player-photo {
         width: 50px;
         height: 65px;
       }
-      
+
       .formation-selector {
         flex-direction: column;
         gap: 8px;
@@ -1241,6 +1241,7 @@
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
   <div class="top-bar">
     <div class="app-title">⚽ FST Fantasy</div>
@@ -1272,7 +1273,6 @@
         <h2 class="section-title">
           <i class="fas fa-trophy"></i> Join Free Contest
         </h2>
-        
         <div class="input-group">
           <label class="input-label">Manager Name</label>
           <input type="text" 
@@ -1280,11 +1280,9 @@
                  placeholder="Choose your fantasy manager name"
                  maxlength="20">
         </div>
-
         <button id="joinContest" class="btn-primary">
           <i class="fas fa-play-circle"></i> Start Building Your Team
         </button>
-        
         <div style="text-align: center; padding: 12px; background: rgba(78, 205, 196, 0.1); border-radius: 12px; margin-top: 16px;">
           <div style="color: var(--accent); font-weight: 600; font-size: 14px;">
             🎁 Entry is <strong>FREE</strong> this week!
@@ -1319,23 +1317,22 @@
             <button class="formation-btn" data-formation="5-3-2">5-3-2</button>
           </div>
         </div>
-
+        
         <div class="team-grid" id="teamGrid">
           <!-- Populated by JS -->
         </div>
-
+        
         <div class="progress-container">
           <div class="progress-bar" id="teamProgress"></div>
         </div>
         <div style="text-align: center; color: var(--text-tertiary); font-size: 13px; margin-bottom: 16px;">
           <span id="teamProgressText">0/11 players selected</span>
         </div>
-
         <button id="submitTeam" class="btn-secondary" disabled>
           <i class="fas fa-lock"></i> Lock In Team & Join Contest
         </button>
       </div>
-
+      
       <!-- TEAM STATS SECTION -->
       <div id="teamStats" class="section" style="display:none;">
         <h3 class="section-title">💰 Your Team Budget</h3>
@@ -1357,7 +1354,7 @@
             <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
           </div>
         </div>
-
+        
         <!-- WILDCARD SYSTEM -->
         <div class="wildcard-container">
           <div class="wildcard-title">
@@ -1405,7 +1402,6 @@
                placeholder="Search by name or team..."
                style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 14px;">
       </div>
-      
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
         <div class="input-group">
           <label class="input-label">Price Range (£m)</label>
@@ -1426,7 +1422,6 @@
                    style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
           </div>
         </div>
-        
         <div class="input-group">
           <label class="input-label">Points Range</label>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1443,12 +1438,10 @@
           </div>
         </div>
       </div>
-      
       <button id="resetFilters" class="btn-outline" style="margin-top: 16px;">
         🔄 Reset Filters
       </button>
     </div>
-    
     <div class="modal-content" id="playerList"></div>
   </div>
 
@@ -1467,11 +1460,9 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
-
     const initData = tg.initDataUnsafe;
     const telegramUser = initData?.user;
     const userId = telegramUser ? telegramUser.id.toString() : 'guest_' + Date.now();
-
     const topUserAvatar = document.getElementById('topUserAvatar');
     const topUserName = document.getElementById('topUserName');
     const joinView = document.getElementById('joinView');
@@ -1483,21 +1474,21 @@
     const playerList = document.getElementById('playerList');
     const teamGrid = document.getElementById('teamGrid');
     const managerNameInput = document.getElementById('managerNameInput');
-
+    
     if (telegramUser) {
       topUserName.innerText = telegramUser.first_name || "FST Manager";
       if (telegramUser.photo_url) {
         topUserAvatar.src = telegramUser.photo_url;
       }
     }
-
+    
     const formations = {
       "4-3-3": [1, 4, 3, 3],
       "3-5-2": [1, 3, 5, 2],
       "4-4-2": [1, 4, 4, 2],
       "5-3-2": [1, 5, 3, 2]
     };
-
+    
     let currentFormation = "4-3-3";
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
@@ -1507,9 +1498,9 @@
     let currentTransferPlayer = null; // Track which player we're transferring out
     let wildcardUsed = false;
     let wildcardGameweek = null;
-
+    
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
-
+    
     // CONFETTI FUNCTION
     function createConfetti() {
       const confettiContainer = document.createElement('div');
@@ -1521,10 +1512,10 @@
       confettiContainer.style.pointerEvents = 'none';
       confettiContainer.style.zIndex = '3000';
       document.body.appendChild(confettiContainer);
-
+      
       const colors = ['#00c3ff', '#4ecdc4', '#4ade80', '#fbbf24', '#f87171'];
       const pieces = 150;
-
+      
       for (let i = 0; i < pieces; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
@@ -1536,13 +1527,13 @@
         piece.style.animationDelay = Math.random() * 2 + 's';
         confettiContainer.appendChild(piece);
       }
-
+      
       // Remove after animation
       setTimeout(() => {
         document.body.removeChild(confettiContainer);
       }, 5000);
     }
-
+    
     // Create particle effects
     function createParticles(x, y) {
       for (let i = 0; i < 10; i++) {
@@ -1556,7 +1547,6 @@
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 50 + 20;
         const duration = Math.random() * 1000 + 500;
-        
         const endX = x + Math.cos(angle) * distance;
         const endY = y + Math.sin(angle) * distance;
         
@@ -1576,7 +1566,7 @@
         }, duration);
       }
     }
-
+    
     // Check existing user on load
     async function checkExistingUser() {
       try {
@@ -1590,22 +1580,27 @@
           if (profile.locked) {
             joinView.style.display = 'none';
             teamView.style.display = 'block';
+            
             loadPlayers().then(() => {
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
+              
               userBudget = profile.budget || 100.0;
               freeTransfers = profile.freeTransfers || 1;
               wildcardUsed = profile.wildcardUsed || false;
               wildcardGameweek = profile.wildcardGameweek;
+              
               updateBudgetDisplay();
               updateWildcardDisplay();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
+              
               // Only reduce opacity (don't disable pointer events)
               document.querySelectorAll('.slot').forEach(slot => {
                 slot.style.opacity = '0.7';
               });
+              
               submitTeamBtn.style.display = 'none';
               document.getElementById('formationSelectorContainer').style.display = 'none';
               
@@ -1630,15 +1625,18 @@
           joinView.style.display = 'none';
           teamView.style.display = 'block';
           loadPlayers();
+          
           if (profile.team && profile.team.length > 0) {
             selectedTeam = profile.team.map(id => 
               allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
             );
           }
+          
           userBudget = profile.budget || 100.0;
           freeTransfers = profile.freeTransfers || 1;
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
+          
           updateBudgetDisplay();
           updateWildcardDisplay();
           renderTeamGrid();
@@ -1651,34 +1649,39 @@
       
       managerNameInput.value = telegramUser?.first_name || "FST Manager";
     }
-
+    
     // Initialize
     checkExistingUser();
-
+    
     joinContestBtn.addEventListener('click', async () => {
       const managerName = managerNameInput.value.trim() || "FST Manager";
+      
       if (managerName.length < 2) {
         alert("Manager name must be at least 2 characters");
         return;
       }
-
+      
       try {
         const response = await fetch('/connect-wallet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, managerName })
         });
+        
         const data = await response.json();
+        
         if (data.success) {
           topUserName.innerText = data.managerName;
           joinView.style.display = 'none';
           teamView.style.display = 'block';
           loadPlayers();
           renderTeamGrid();
+          
           userBudget = data.budget || 100.0;
           freeTransfers = data.freeTransfers || 1;
           wildcardUsed = false;
           wildcardGameweek = null;
+          
           updateBudgetDisplay();
           updateWildcardDisplay();
         } else {
@@ -1688,15 +1691,16 @@
         alert("Error: " + (e.message || "Failed to join contest"));
       }
     });
-
+    
     async function loadPlayers() {
       const statusDiv = document.getElementById('status') || document.createElement('div');
+      
       if (!document.getElementById('status')) {
         const firstSection = document.querySelector('.section');
         firstSection.insertBefore(statusDiv, firstSection.firstChild);
         statusDiv.id = 'status';
       }
-
+      
       // Show skeleton loading
       teamGrid.innerHTML = `
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px;">
@@ -1705,13 +1709,15 @@
           `).join('')}
         </div>
       `;
-
+      
       try {
         const response = await fetch('/players');
+        
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to load players');
         }
+        
         const players = await response.json();
         allPlayers = players;
         statusDiv.innerText = "";
@@ -1724,17 +1730,20 @@
             <i class="fas fa-redo"></i> Retry
           </button>
         `;
+        
         document.getElementById('retryBtn').addEventListener('click', loadPlayers);
       }
     }
-
+    
     function updateBudgetDisplay() {
       const budgetContainer = document.getElementById('budgetRemaining');
       const budgetStats = document.getElementById('budgetStats');
+      
       if (!budgetContainer || !budgetStats) return;
       
       // Format budget with color based on value
       let budgetClass = 'budget-value';
+      
       if (userBudget < 10) {
         budgetClass = 'budget-critical';
       } else if (userBudget < 20) {
@@ -1748,6 +1757,7 @@
       
       // Update free transfers display
       const transfersElement = document.getElementById('freeTransfers');
+      
       if (transfersElement) {
         if (freeTransfers > 0) {
           transfersElement.className = 'free-transfers';
@@ -1758,7 +1768,7 @@
         }
       }
     }
-
+    
     function updateWildcardDisplay() {
       const wildcardStatus = document.getElementById('wildcardStatus');
       const wildcardUsage = document.getElementById('wildcardUsage');
@@ -1778,18 +1788,18 @@
         activateBtn.title = "Activate for unlimited transfers this gameweek";
       }
     }
-
+    
     function calculateTeamValue() {
       return selectedTeam
         .filter(p => p !== null)
         .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
     }
-
+    
     function calculateRemainingBudget() {
       const teamValue = calculateTeamValue();
       return (100.0 - teamValue).toFixed(1);
     }
-
+    
     function renderTeamGrid() {
       const [gk, def, mid, fwd] = formations[currentFormation];
       const slots = [];
@@ -1798,7 +1808,7 @@
       for (let i = 0; i < def; i++) slots.push({ type: 'def', label: 'DEF' });
       for (let i = 0; i < mid; i++) slots.push({ type: 'mid', label: 'MID' });
       for (let i = 0; i < fwd; i++) slots.push({ type: 'fwd', label: 'FWD' });
-
+      
       let html = '';
       const lines = [
         slots.slice(-fwd),
@@ -1806,13 +1816,16 @@
         slots.slice(-(fwd+mid+def), -(fwd+mid)),
         slots.slice(0, gk)
       ];
-
+      
       lines.forEach(line => {
         if (line.length === 0) return;
+        
         html += `<div class="line">`;
+        
         line.forEach((slot, idx) => {
           const slotIndex = slots.indexOf(slot);
           const player = selectedTeam[slotIndex];
+          
           html += `
             <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
                  data-index="${slotIndex}" 
@@ -1827,11 +1840,12 @@
             </div>
           `;
         });
+        
         html += `</div>`;
       });
-
+      
       teamGrid.innerHTML = html;
-
+      
       // Click handler for player stats
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
@@ -1857,7 +1871,7 @@
           }
         });
       });
-
+      
       checkSubmitButton();
       calculateTeamStats(); // Update team stats
       
@@ -1870,6 +1884,7 @@
       // Hide formation for submitted teams
       const isSubmitted = submitTeamBtn.style.display === 'none';
       const formationContainer = document.getElementById('formationSelectorContainer');
+      
       if (formationContainer) {
         formationContainer.style.display = isSubmitted ? 'none' : 'block';
       }
@@ -1878,31 +1893,32 @@
       userBudget = 100.0 - calculateTeamValue();
       updateBudgetDisplay();
     }
-
+    
     function openPlayerModal(positionType, slotIndex) {
       const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
       const fplType = positionMap[positionType];
       const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
-
+      
       document.getElementById('modalPosition').innerText = positionName;
-
+      
       const selectedIds = new Set(
         selectedTeam
           .filter(p => p !== null)
           .map(p => p.id)
       );
-
+      
       let availablePlayers = allPlayers
         .filter(p => p.element_type === fplType)
         .filter(p => !selectedIds.has(p.id));
-
+      
       const originalPlayers = [...availablePlayers];
       renderPlayerList(availablePlayers, slotIndex);
       setupFilters(originalPlayers, slotIndex);
+      
       playerModal.style.display = 'flex';
       playerModal.classList.add('slide-in-up');
     }
-
+    
     function setupFilters(originalPlayers, slotIndex) {
       const searchInput = document.getElementById('playerSearch');
       const minPriceInput = document.getElementById('minPrice');
@@ -1910,35 +1926,43 @@
       const minPointsInput = document.getElementById('minPoints');
       const maxPointsInput = document.getElementById('maxPoints');
       const resetBtn = document.getElementById('resetFilters');
-
+      
       const applyFilters = () => {
         let filtered = [...originalPlayers];
         const searchTerm = searchInput.value.toLowerCase();
+        
         if (searchTerm) {
           filtered = filtered.filter(player => 
             player.web_name.toLowerCase().includes(searchTerm) ||
             player.team_name.toLowerCase().includes(searchTerm)
           );
         }
+        
         const minPrice = parseFloat(minPriceInput.value);
         const maxPrice = parseFloat(maxPriceInput.value);
+        
         if (!isNaN(minPrice)) {
           filtered = filtered.filter(player => parseFloat(player.now_cost) >= minPrice);
         }
+        
         if (!isNaN(maxPrice)) {
           filtered = filtered.filter(player => parseFloat(player.now_cost) <= maxPrice);
         }
+        
         const minPoints = parseInt(minPointsInput.value);
         const maxPoints = parseInt(maxPointsInput.value);
+        
         if (!isNaN(minPoints)) {
           filtered = filtered.filter(player => player.total_points >= minPoints);
         }
+        
         if (!isNaN(maxPoints)) {
           filtered = filtered.filter(player => player.total_points <= maxPoints);
         }
+        
         renderPlayerList(filtered, slotIndex);
       };
-
+      
       searchInput.addEventListener('input', applyFilters);
       minPriceInput.addEventListener('input', applyFilters);
       maxPriceInput.addEventListener('input', applyFilters);
@@ -1954,9 +1978,10 @@
         renderPlayerList(originalPlayers, slotIndex);
       });
     }
-
+    
     function renderPlayerList(players, slotIndex) {
       let html = '';
+      
       players.forEach(player => {
         // Check if adding this player would exceed budget
         const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
@@ -1976,13 +2001,13 @@
           </div>
         `;
       });
-
+      
       if (players.length === 0) {
         html = '<div class="empty-state"><i class="fas fa-search"></i><p>No players match your filters</p></div>';
       }
-
+      
       playerList.innerHTML = html;
-
+      
       document.querySelectorAll('.player-card').forEach(card => {
         card.addEventListener('click', async () => {
           const playerId = parseInt(card.dataset.id);
@@ -2002,6 +2027,7 @@
                   newPlayerId: playerId 
                 })
               });
+              
               const data = await response.json();
               
               if (data.success) {
@@ -2021,6 +2047,7 @@
                     ${wildcardActive ? '<div class="wildcard-active">Wildcard active - unlimited transfers</div>' : ''}
                   </div>
                 `;
+                
                 const firstSection = document.querySelector('.section');
                 firstSection.insertBefore(successBanner, firstSection.firstChild);
                 
@@ -2059,6 +2086,7 @@
           
           // Check if adding this player would exceed budget
           const playerCost = parseFloat(player.now_cost);
+          
           if (userBudget < playerCost) {
             alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
             return;
@@ -2070,12 +2098,13 @@
         });
       });
     }
-
+    
     function showPlayerStats(player) {
       const statsContent = document.getElementById('statsContent');
       
       // Position-specific stats
       let positionStats = '';
+      
       if (player.element_type === 1 || player.element_type === 2) { // GK/DEF
         positionStats = `
           <div class="stat-row">
@@ -2087,6 +2116,7 @@
       
       // Transfer section HTML
       let transferSection = '';
+      
       if (submitTeamBtn.style.display === 'none') {
         transferSection = `
           <div class="transfer-section">
@@ -2102,7 +2132,7 @@
           </div>
         `;
       }
-
+      
       statsContent.innerHTML = `
         <div style="text-align:center; margin-bottom:20px;">
           <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
@@ -2110,7 +2140,6 @@
           <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
           <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
         </div>
-        
         <div class="stat-grid">
           <div class="stat-row">
             <span>Form:</span>
@@ -2142,9 +2171,7 @@
           </div>
           ${positionStats}
         </div>
-        
         ${transferSection}
-        
         <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
           <div style="color:var(--text-tertiary); font-size:13px;">
             * Stats updated after each gameweek
@@ -2157,6 +2184,7 @@
       
       // Add transfer button event listener
       const transferBtn = document.getElementById('transferOutBtn');
+      
       if (transferBtn) {
         transferBtn.addEventListener('click', () => {
           currentTransferPlayer = player;
@@ -2171,7 +2199,7 @@
         });
       }
     }
-
+    
     function calculateTeamStats() {
       if (selectedTeam.some(p => p === null)) {
         document.getElementById('teamStats').style.display = 'none';
@@ -2195,7 +2223,7 @@
       // Update budget stats
       updateBudgetDisplay();
     }
-
+    
     function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
       const element = document.getElementById(id);
       const range = end - start;
@@ -2204,6 +2232,7 @@
       const stepTime = Math.abs(Math.floor(duration / range));
       const timer = setInterval(() => {
         current += increment;
+        
         if (current >= end) {
           clearInterval(timer);
           element.innerText = formatter(end);
@@ -2212,7 +2241,7 @@
         }
       }, stepTime);
     }
-
+    
     // UPDATE LIVE SCORES
     async function updateLiveScores() {
       if (selectedTeam.every(p => p === null)) return;
@@ -2223,6 +2252,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId })
         });
+        
         const data = await response.json();
         
         if (data.success) {
@@ -2256,31 +2286,31 @@
         console.error('Failed to update scores:', e.message);
       }
     }
-
+    
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
       if (submitTeamBtn.style.display === 'none') {
         updateLiveScores();
       }
     }, 300000); // 5 minutes
-
+    
     // Manual update button
     document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
-
+    
     closeModal.addEventListener('click', () => {
       playerModal.classList.remove('slide-in-up');
       setTimeout(() => {
         playerModal.style.display = 'none';
       }, 300);
     });
-
+    
     document.getElementById('closeStatsModal').addEventListener('click', () => {
       document.getElementById('statsModal').classList.remove('slide-in-up');
       setTimeout(() => {
         document.getElementById('statsModal').style.display = 'none';
       }, 300);
     });
-
+    
     document.querySelectorAll('.formation-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
@@ -2290,21 +2320,24 @@
         renderTeamGrid();
       });
     });
-
+    
     submitTeamBtn.addEventListener('click', async () => {
       if (selectedTeam.some(p => p === null)) {
         alert("Please fill all 11 slots");
         return;
       }
-
+      
       const teamIds = selectedTeam.map(p => p.id);
+      
       try {
         const response = await fetch('/save-team', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, team: teamIds })
         });
+        
         const data = await response.json();
+        
         if (data.success) {
           // Create confetti celebration
           createConfetti();
@@ -2318,26 +2351,32 @@
               <div style="color:var(--text-secondary);">Good luck in the contest!</div>
             </div>
           `;
+          
           const firstSection = document.querySelector('.section');
           firstSection.insertBefore(successBanner, firstSection.firstChild);
           
           // Rest of your existing code...
           const response = await fetch(`/user-profile?userId=${userId}`);
           const profile = await response.json();
+          
           selectedTeam = profile.team.map(id => 
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
+          
           userBudget = profile.budget || 100.0;
           freeTransfers = profile.freeTransfers || 1;
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
+          
           updateBudgetDisplay();
           updateWildcardDisplay();
           renderTeamGrid();
           calculateTeamStats();
+          
           document.querySelectorAll('.slot').forEach(slot => {
             slot.style.opacity = '0.7';
           });
+          
           submitTeamBtn.style.display = 'none';
           document.getElementById('formationSelectorContainer').style.display = 'none';
           
@@ -2355,7 +2394,7 @@
         alert("Failed to submit team: " + (e.message || ""));
       }
     });
-
+    
     function checkSubmitButton() {
       const isComplete = !selectedTeam.some(p => p === null);
       const isOverBudget = calculateTeamValue() > 100;
@@ -2368,7 +2407,7 @@
         submitTeamBtn.title = "";
       }
     }
-
+    
     // WILDCARD ACTIVATION
     document.getElementById('activateWildcardBtn').addEventListener('click', async () => {
       try {
@@ -2377,6 +2416,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId })
         });
+        
         const data = await response.json();
         
         if (data.success) {
@@ -2392,6 +2432,7 @@
               <div style="color:var(--text-secondary); margin-top:6px;">Unlimited transfers for this gameweek</div>
             </div>
           `;
+          
           const firstSection = document.querySelector('.section');
           firstSection.insertBefore(successBanner, firstSection.firstChild);
           
@@ -2415,7 +2456,7 @@
         alert("Failed to activate wildcard: " + (e.message || ""));
       }
     });
-
+    
     // Initial setup
     document.addEventListener('DOMContentLoaded', () => {
       // Auto-update live scores every 5 minutes
