@@ -256,7 +256,6 @@
       cursor: pointer;
       transition: var(--transition);
       position: relative;
-      opacity: 1;
     }
 
     .slot:hover {
@@ -276,29 +275,6 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--text-tertiary);
-    }
-
-    /* READ-ONLY STATE */
-    .slot.read-only {
-      cursor: default;
-      opacity: 0.85;
-      pointer-events: none;
-    }
-
-    .read-only-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.15);
-      border-radius: 14px;
-      display: none;
-      z-index: 5;
-    }
-
-    .read-only .read-only-overlay {
-      display: block;
     }
 
     .player-modal {
@@ -905,80 +881,133 @@
       font-size: 12px;
     }
 
-    /* SUBMITTED STATE */
-    .submitted .slot {
-      cursor: default;
-      opacity: 0.85;
-      pointer-events: none;
-    }
-
-    .submitted .slot:hover {
-      border-color: var(--text-tertiary);
-    }
-
-    .submitted .team-grid {
-      pointer-events: none;
-    }
-
-    .submitted .read-only-overlay {
-      display: block;
-    }
-
-    .submitted .transfer-section,
-    .submitted .wildcard-container,
-    .submitted .triple-captain-container,
-    .submitted .wild-bench-container {
-      opacity: 0.9;
-      pointer-events: auto;
-    }
-
-    .submitted .transfer-btn,
-    .submitted .wildcard-btn,
-    .submitted .triple-captain-btn,
-    .submitted .wild-bench-btn {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .read-only {
-      opacity: 0.9;
-      pointer-events: auto;
-    }
-
-    .read-only .slot {
-      opacity: 1;
-      pointer-events: none;
-    }
-
-    .read-only .slot:hover {
-      border-color: var(--text-tertiary);
-    }
-
-    .read-only .player-card {
-      opacity: 1;
+    /* READ-ONLY MODE */
+    .slot.read-only {
+      opacity: 0.7;
       pointer-events: none;
       cursor: default;
     }
 
-    .read-only .player-card:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: transparent;
+    .slot.read-only:hover {
+      border-color: var(--text-tertiary);
       transform: none;
       box-shadow: none;
-      cursor: default;
     }
 
-    .read-only .player-name {
-      cursor: default;
-      pointer-events: none;
+    .slot.read-only.filled {
+      border-style: solid;
+      transform: none;
+      box-shadow: none;
     }
 
-    .read-only .stats-modal {
-      pointer-events: auto;
+    .read-only .captain-badge {
+      opacity: 0.7;
     }
 
-    .read-only .modal-content {
-      pointer-events: auto;
+    .read-only .live-badge {
+      opacity: 0.7;
+    }
+
+    .read-only .live-indicator {
+      opacity: 0.7;
+    }
+
+    /* POWER-UP BUTTONS IN READ-ONLY MODE */
+    .power-up-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .power-up-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .power-up-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .power-up-btn.active {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 4px 8px rgba(78, 205, 196, 0.3);
+    }
+
+    .power-up-btn.active:hover {
+      background: var(--accent-dark);
+    }
+
+    .power-up-status {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+    }
+
+    .power-up-status i {
+      color: var(--success);
+      margin-right: 8px;
+    }
+
+    .power-up-warning {
+      color: var(--warning);
+      font-weight: 600;
+    }
+
+    /* PLAYER STATS MODAL IN READ-ONLY MODE */
+    .stats-modal-read-only {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+
+    .stats-modal-read-only:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 195, 255, 0.3);
+    }
+
+    .stats-modal-read-only .player-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .stats-modal-read-only .player-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .stats-modal-read-only .price-tag { color: var(--accent); font-weight: 600; }
+    .stats-modal-read-only .points-tag { color: var(--success); font-weight: 600; }
+
+    .stats-modal-read-only .player-photo {
+      width: 60px;
+      height: 75px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #000;
+    }
+
+    .stats-modal-read-only .player-info {
+      flex: 1;
     }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -1061,7 +1090,7 @@
           <span id="teamProgressText">0/11 players selected</span>
         </div>
 
-        <button id="submitTeam" class="btn-secondary" disabled>
+        <button id="submitTeam" class="btn-secondary">
           <i class="fas fa-lock"></i> Lock In Team & Join Contest
         </button>
       </div>
@@ -1254,8 +1283,6 @@
     const playerList = document.getElementById('playerList');
     const teamGrid = document.getElementById('teamGrid');
     const managerNameInput = document.getElementById('managerNameInput');
-    const teamStatsSection = document.getElementById('teamStats');
-    const formationSelector = document.getElementById('formationSelectorContainer');
 
     if (telegramUser) {
       topUserName.innerText = telegramUser.first_name || "FST Manager";
@@ -1287,7 +1314,7 @@
     let wildBenchUsed = false;
     let wildBenchGameweek = null;
     let teamCounts = {}; // Track how many players from each team
-    let isTeamLocked = false; // NEW: Track team lock state
+    let isLocked = false; // Track if team is locked
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1335,9 +1362,9 @@
           
           // If team is LOCKED (submitted), show read-only view
           if (profile.locked) {
-            isTeamLocked = true;
             joinView.style.display = 'none';
             teamView.style.display = 'block';
+            isLocked = true;
             loadPlayers().then(() => {
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
@@ -1359,8 +1386,27 @@
               updateWildBenchDisplay();
               renderTeamGrid();
               calculateTeamStats(); // Show team stats
-              // Set read-only state
-              setReadonlyState(true);
+              // Only reduce opacity (don't disable pointer events)
+              document.querySelectorAll('.slot').forEach(slot => {
+                slot.classList.add('read-only');
+                slot.style.opacity = '0.7';
+              });
+              submitTeamBtn.style.display = 'none';
+              document.getElementById('formationSelectorContainer').style.display = 'none';
+              
+              // Show "Already Submitted" banner
+              const banner = document.createElement('div');
+              banner.innerHTML = `
+                <div class="submission-banner">
+                  <div class="banner-title">✅ Team Submitted!</div>
+                  <div class="banner-text">Your team is locked for this contest.</div>
+                </div>
+              `;
+              const firstSection = document.querySelector('.section');
+              firstSection.insertBefore(banner, firstSection.firstChild);
+              
+              // Load live scores
+              updateLiveScores();
             });
             return;
           }
@@ -1400,77 +1446,8 @@
       managerNameInput.value = telegramUser?.first_name || "FST Manager";
     }
 
-    // NEW: Set read-only state
-    function setReadonlyState(isLocked) {
-      isTeamLocked = isLocked;
-      
-      // Update UI
-      if (isLocked) {
-        // Hide team building elements
-        document.querySelector('.formation-selector').style.display = 'none';
-        document.querySelector('.progress-container').style.display = 'none';
-        document.querySelector('.progress-bar').style.display = 'none';
-        document.querySelector('.progress-text').style.display = 'none';
-        document.getElementById('teamProgressText').style.display = 'none';
-        submitTeamBtn.style.display = 'none';
-        
-        // Add read-only overlay to team grid
-        document.querySelectorAll('.slot').forEach(slot => {
-          // Add read-only overlay
-          if (!slot.querySelector('.read-only-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'read-only-overlay';
-            slot.appendChild(overlay);
-          }
-          
-          // Add read-only class
-          slot.classList.add('read-only');
-        });
-        
-        // Show "Already Submitted" banner
-        const banner = document.createElement('div');
-        banner.innerHTML = `
-          <div class="submission-banner">
-            <div class="banner-title">✅ Team Submitted!</div>
-            <div class="banner-text">Your team is locked for this contest.</div>
-          </div>
-        `;
-        const firstSection = document.querySelector('.section');
-        firstSection.insertBefore(banner, firstSection.firstChild);
-        
-        // Show stats section (if hidden)
-        teamStatsSection.style.display = 'block';
-        
-        // Enable feature buttons
-        document.querySelectorAll('.transfer-btn, .wildcard-btn, .triple-captain-btn, .wild-bench-btn').forEach(btn => {
-          btn.disabled = false;
-        });
-      } else {
-        // Restore team building elements
-        document.querySelector('.formation-selector').style.display = 'flex';
-        document.querySelector('.progress-container').style.display = 'block';
-        document.querySelector('.progress-bar').style.display = 'block';
-        document.querySelector('.progress-text').style.display = 'block';
-        document.getElementById('teamProgressText').style.display = 'block';
-        submitTeamBtn.style.display = 'block';
-        
-        // Remove read-only overlays
-        document.querySelectorAll('.slot').forEach(slot => {
-          const overlay = slot.querySelector('.read-only-overlay');
-          if (overlay) overlay.remove();
-          slot.classList.remove('read-only');
-        });
-        
-        // Remove submission banner
-        const banner = document.querySelector('.submission-banner');
-        if (banner) banner.remove();
-      }
-      
-      // Update feature buttons state
-      updateWildcardDisplay();
-      updateTripleCaptainDisplay();
-      updateWildBenchDisplay();
-    }
+    // Initialize
+    checkExistingUser();
 
     joinContestBtn.addEventListener('click', async () => {
       const managerName = managerNameInput.value.trim() || "FST Manager";
@@ -1507,9 +1484,6 @@
           updateWildcardDisplay();
           updateTripleCaptainDisplay();
           updateWildBenchDisplay();
-          
-          // Ensure we're in editable state
-          setReadonlyState(false);
         } else {
           throw new Error(data.error || 'Failed to join');
         }
@@ -1612,8 +1586,7 @@
         wildcardStatus.className = 'wildcard-inactive';
         wildcardStatus.innerText = 'Not activated';
         wildcardUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        // Only enable if team is locked
-        activateBtn.disabled = !isTeamLocked || false;
+        activateBtn.disabled = false;
         activateBtn.title = "Activate for unlimited transfers this gameweek";
       }
     }
@@ -1633,8 +1606,7 @@
         tripleCaptainStatus.className = 'triple-captain-inactive';
         tripleCaptainStatus.innerText = 'Not activated';
         tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        // Only enable if team is locked
-        activateBtn.disabled = !isTeamLocked || false;
+        activateBtn.disabled = false;
         activateBtn.title = "Activate to triple captain points this gameweek";
       }
     }
@@ -1654,8 +1626,7 @@
         wildBenchStatus.className = 'wild-bench-inactive';
         wildBenchStatus.innerText = 'Not activated';
         wildBenchUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        // Only enable if team is locked
-        activateBtn.disabled = !isTeamLocked || false;
+        activateBtn.disabled = false;
         activateBtn.title = "Activate for 12th player this gameweek";
       }
     }
@@ -1696,7 +1667,7 @@
           const player = selectedTeam[slotIndex];
           const isCaptain = captainId === player?.id;
           html += `
-            <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
+            <div class="slot ${slot.type} ${player ? 'filled' : ''} ${isLocked ? 'read-only' : ''}" 
                  data-index="${slotIndex}" 
                  data-type="${slot.type}">
               ${player ? 
@@ -1705,7 +1676,6 @@
                  ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
                  ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
                  ${teamCounts[player.team] > 2 ? '<div class="team-limit-indicator" style="opacity:0.6;"></div>' : ''}
-                 <div class="read-only-overlay"></div>
                 ` : 
                 `<span class="slot-label">${slot.label}</span>`
               }
@@ -1720,14 +1690,13 @@
         const wildBenchPlayer = allPlayers.find(p => p.id === wildBenchPlayer);
         html += `
           <div class="line" style="margin-top: 16px;">
-            <div class="wild-bench-slot ${wildBenchPlayer ? 'filled' : ''}" data-type="wild-bench">
+            <div class="wild-bench-slot ${wildBenchPlayer ? 'filled' : ''} ${isLocked ? 'read-only' : ''}" data-type="wild-bench">
               ${wildBenchPlayer ? 
                 `<img src="${wildBenchPlayer.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
                  <div class="wild-bench-badge">12</div>
                  ${liveScores[wildBenchPlayer.id] ? `<div class="live-indicator"></div>` : ''}
                  ${liveScores[wildBenchPlayer.id] ? `<div class="live-badge">${liveScores[wildBenchPlayer.id].points}</div>` : ''}
                  ${teamCounts[wildBenchPlayer.team] > 2 ? '<div class="team-limit-indicator" style="opacity:0.6;"></div>' : ''}
-                 <div class="read-only-overlay"></div>
                 ` : 
                 `<span class="wild-bench-label">Wild Bench</span>`
               }
@@ -1738,27 +1707,6 @@
 
       teamGrid.innerHTML = html;
 
-      // Add read-only overlay if needed
-      if (isTeamLocked) {
-        document.querySelectorAll('.slot').forEach(slot => {
-          // Add read-only overlay if not already present
-          if (!slot.querySelector('.read-only-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'read-only-overlay';
-            slot.appendChild(overlay);
-          }
-          
-          slot.classList.add('read-only');
-        });
-      } else {
-        // Remove read-only overlay
-        document.querySelectorAll('.slot').forEach(slot => {
-          const overlay = slot.querySelector('.read-only-overlay');
-          if (overlay) overlay.remove();
-          slot.classList.remove('read-only');
-        });
-      }
-
       // Click handler for player stats
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
@@ -1766,13 +1714,13 @@
           const player = selectedTeam[index];
           
           // If team is submitted and player exists, show stats
-          if (player && player.id && isTeamLocked) {
+          if (player && player.id && isLocked) {
             showPlayerStats(player);
             return;
           }
           
           // For non-submitted teams, allow selection on empty slots
-          if (!isTeamLocked && !player) {
+          if (!isLocked && !player) {
             const type = slot.dataset.type;
             openPlayerModal(type, index);
             
@@ -1807,8 +1755,9 @@
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
       
       // Hide formation for submitted teams
-      if (formationSelector) {
-        formationSelector.style.display = isTeamLocked ? 'none' : 'flex';
+      const formationContainer = document.getElementById('formationSelectorContainer');
+      if (formationContainer) {
+        formationContainer.style.display = isLocked ? 'none' : 'block';
       }
       
       // Update budget
@@ -2116,7 +2065,42 @@
       
       // Transfer section HTML
       let transferSection = '';
-      if (isTeamLocked) {
+      if (isLocked) {
+        transferSection = `
+          <div class="transfer-section">
+            <div class="transfer-title">📊 Player Stats</div>
+            <div class="stat-row">
+              <span>Form:</span>
+              <span>${player.form}</span>
+            </div>
+            <div class="stat-row">
+              <span>Pts/Game:</span>
+              <span>${player.points_per_game}</span>
+            </div>
+            <div class="stat-row">
+              <span>Selected By:</span>
+              <span>${player.selected_by_percent}%</span>
+            </div>
+            <div class="stat-row">
+              <span>Minutes:</span>
+              <span>${player.minutes}</span>
+            </div>
+            <div class="stat-row">
+              <span>Goals:</span>
+              <span>${player.goals_scored}</span>
+            </div>
+            <div class="stat-row">
+              <span>Assists:</span>
+              <span>${player.assists}</span>
+            </div>
+            <div class="stat-row">
+              <span>Bonus:</span>
+              <span>${player.bonus}</span>
+            </div>
+            ${positionStats}
+          </div>
+        `;
+      } else {
         transferSection = `
           <div class="transfer-section">
             <div class="transfer-title">🔄 Transfer Options</div>
@@ -2288,7 +2272,7 @@
 
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
-      if (isTeamLocked) {
+      if (isLocked) {
         updateLiveScores();
       }
     }, 300000); // 5 minutes
@@ -2371,11 +2355,15 @@
           updateWildcardDisplay();
           updateTripleCaptainDisplay();
           updateWildBenchDisplay();
+          isLocked = true;
           renderTeamGrid();
           calculateTeamStats();
-          
-          // Set read-only state
-          setReadonlyState(true);
+          document.querySelectorAll('.slot').forEach(slot => {
+            slot.classList.add('read-only');
+            slot.style.opacity = '0.7';
+          });
+          submitTeamBtn.style.display = 'none';
+          document.getElementById('formationSelectorContainer').style.display = 'none';
           
           // Auto-hide success banner after 3 seconds
           setTimeout(() => {
@@ -2394,7 +2382,7 @@
 
     function checkSubmitButton() {
       const isComplete = !selectedTeam.some(p => p === null);
-      const isOverBudget = calculateTeamValue() > 75;
+      const isOverBudget = calculateTeamValue() > 75; // Budget is 75€
       const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
       
       submitTeamBtn.disabled = !isComplete || isOverBudget || hasTeamLimitExceeded;
@@ -2557,14 +2545,14 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Auto-update live scores every 5 minutes
       setInterval(() => {
-        if (isTeamLocked) {
+        if (isLocked) {
           updateLiveScores();
         }
       }, 300000);
       
       // Set up captain selection
       document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('slot') && isTeamLocked) {
+        if (e.target.classList.contains('slot') && isLocked) {
           const index = e.target.dataset.index;
           const player = selectedTeam[index];
           
