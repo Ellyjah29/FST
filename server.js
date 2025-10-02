@@ -1,4 +1,4 @@
-// server.js — FINAL: BUDGET (75€) & FREE TRANSFERS FIXED
+// server.js — FINAL: WILDCARD SYSTEM INTEGRATED
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - FIXED: Budget 75€ and Free Transfers persistence
+// User Schema - UPDATED WITH WILDCARD FIELDS
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -32,7 +32,6 @@ const userSchema = new mongoose.Schema({
   },
   solWallet: { type: String },
   team: [{ type: Number, length: 11 }], // 11 players max
-  wildBenchPlayer: { type: Number, default: null }, // 12th player for Wild Bench
   points: { type: Number, default: 0 }, // Current gameweek points
   totalPoints: { type: Number, default: 0 }, // Season total points
   entries: { type: Number, default: 0 },
@@ -40,22 +39,13 @@ const userSchema = new mongoose.Schema({
   locked: { type: Boolean, default: false },
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
-  budget: { type: Number, default: 75.0 }, // Budget tracking (75€)
-  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek (PERSISTENT)
+  budget: { type: Number, default: 100.0 }, // Budget tracking
+  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
   lastTransferGameweek: { type: Number, default: 1 },
   
   // WILDCARD SYSTEM
-  wildcardUsed: { type: Boolean, default: false },
-  wildcardGameweek: { type: Number, default: null },
-  
-  // TRIPLE CAPTAIN SYSTEM
-  tripleCaptainUsed: { type: Boolean, default: false },
-  tripleCaptainGameweek: { type: Number, default: null },
-  captainId: { type: Number, default: null },
-  
-  // WILD BENCH SYSTEM
-  wildBenchUsed: { type: Boolean, default: false },
-  wildBenchGameweek: { type: Number, default: null },
+  wildcardUsed: { type: Boolean, default: false }, // Has user used wildcard this season?
+  wildcardGameweek: { type: Number, default: null }, // Which gameweek was wildcard used?
   
   createdAt: { type: Date, default: Date.now }
 });
@@ -71,7 +61,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Connect Wallet - FIXED: Budget set to 75.0
+// Connect Wallet
 app.post('/connect-wallet', async (req, res) => {
   try {
     const { userId, managerName = "FST Manager", solWallet } = req.body;
@@ -89,17 +79,11 @@ app.post('/connect-wallet', async (req, res) => {
         solWallet: solWallet || undefined,
         joined: true,
         currentGameweek: 1,
-        budget: 75.0, // FIXED: Set budget to 75.0
-        freeTransfers: 1, // Start with 1 free transfer
+        budget: 100.0,
+        freeTransfers: 1,
         lastTransferGameweek: 1,
-        wildcardUsed: false,
-        wildcardGameweek: null,
-        tripleCaptainUsed: false,
-        tripleCaptainGameweek: null,
-        captainId: null,
-        wildBenchUsed: false,
-        wildBenchGameweek: null,
-        wildBenchPlayer: null
+        wildcardUsed: false, // Initialize wildcard as unused
+        wildcardGameweek: null
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
     );
@@ -110,9 +94,7 @@ app.post('/connect-wallet', async (req, res) => {
       managerName: user.managerName,
       budget: user.budget,
       freeTransfers: user.freeTransfers,
-      wildcardUsed: user.wildcardUsed,
-      tripleCaptainUsed: user.tripleCaptainUsed,
-      wildBenchUsed: user.wildBenchUsed
+      wildcardUsed: user.wildcardUsed
     });
   } catch (error) {
     console.error('Connect error:', error.message);
@@ -192,7 +174,7 @@ app.get('/player-stats/:playerId', async (req, res) => {
   }
 });
 
-// Save Team — FIXED: Budget 75€ and proper free transfers
+// Save Team — WITH BUDGET CHECK
 app.post('/save-team', async (req, res) => {
   try {
     const { userId, team } = req.body;
@@ -207,8 +189,6 @@ app.post('/save-team', async (req, res) => {
 
     // Get player costs from API
     let totalCost = 0;
-    const teamCounts = {};
-    
     for (const playerId of team) {
       try {
         const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
@@ -216,28 +196,16 @@ app.post('/save-team', async (req, res) => {
         });
         const player = response.data;
         totalCost += parseFloat(player.now_cost / 10) || 5.0;
-        
-        // Track player count per team
-        const teamId = player.team;
-        teamCounts[teamId] = (teamCounts[teamId] || 0) + 1;
-        
-        // Check 2-player limit
-        if (teamCounts[teamId] > 2) {
-          const teamName = player.team_name || `Team ${teamId}`;
-          return res.status(400).json({ 
-            error: `Cannot select more than 2 players from ${teamName}`
-          });
-        }
       } catch (e) {
         totalCost += 5.0;
       }
     }
 
-    // Calculate total cost - FIXED: Budget 75€
-    if (totalCost > 75) {
+    // Calculate total cost
+    if (totalCost > 100) {
       return res.status(400).json({ 
-        error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £75m)`,
-        remaining: (75 - totalCost).toFixed(1)
+        error: `Team budget exceeded! Total: £${totalCost.toFixed(1)}m (max £100m)`,
+        remaining: (100 - totalCost).toFixed(1)
       });
     }
 
@@ -249,7 +217,7 @@ app.post('/save-team', async (req, res) => {
     user.locked = true;
     user.entries += 1;
     user.points = 0;
-    user.budget = 75.0 - totalCost; // FIXED: Budget calculation based on 75€
+    user.budget = 100.0 - totalCost;
     user.lastUpdated = new Date();
     await user.save();
 
@@ -264,7 +232,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player — FIXED: Proper free transfers persistence
+// Transfer Player - UPDATED WITH WILDCARD LOGIC
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -290,7 +258,6 @@ app.post('/transfer-player', async (req, res) => {
     // Get player costs from API
     let oldPlayerCost = 0;
     let newPlayerCost = 0;
-    let newPlayerTeam = null;
     
     try {
       const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${oldPlayerId}/`, {
@@ -306,16 +273,15 @@ app.post('/transfer-player', async (req, res) => {
         timeout: 5000
       });
       newPlayerCost = parseFloat(response.data.now_cost / 10) || 5.0;
-      newPlayerTeam = response.data.team;
     } catch (e) {
       newPlayerCost = 5.0;
     }
 
-    // Calculate new budget - FIXED: Budget 75€
+    // Calculate new budget
     const budgetChange = newPlayerCost - oldPlayerCost;
     const newBudget = user.budget - budgetChange;
     
-    // Check budget - FIXED: Budget 75€
+    // Check budget
     if (newBudget < 0) {
       return res.status(400).json({ 
         error: `Cannot afford this transfer! Need £${(-newBudget).toFixed(1)}m more`,
@@ -328,7 +294,6 @@ app.post('/transfer-player', async (req, res) => {
       // Reset transfers at new gameweek
       user.freeTransfers = 1;
       user.lastTransferGameweek = user.currentGameweek;
-      await user.save(); // FIXED: Save the reset
     }
 
     // WILDCARD CHECK
@@ -343,39 +308,11 @@ app.post('/transfer-player', async (req, res) => {
         // -4 points penalty for extra transfers
         penaltyPoints = 4;
         user.points = Math.max(0, user.points - 4);
-        user.markModified('points');
       }
     } else {
       // Wildcard is active - unlimited transfers
       // No penalty, no free transfer deduction needed
       user.freeTransfers = 1; // Keep free transfers at 1 to show active wildcard
-    }
-
-    // Check 2-player team limit
-    const currentTeam = [...user.team];
-    currentTeam[oldPlayerIndex] = parseInt(newPlayerId);
-    
-    // Count players per team
-    const teamCounts = {};
-    for (const playerId of currentTeam) {
-      try {
-        const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
-          timeout: 5000
-        });
-        const teamId = response.data.team;
-        teamCounts[teamId] = (teamCounts[teamId] || 0) + 1;
-        
-        // Check if we're over the limit
-        if (teamCounts[teamId] > 2) {
-          const teamName = response.data.team_name || `Team ${teamId}`;
-          return res.status(400).json({ 
-            error: `Cannot select more than 2 players from ${teamName}`
-          });
-        }
-      } catch (e) {
-        // If API fails, skip this check
-        continue;
-      }
     }
 
     // Perform transfer
@@ -386,12 +323,14 @@ app.post('/transfer-player', async (req, res) => {
     if (!isWildcardActive) {
       if (user.freeTransfers > 0) {
         user.freeTransfers -= 1;
-        user.markModified('freeTransfers'); // CRITICAL: Mark as modified
       }
     }
 
+    // CRITICAL FIX: Explicitly mark freeTransfers as modified
+    user.markModified('freeTransfers');
+    
     user.lastUpdated = new Date();
-    await user.save(); // FIXED: Save the user with updated freeTransfers
+    await user.save();
 
     res.json({
       success: true,
@@ -411,7 +350,7 @@ app.post('/transfer-player', async (req, res) => {
   }
 });
 
-// ACTIVATE WILDCARD - NO CHANGES NEEDED
+// ACTIVATE WILDCARD - NEW ENDPOINT
 app.post('/activate-wildcard', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -438,105 +377,7 @@ app.post('/activate-wildcard', async (req, res) => {
   }
 });
 
-// ACTIVATE TRIPLE CAPTAIN - NO CHANGES NEEDED
-app.post('/activate-triple-captain', async (req, res) => {
-  try {
-    const { userId, captainId } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
-    if (!captainId) return res.status(400).json({ error: 'Captain ID required' });
-
-    const user = await User.findOne({ telegramId: userId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.tripleCaptainUsed) return res.status(400).json({ error: 'Triple Captain already used' });
-    if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use Triple Captain' });
-    if (!user.team.includes(captainId)) return res.status(400).json({ error: 'Captain must be in your team' });
-
-    // Set captain and activate Triple Captain for current gameweek
-    user.captainId = captainId;
-    user.tripleCaptainUsed = true;
-    user.tripleCaptainGameweek = user.currentGameweek;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: '✅ Triple Captain activated! Captain points will be tripled this gameweek',
-      tripleCaptainActive: true
-    });
-  } catch (error) {
-    console.error('Triple Captain error:', error.message);
-    res.status(500).json({ error: 'Failed to activate Triple Captain' });
-  }
-});
-
-// ACTIVATE WILD BENCH - NO CHANGES NEEDED
-app.post('/activate-wild-bench', async (req, res) => {
-  try {
-    const { userId, wildBenchPlayerId } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
-    if (!wildBenchPlayerId) return res.status(400).json({ error: 'Wild Bench player ID required' });
-
-    const user = await User.findOne({ telegramId: userId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.wildBenchUsed) return res.status(400).json({ error: 'Wild Bench already used' });
-    if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use Wild Bench' });
-    if (user.team.includes(parseInt(wildBenchPlayerId))) return res.status(400).json({ error: 'Wild Bench player must be different from your team' });
-
-    // Check 2-player team limit for Wild Bench player
-    try {
-      const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${wildBenchPlayerId}/`, {
-        timeout: 5000
-      });
-      const player = response.data;
-      const currentTeam = [...user.team];
-      
-      // Count players per team including the Wild Bench player
-      const teamCounts = {};
-      for (const playerId of currentTeam) {
-        try {
-          const playerResponse = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
-            timeout: 5000
-          });
-          const teamId = playerResponse.data.team;
-          teamCounts[teamId] = (teamCounts[teamId] || 0) + 1;
-        } catch (e) {
-          // If API fails, skip this check
-          continue;
-        }
-      }
-      
-      // Add the Wild Bench player
-      const wildBenchTeam = player.team;
-      teamCounts[wildBenchTeam] = (teamCounts[wildBenchTeam] || 0) + 1;
-      
-      if (teamCounts[wildBenchTeam] > 2) {
-        const teamName = player.team_name || `Team ${wildBenchTeam}`;
-        return res.status(400).json({ 
-          error: `Cannot select more than 2 players from ${teamName}`
-        });
-      }
-    } catch (e) {
-      // If API fails, allow the Wild Bench activation
-      console.error("Failed to check Wild Bench team limit:", e);
-    }
-
-    // Set Wild Bench player and activate for current gameweek
-    user.wildBenchPlayer = wildBenchPlayerId;
-    user.wildBenchUsed = true;
-    user.wildBenchGameweek = user.currentGameweek;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: '✅ Wild Bench activated! 12th player will score this gameweek',
-      wildBenchActive: true
-    });
-  } catch (error) {
-    console.error('Wild Bench error:', error.message);
-    res.status(500).json({ error: 'Failed to activate Wild Bench' });
-  }
-});
-
-// Update Team Points
+// Update Team Points (Real-time scoring)
 app.post('/update-points', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -552,20 +393,8 @@ app.post('/update-points', async (req, res) => {
     let totalPoints = 0;
     const playerStats = [];
 
-    // Check if Wild Bench is active
-    const isWildBenchActive = user.wildBenchUsed && user.wildBenchGameweek === user.currentGameweek;
-    
-    // Check if Triple Captain is active
-    const isTripleCaptainActive = user.tripleCaptainUsed && user.tripleCaptainGameweek === user.currentGameweek;
-    
-    // Get all players (starting 11 + Wild Bench)
-    const allPlayerIds = [...user.team];
-    if (isWildBenchActive && user.wildBenchPlayer) {
-      allPlayerIds.push(user.wildBenchPlayer);
-    }
-
     // Fetch stats for each player
-    for (const playerId of allPlayerIds) {
+    for (const playerId of user.team) {
       try {
         const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
@@ -574,13 +403,7 @@ app.post('/update-points', async (req, res) => {
         const data = response.data;
         const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
         
-        let points = latestGW?.total_points || 0;
-        
-        // Triple Captain logic
-        if (isTripleCaptainActive && playerId === user.captainId) {
-          points *= 3;
-        }
-        
+        const points = latestGW?.total_points || 0;
         totalPoints += points;
         
         playerStats.push({
@@ -590,11 +413,7 @@ app.post('/update-points', async (req, res) => {
           goals: latestGW?.goals_scored || 0,
           assists: latestGW?.assists || 0,
           clean_sheets: latestGW?.clean_sheets || 0,
-          bonus: latestGW?.bonus || 0,
-          wildBenchActive: isWildBenchActive,
-          isWildBenchPlayer: isWildBenchActive && playerId === user.wildBenchPlayer,
-          tripleCaptainActive: isTripleCaptainActive,
-          isCaptain: playerId === user.captainId
+          bonus: latestGW?.bonus || 0
         });
       } catch (e) {
         // If API fails, use 0 points for this player
@@ -605,11 +424,7 @@ app.post('/update-points', async (req, res) => {
           goals: 0,
           assists: 0,
           clean_sheets: 0,
-          bonus: 0,
-          wildBenchActive: isWildBenchActive,
-          isWildBenchPlayer: isWildBenchActive && playerId === user.wildBenchPlayer,
-          tripleCaptainActive: isTripleCaptainActive,
-          isCaptain: false
+          bonus: 0
         });
       }
     }
@@ -623,8 +438,7 @@ app.post('/update-points', async (req, res) => {
     res.json({
       success: true,
       points: totalPoints,
-      playerStats: playerStats,
-      wildBenchActive: isWildBenchActive
+      playerStats: playerStats
     });
   } catch (error) {
     console.error('Update points error:', error.message);
@@ -632,7 +446,7 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Get User Profile - NO CHANGES NEEDED
+// Get User Profile - UPDATED WITH WILDCARD DATA
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -645,7 +459,6 @@ app.get('/user-profile', async (req, res) => {
       managerName: user.managerName,
       solWallet: user.solWallet,
       team: user.team,
-      wildBenchPlayer: user.wildBenchPlayer,
       points: user.points,
       totalPoints: user.totalPoints,
       entries: user.entries,
@@ -656,12 +469,7 @@ app.get('/user-profile', async (req, res) => {
       budget: user.budget,
       freeTransfers: user.freeTransfers,
       wildcardUsed: user.wildcardUsed,
-      wildcardGameweek: user.wildcardGameweek,
-      tripleCaptainUsed: user.tripleCaptainUsed,
-      tripleCaptainGameweek: user.tripleCaptainGameweek,
-      captainId: user.captainId,
-      wildBenchUsed: user.wildBenchUsed,
-      wildBenchGameweek: user.wildBenchGameweek
+      wildcardGameweek: user.wildcardGameweek
     });
   } catch (error) {
     console.error('Profile error:', error.message);
