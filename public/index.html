@@ -447,187 +447,226 @@
     .stat-avg-ppg { color: var(--warning); }
     .stat-budget { color: var(--accent); }
 
-    /* BUY TEAM BUTTON */
-    .buy-team-container {
-      margin-top: 20px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .buy-team-title {
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text);
-    }
-
-    .buy-team-btn {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .buy-team-btn:hover {
-      background: var(--accent-dark);
-    }
-
-    .buy-team-info {
-      font-size: 13px;
-      color: var(--text-tertiary);
-      margin-top: 8px;
-    }
-
-    /* CONFIRMATION MODAL */
-    .confirmation-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.92);
-      display: none;
-      flex-direction: column;
-      z-index: 3000;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .confirmation-header {
-      padding: 18px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .confirmation-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--primary);
-    }
-
-    .close-confirmation {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 24px;
-      cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-
-    .close-confirmation:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .confirmation-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
+    /* SUBMISSION BANNER */
+    .submission-banner {
       text-align: center;
-    }
-
-    .confirmation-message {
-      font-size: 18px;
-      margin: 20px 0;
-      color: var(--text);
-    }
-
-    .confirmation-buttons {
-      display: flex;
-      gap: 10px;
-      margin: 20px 0;
-    }
-
-    .confirm-btn {
-      flex: 1;
-      padding: 12px;
-      background: var(--success);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .cancel-btn {
-      flex: 1;
-      padding: 12px;
-      background: var(--error);
-      color: #000;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .confirm-btn:hover {
-      background: var(--success-dark);
-    }
-
-    .cancel-btn:hover {
-      background: #e03131;
-    }
-
-    /* WILD BENCH SYSTEM */
-    .wild-bench-container {
-      margin-top: 20px;
       padding: 16px;
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(78, 205, 196, 0.12);
       border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 20px;
+      border: 1px solid rgba(78, 205, 196, 0.3);
     }
 
-    .wild-bench-title {
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .banner-title {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 17px;
+      margin: 0 0 8px;
     }
 
-    .wild-bench-icon {
-      background: var(--accent);
-      color: #000;
-      width: 24px;
-      height: 24px;
+    .banner-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* LOADING INDICATOR */
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
+      border-top-color: var(--text);
+      animation: spin 1s ease-in-out infinite;
       margin-right: 8px;
     }
 
-    .wild-bench-active {
-      color: var(--success);
-      font-weight: 700;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
-    .wild-bench-inactive {
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 30px 20px;
       color: var(--text-tertiary);
     }
 
-    .wild-bench-btn {
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    /* PROGRESS BAR */
+    .progress-container {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin: 12px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.4s ease-out forwards;
+    }
+
+    .slide-in-up {
+      animation: slideInUp 0.3s ease-out forwards;
+    }
+
+    .pulse {
+      animation: pulse 0.6s ease-in-out;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #00c3ff;
+      opacity: 0;
+    }
+
+    /* SKELETON LOADING */
+    .skeleton {
+      background: linear-gradient(90deg, #1a2a3a 25%, #25384d 50%, #1a2a3a 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 12px;
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* STAGGERED ANIMATIONS */
+    .team-stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* LIVE SCORING BADGE */
+    .live-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .live-indicator {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--success);
+    }
+
+    .live-update {
+      color: var(--success);
+      font-weight: 600;
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    /* BUDGET TRACKER */
+    .budget-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: rgba(26, 42, 58, 0.7);
+      border-radius: 12px;
+      margin: 16px 0;
+    }
+
+    .budget-label {
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .budget-value {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--success);
+    }
+
+    .budget-warning {
+      color: var(--warning);
+    }
+
+    .budget-critical {
+      color: var(--error);
+      font-weight: 700;
+    }
+
+    /* TRANSFER SYSTEM */
+    .transfer-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .transfer-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .transfer-btn {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
@@ -640,16 +679,101 @@
       transition: var(--transition);
     }
 
-    .wild-bench-btn:hover {
+    .transfer-btn:hover {
       background: rgba(255, 255, 255, 0.12);
     }
 
-    .wild-bench-btn:disabled {
+    .transfer-btn.disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
-    .wild-bench-usage {
+    .transfer-info {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      margin-top: 8px;
+    }
+
+    .transfer-penalty {
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    .free-transfers {
+      color: var(--success);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .transfer-cooldown {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    /* WILDCARD SYSTEM */
+    .wildcard-container {
+      margin-top: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .wildcard-title {
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .wildcard-icon {
+      background: var(--accent);
+      color: #000;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      margin-right: 8px;
+    }
+
+    .wildcard-active {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .wildcard-inactive {
+      color: var(--text-tertiary);
+    }
+
+    .wildcard-btn {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .wildcard-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .wildcard-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .wildcard-usage {
       font-size: 13px;
       color: var(--text-tertiary);
       margin-top: 8px;
@@ -657,104 +781,14 @@
       align-items: center;
     }
 
-    .wild-bench-usage i {
+    .wildcard-usage i {
       color: var(--success);
       margin-right: 8px;
     }
 
-    .wild-bench-warning {
+    .wildcard-warning {
       color: var(--warning);
       font-weight: 600;
-    }
-
-    /* WILD BENCH SLOT */
-    .wild-bench-slot {
-      width: 64px;
-      height: 80px;
-      border: 2px dashed var(--text-tertiary);
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--accent);
-    }
-
-    .wild-bench-slot:hover {
-      border-color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .wild-bench-slot.filled {
-      border-style: solid;
-      transform: scale(1.03);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .wild-bench-label {
-      font-size: 11px;
-      font-weight: 600;
-      margin-top: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-tertiary);
-      color: var(--accent);
-    }
-
-    .wild-bench-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      width: 20px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 600;
-      color: #000;
-    }
-
-    /* TEAM LIMIT INDICATORS */
-    .team-limit-indicator {
-      position: absolute;
-      bottom: -10px;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 0, 0, 0.5);
-      border-radius: 2px;
-      opacity: 0;
-      transition: var(--transition);
-    }
-
-    .slot:hover .team-limit-indicator {
-      opacity: 0.6;
-    }
-
-    .slot.team-limit-exceeded {
-      border-color: var(--error);
-      transform: scale(1.03);
-      box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
-    }
-
-    .player-card.team-limit-exceeded {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .team-limit-warning {
-      color: var(--error);
-      font-weight: 600;
-      margin-top: 8px;
-      text-align: center;
-      font-size: 12px;
     }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -812,7 +846,7 @@
         <!-- BUDGET TRACKER -->
         <div class="budget-container">
           <div class="budget-label">Budget Remaining:</div>
-          <div id="budgetRemaining" class="budget-value">£75.0m</div>
+          <div id="budgetRemaining" class="budget-value">£100.0m</div>
         </div>
         
         <!-- FORMATION CONTAINER -->
@@ -837,16 +871,9 @@
           <span id="teamProgressText">0/11 players selected</span>
         </div>
 
-        <!-- BUY TEAM BUTTON -->
-        <div class="buy-team-container">
-          <div class="buy-team-title">🛒 Buy This Team</div>
-          <button id="buyTeamBtn" class="buy-team-btn">
-            <i class="fas fa-shopping-cart"></i> Buy Team & Join Contest
-          </button>
-          <div class="buy-team-info">
-            <i class="fas fa-info-circle"></i> You'll be asked to confirm before finalizing your purchase
-          </div>
-        </div>
+        <button id="submitTeam" class="btn-secondary" disabled>
+          <i class="fas fa-lock"></i> Lock In Team & Join Contest
+        </button>
       </div>
 
       <!-- TEAM STATS SECTION -->
@@ -855,7 +882,7 @@
         <div class="team-stats-grid">
           <div class="team-stat-card">
             <div class="team-stat-label">Budget Remaining</div>
-            <div id="budgetStats" class="team-stat-value stat-budget">£75.0m</div>
+            <div id="budgetStats" class="team-stat-value stat-budget">£100.0m</div>
           </div>
           <div class="team-stat-card">
             <div class="team-stat-label">Free Transfers</div>
@@ -869,11 +896,6 @@
             <div class="team-stat-label">Avg. Form</div>
             <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
           </div>
-        </div>
-
-        <!-- TEAM LIMITS WARNING -->
-        <div class="team-limit-warning" id="teamLimitWarning" style="display:none;">
-          <i class="fas fa-exclamation-triangle"></i> Max 2 players per real-world team
         </div>
 
         <!-- WILDCARD SYSTEM -->
@@ -891,42 +913,6 @@
           <div class="wildcard-usage">
             <i class="fas fa-check"></i>
             <span id="wildcardUsage">1 per season</span>
-          </div>
-        </div>
-        
-        <!-- TRIPLE CAPTAIN SYSTEM -->
-        <div class="triple-captain-container">
-          <div class="triple-captain-title">
-            <div class="triple-captain-icon">3x</div>
-            Triple Captain
-          </div>
-          <div class="triple-captain-status">
-            <span id="tripleCaptainStatus" class="triple-captain-inactive">Not activated</span>
-          </div>
-          <button id="activateTripleCaptainBtn" class="triple-captain-btn">
-            <i class="fas fa-star"></i> Activate Triple Captain
-          </button>
-          <div class="triple-captain-usage">
-            <i class="fas fa-check"></i>
-            <span id="tripleCaptainUsage">1 per season</span>
-          </div>
-        </div>
-        
-        <!-- WILD BENCH SYSTEM -->
-        <div class="wild-bench-container">
-          <div class="wild-bench-title">
-            <div class="wild-bench-icon">12</div>
-            Wild Bench
-          </div>
-          <div class="wild-bench-status">
-            <span id="wildBenchStatus" class="wild-bench-inactive">Not activated</span>
-          </div>
-          <button id="activateWildBenchBtn" class="wild-bench-btn">
-            <i class="fas fa-plus"></i> Activate Wild Bench
-          </button>
-          <div class="wild-bench-usage">
-            <i class="fas fa-check"></i>
-            <span id="wildBenchUsage">1 per season</span>
           </div>
         </div>
         
@@ -1017,32 +1003,6 @@
     </div>
   </div>
 
-  <!-- CONFIRMATION MODAL -->
-  <div class="confirmation-modal" id="confirmationModal">
-    <div class="confirmation-header">
-      <div class="confirmation-title">⚠️ Confirm Purchase</div>
-      <button class="close-confirmation" id="closeConfirmation">&times;</button>
-    </div>
-    <div class="confirmation-content">
-      <div class="confirmation-message">
-        Are you sure you want to buy this team?
-      </div>
-      <div style="font-size: 14px; color: var(--text-tertiary); margin: 20px 0;">
-        This will lock your team and enter you into the contest.
-        <br><br>
-        <strong>Once confirmed, you won't be able to make changes.</strong>
-      </div>
-      <div class="confirmation-buttons">
-        <button id="confirmBuyBtn" class="confirm-btn">
-          <i class="fas fa-check"></i> Yes, Buy Team
-        </button>
-        <button id="cancelBuyBtn" class="cancel-btn">
-          <i class="fas fa-times"></i> Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -1057,7 +1017,7 @@
     const joinView = document.getElementById('joinView');
     const teamView = document.getElementById('teamView');
     const joinContestBtn = document.getElementById('joinContest');
-    const buyTeamBtn = document.getElementById('buyTeamBtn');
+    const submitTeamBtn = document.getElementById('submitTeam');
     const playerModal = document.getElementById('playerModal');
     const closeModal = document.getElementById('closeModal');
     const playerList = document.getElementById('playerList');
@@ -1080,20 +1040,13 @@
 
     let currentFormation = "4-3-3";
     let selectedTeam = Array(11).fill(null);
-    let wildBenchPlayer = null;
     let allPlayers = [];
     let liveScores = {};
-    let userBudget = 75.0;
+    let userBudget = 100.0;
     let freeTransfers = 1;
     let currentTransferPlayer = null; // Track which player we're transferring out
     let wildcardUsed = false;
     let wildcardGameweek = null;
-    let tripleCaptainUsed = false;
-    let tripleCaptainGameweek = null;
-    let captainId = null;
-    let wildBenchUsed = false;
-    let wildBenchGameweek = null;
-    let teamCounts = {}; // Track how many players from each team
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1139,7 +1092,47 @@
         if (profile.managerName && profile.joined) {
           topUserName.innerText = profile.managerName;
           
-          // Show team builder with saved team
+          // If team is LOCKED (submitted), show read-only view
+          if (profile.locked) {
+            joinView.style.display = 'none';
+            teamView.style.display = 'block';
+            loadPlayers().then(() => {
+              selectedTeam = profile.team.map(id => 
+                allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+              );
+              userBudget = profile.budget || 100.0;
+              freeTransfers = profile.freeTransfers || 1;
+              wildcardUsed = profile.wildcardUsed || false;
+              wildcardGameweek = profile.wildcardGameweek;
+              updateBudgetDisplay();
+              updateWildcardDisplay();
+              renderTeamGrid();
+              calculateTeamStats(); // Show team stats
+              // Only reduce opacity (don't disable pointer events)
+              document.querySelectorAll('.slot').forEach(slot => {
+                slot.style.opacity = '0.7';
+              });
+              submitTeamBtn.style.display = 'none';
+              document.getElementById('formationSelectorContainer').style.display = 'none';
+              
+              // Show "Already Submitted" banner
+              const banner = document.createElement('div');
+              banner.innerHTML = `
+                <div class="submission-banner">
+                  <div class="banner-title">✅ Team Submitted!</div>
+                  <div class="banner-text">Your team is locked for this contest.</div>
+                </div>
+              `;
+              const firstSection = document.querySelector('.section');
+              firstSection.insertBefore(banner, firstSection.firstChild);
+              
+              // Load live scores
+              updateLiveScores();
+            });
+            return;
+          }
+          
+          // If joined but not submitted, show team builder
           joinView.style.display = 'none';
           teamView.style.display = 'block';
           loadPlayers();
@@ -1147,22 +1140,13 @@
             selectedTeam = profile.team.map(id => 
               allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
             );
-            wildBenchPlayer = profile.wildBenchPlayer;
           }
-          userBudget = profile.budget || 75.0;
+          userBudget = profile.budget || 100.0;
           freeTransfers = profile.freeTransfers || 1;
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
-          tripleCaptainUsed = profile.tripleCaptainUsed || false;
-          tripleCaptainGameweek = profile.tripleCaptainGameweek;
-          captainId = profile.captainId;
-          wildBenchUsed = profile.wildBenchUsed || false;
-          wildBenchGameweek = profile.wildBenchGameweek;
-          calculateTeamCounts();
           updateBudgetDisplay();
           updateWildcardDisplay();
-          updateTripleCaptainDisplay();
-          updateWildBenchDisplay();
           renderTeamGrid();
           calculateTeamStats(); // Show team stats
           return;
@@ -1197,21 +1181,12 @@
           teamView.style.display = 'block';
           loadPlayers();
           renderTeamGrid();
-          userBudget = data.budget || 75.0;
+          userBudget = data.budget || 100.0;
           freeTransfers = data.freeTransfers || 1;
           wildcardUsed = false;
           wildcardGameweek = null;
-          tripleCaptainUsed = false;
-          tripleCaptainGameweek = null;
-          captainId = null;
-          wildBenchUsed = false;
-          wildBenchGameweek = null;
-          wildBenchPlayer = null;
-          teamCounts = {};
           updateBudgetDisplay();
           updateWildcardDisplay();
-          updateTripleCaptainDisplay();
-          updateWildBenchDisplay();
         } else {
           throw new Error(data.error || 'Failed to join');
         }
@@ -1257,15 +1232,6 @@
         `;
         document.getElementById('retryBtn').addEventListener('click', loadPlayers);
       }
-    }
-
-    function calculateTeamCounts() {
-      teamCounts = {};
-      selectedTeam.forEach(player => {
-        if (player && player.team) {
-          teamCounts[player.team] = (teamCounts[player.team] || 0) + 1;
-        }
-      });
     }
 
     function updateBudgetDisplay() {
@@ -1319,46 +1285,6 @@
       }
     }
 
-    function updateTripleCaptainDisplay() {
-      const tripleCaptainStatus = document.getElementById('tripleCaptainStatus');
-      const tripleCaptainUsage = document.getElementById('tripleCaptainUsage');
-      const activateBtn = document.getElementById('activateTripleCaptainBtn');
-      
-      if (tripleCaptainUsed) {
-        tripleCaptainStatus.className = 'triple-captain-active';
-        tripleCaptainStatus.innerText = 'Activated!';
-        tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${tripleCaptainGameweek}`;
-        activateBtn.disabled = true;
-        activateBtn.title = "Triple Captain already used this season";
-      } else {
-        tripleCaptainStatus.className = 'triple-captain-inactive';
-        tripleCaptainStatus.innerText = 'Not activated';
-        tripleCaptainUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        activateBtn.disabled = false;
-        activateBtn.title = "Activate to triple captain points this gameweek";
-      }
-    }
-
-    function updateWildBenchDisplay() {
-      const wildBenchStatus = document.getElementById('wildBenchStatus');
-      const wildBenchUsage = document.getElementById('wildBenchUsage');
-      const activateBtn = document.getElementById('activateWildBenchBtn');
-      
-      if (wildBenchUsed) {
-        wildBenchStatus.className = 'wild-bench-active';
-        wildBenchStatus.innerText = 'Activated!';
-        wildBenchUsage.innerHTML = `<i class="fas fa-check"></i> Used in GW${wildBenchGameweek}`;
-        activateBtn.disabled = true;
-        activateBtn.title = "Wild Bench already used this season";
-      } else {
-        wildBenchStatus.className = 'wild-bench-inactive';
-        wildBenchStatus.innerText = 'Not activated';
-        wildBenchUsage.innerHTML = `<i class="fas fa-check"></i> 1 per season`;
-        activateBtn.disabled = false;
-        activateBtn.title = "Activate for 12th player this gameweek";
-      }
-    }
-
     function calculateTeamValue() {
       return selectedTeam
         .filter(p => p !== null)
@@ -1367,7 +1293,7 @@
 
     function calculateRemainingBudget() {
       const teamValue = calculateTeamValue();
-      return (75.0 - teamValue).toFixed(1);
+      return (100.0 - teamValue).toFixed(1);
     }
 
     function renderTeamGrid() {
@@ -1393,17 +1319,14 @@
         line.forEach((slot, idx) => {
           const slotIndex = slots.indexOf(slot);
           const player = selectedTeam[slotIndex];
-          const isCaptain = captainId === player?.id;
           html += `
             <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
                  data-index="${slotIndex}" 
                  data-type="${slot.type}">
               ${player ? 
                 `<img src="${player.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
-                 ${isCaptain ? '<div class="captain-badge">C</div>' : ''}
                  ${liveScores[player.id] ? `<div class="live-indicator"></div>` : ''}
                  ${liveScores[player.id] ? `<div class="live-badge">${liveScores[player.id].points}</div>` : ''}
-                 ${teamCounts[player.team] > 2 ? '<div class="team-limit-indicator" style="opacity:0.6;"></div>' : ''}
                 ` : 
                 `<span class="slot-label">${slot.label}</span>`
               }
@@ -1413,26 +1336,6 @@
         html += `</div>`;
       });
 
-      // Add Wild Bench slot if active
-      if (wildBenchUsed && wildBenchGameweek === 1) {
-        const wildBenchPlayer = allPlayers.find(p => p.id === wildBenchPlayer);
-        html += `
-          <div class="line" style="margin-top: 16px;">
-            <div class="wild-bench-slot ${wildBenchPlayer ? 'filled' : ''}" data-type="wild-bench">
-              ${wildBenchPlayer ? 
-                `<img src="${wildBenchPlayer.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
-                 <div class="wild-bench-badge">12</div>
-                 ${liveScores[wildBenchPlayer.id] ? `<div class="live-indicator"></div>` : ''}
-                 ${liveScores[wildBenchPlayer.id] ? `<div class="live-badge">${liveScores[wildBenchPlayer.id].points}</div>` : ''}
-                 ${teamCounts[wildBenchPlayer.team] > 2 ? '<div class="team-limit-indicator" style="opacity:0.6;"></div>' : ''}
-                ` : 
-                `<span class="wild-bench-label">Wild Bench</span>`
-              }
-            </div>
-          </div>
-        `;
-      }
-
       teamGrid.innerHTML = html;
 
       // Click handler for player stats
@@ -1441,14 +1344,14 @@
           const index = slot.dataset.index;
           const player = selectedTeam[index];
           
-          // Always allow viewing player stats
-          if (player && player.id) {
+          // If team is submitted and player exists, show stats
+          if (player && player.id && submitTeamBtn.style.display === 'none') {
             showPlayerStats(player);
             return;
           }
           
           // For non-submitted teams, allow selection on empty slots
-          if (!player) {
+          if (submitTeamBtn.style.display !== 'none' && !player) {
             const type = slot.dataset.type;
             openPlayerModal(type, index);
             
@@ -1461,19 +1364,7 @@
         });
       });
 
-      // Click handler for Wild Bench slot
-      const wildBenchSlot = document.querySelector('.wild-bench-slot');
-      if (wildBenchSlot) {
-        wildBenchSlot.addEventListener('click', () => {
-          if (wildBenchUsed && wildBenchGameweek === 1) {
-            openPlayerModal('wild-bench', 11);
-          }
-        });
-      }
-
-      // Check team limits
-      checkTeamLimits();
-      checkBuyTeamButton();
+      checkSubmitButton();
       calculateTeamStats(); // Update team stats
       
       // Update progress bar
@@ -1482,49 +1373,22 @@
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
       
-      // Hide formation for submitted teams (not applicable in this model)
+      // Hide formation for submitted teams
+      const isSubmitted = submitTeamBtn.style.display === 'none';
       const formationContainer = document.getElementById('formationSelectorContainer');
       if (formationContainer) {
-        formationContainer.style.display = 'block';
+        formationContainer.style.display = isSubmitted ? 'none' : 'block';
       }
       
       // Update budget
-      userBudget = 75.0 - calculateTeamValue();
+      userBudget = 100.0 - calculateTeamValue();
       updateBudgetDisplay();
     }
 
-    function checkTeamLimits() {
-      // Show team limit warning if needed
-      const teamLimitWarning = document.getElementById('teamLimitWarning');
-      if (Object.values(teamCounts).some(count => count > 2)) {
-        teamLimitWarning.style.display = 'block';
-      } else {
-        teamLimitWarning.style.display = 'none';
-      }
-
-      // Highlight slots where teams are over the limit
-      document.querySelectorAll('.slot').forEach((slot, index) => {
-        const player = selectedTeam[index];
-        if (player && teamCounts[player.team] > 2) {
-          slot.classList.add('team-limit-exceeded');
-        } else {
-          slot.classList.remove('team-limit-exceeded');
-        }
-      });
-    }
-
     function openPlayerModal(positionType, slotIndex) {
-      let positionName = '';
-      let fplType = null;
-      
-      if (positionType === 'wild-bench') {
-        positionName = '12th Player (Wild Bench)';
-        fplType = null; // Wild Bench can be any position
-      } else {
-        const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
-        fplType = positionMap[positionType];
-        positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
-      }
+      const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
+      const fplType = positionMap[positionType];
+      const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
 
       document.getElementById('modalPosition').innerText = positionName;
 
@@ -1534,19 +1398,9 @@
           .map(p => p.id)
       );
 
-      let availablePlayers = allPlayers;
-      if (positionType !== 'wild-bench') {
-        availablePlayers = allPlayers
-          .filter(p => p.element_type === fplType)
-          .filter(p => !selectedIds.has(p.id));
-      }
-
-      // Filter out players that would exceed team limits
-      availablePlayers = availablePlayers.filter(player => {
-        // If adding this player would exceed the 2-player limit for the team
-        const teamCount = (teamCounts[player.team] || 0) + 1;
-        return teamCount <= 2;
-      });
+      let availablePlayers = allPlayers
+        .filter(p => p.element_type === fplType)
+        .filter(p => !selectedIds.has(p.id));
 
       const originalPlayers = [...availablePlayers];
       renderPlayerList(availablePlayers, slotIndex);
@@ -1588,13 +1442,6 @@
         if (!isNaN(maxPoints)) {
           filtered = filtered.filter(player => player.total_points <= maxPoints);
         }
-        
-        // Filter out players that would exceed team limits
-        filtered = filtered.filter(player => {
-          const teamCount = (teamCounts[player.team] || 0) + 1;
-          return teamCount <= 2;
-        });
-        
         renderPlayerList(filtered, slotIndex);
       };
 
@@ -1621,11 +1468,8 @@
         const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
         const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
         
-        // Check if adding this player would exceed team limit
-        const wouldExceedTeamLimit = (teamCounts[player.team] || 0) >= 2;
-        
         html += `
-          <div class="${playerClass} ${wouldExceedTeamLimit ? 'team-limit-exceeded' : ''}" data-id="${player.id}">
+          <div class="${playerClass}" data-id="${player.id}">
             <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
             <div class="player-info">
               <div class="player-name">${player.web_name}</div>
@@ -1674,21 +1518,6 @@
                 freeTransfers = data.freeTransfers;
                 const wildcardActive = data.wildcardActive;
                 
-                // Update team counts
-                if (oldPlayerIndex !== -1) {
-                  const oldPlayer = selectedTeam[oldPlayerIndex];
-                  if (oldPlayer && oldPlayer.team) {
-                    teamCounts[oldPlayer.team] = (teamCounts[oldPlayer.team] || 0) - 1;
-                    if (teamCounts[oldPlayer.team] <= 0) {
-                      delete teamCounts[oldPlayer.team];
-                    }
-                  }
-                }
-                
-                if (player && player.team) {
-                  teamCounts[player.team] = (teamCounts[player.team] || 0) + 1;
-                }
-                
                 // Show success message
                 const successBanner = document.createElement('div');
                 successBanner.innerHTML = `
@@ -1728,26 +1557,9 @@
           }
           
           // If this is a regular selection (not a transfer)
-          if (slotIndex === 11) {
-            // Wild Bench selection
-            wildBenchPlayer = player;
-            renderTeamGrid();
-            playerModal.style.display = 'none';
-            return;
-          }
-          
           for (let i = 0; i < selectedTeam.length; i++) {
             if (selectedTeam[i] && selectedTeam[i].id === playerId) {
               selectedTeam[i] = null;
-              
-              // Update team counts
-              const removedPlayer = selectedTeam[i];
-              if (removedPlayer && removedPlayer.team) {
-                teamCounts[removedPlayer.team] = (teamCounts[removedPlayer.team] || 0) - 1;
-                if (teamCounts[removedPlayer.team] <= 0) {
-                  delete teamCounts[removedPlayer.team];
-                }
-              }
             }
           }
           
@@ -1756,18 +1568,6 @@
           if (userBudget < playerCost) {
             alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
             return;
-          }
-          
-          // Check if adding this player would exceed team limit
-          const teamCount = (teamCounts[player.team] || 0) + 1;
-          if (teamCount > 2) {
-            alert(`Cannot select more than 2 players from ${player.team_name}`);
-            return;
-          }
-          
-          // Update team counts
-          if (player && player.team) {
-            teamCounts[player.team] = (teamCounts[player.team] || 0) + 1;
           }
           
           selectedTeam[slotIndex] = player;
@@ -1793,40 +1593,21 @@
       
       // Transfer section HTML
       let transferSection = '';
-      transferSection = `
-        <div class="transfer-section">
-          <div class="transfer-title">📊 Player Stats</div>
-          <div class="stat-row">
-            <span>Form:</span>
-            <span>${player.form}</span>
+      if (submitTeamBtn.style.display === 'none') {
+        transferSection = `
+          <div class="transfer-section">
+            <div class="transfer-title">🔄 Transfer Options</div>
+            <button id="transferOutBtn" class="transfer-btn">
+              <i class="fas fa-exchange-alt"></i> Replace this player
+            </button>
+            <div class="transfer-info">
+              ${freeTransfers > 0 ? 
+                `You have ${freeTransfers} free transfer${freeTransfers > 1 ? 's' : ''} left.` : 
+                `No free transfers left. -4 points penalty for extra transfers.`}
+            </div>
           </div>
-          <div class="stat-row">
-            <span>Pts/Game:</span>
-            <span>${player.points_per_game}</span>
-          </div>
-          <div class="stat-row">
-            <span>Selected By:</span>
-            <span>${player.selected_by_percent}%</span>
-          </div>
-          <div class="stat-row">
-            <span>Minutes:</span>
-            <span>${player.minutes}</span>
-          </div>
-          <div class="stat-row">
-            <span>Goals:</span>
-            <span>${player.goals_scored}</span>
-          </div>
-          <div class="stat-row">
-            <span>Assists:</span>
-            <span>${player.assists}</span>
-          </div>
-          <div class="stat-row">
-            <span>Bonus:</span>
-            <span>${player.bonus}</span>
-          </div>
-          ${positionStats}
-        </div>
-      `;
+        `;
+      }
 
       statsContent.innerHTML = `
         <div style="text-align:center; margin-bottom:20px;">
@@ -1879,6 +1660,22 @@
       
       document.getElementById('statsModal').style.display = 'flex';
       document.getElementById('statsModal').classList.add('slide-in-up');
+      
+      // Add transfer button event listener
+      const transferBtn = document.getElementById('transferOutBtn');
+      if (transferBtn) {
+        transferBtn.addEventListener('click', () => {
+          currentTransferPlayer = player;
+          document.getElementById('statsModal').style.display = 'none';
+          
+          // FIX: Map element_type to positionType string
+          const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
+          const positionType = positionMap[player.element_type] || 'fwd';
+          
+          // Open player selection for the same position
+          openPlayerModal(positionType, selectedTeam.indexOf(player));
+        });
+      }
     }
 
     function calculateTeamStats() {
@@ -1968,7 +1765,9 @@
 
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
-      updateLiveScores();
+      if (submitTeamBtn.style.display === 'none') {
+        updateLiveScores();
+      }
     }, 300000); // 5 minutes
 
     // Manual update button
@@ -1998,115 +1797,81 @@
       });
     });
 
-    // BUY TEAM CONFIRMATION
-    buyTeamBtn.addEventListener('click', () => {
-      // First check if team is complete
+    submitTeamBtn.addEventListener('click', async () => {
       if (selectedTeam.some(p => p === null)) {
         alert("Please fill all 11 slots");
         return;
       }
 
-      // Check if team budget is within limit
-      const teamValue = calculateTeamValue();
-      if (teamValue > 75) {
-        alert(`Team budget exceeded! Total: £${teamValue.toFixed(1)}m (max £75m)`);
-        return;
-      }
-
-      // Check if team has more than 2 players from any team
-      const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
-      if (hasTeamLimitExceeded) {
-        alert("Cannot have more than 2 players from any single team");
-        return;
-      }
-
-      // Show confirmation modal
-      document.getElementById('confirmationModal').style.display = 'flex';
-      document.getElementById('confirmationModal').classList.add('slide-in-up');
-    });
-
-    // CONFIRM BUY TEAM
-    document.getElementById('confirmBuyBtn').addEventListener('click', async () => {
+      const teamIds = selectedTeam.map(p => p.id);
       try {
-        const teamIds = selectedTeam.map(p => p.id);
         const response = await fetch('/save-team', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, team: teamIds })
         });
         const data = await response.json();
-        
         if (data.success) {
           // Create confetti celebration
           createConfetti();
           
-          // Show success message
+          // Show success message with animation
           const successBanner = document.createElement('div');
           successBanner.innerHTML = `
             <div style="text-align:center; padding:20px; background:rgba(74, 222, 128, 0.15); border-radius:16px; margin:16px 0; animation: fadeInUp 0.5s ease-out;">
               <div style="font-size:24px; margin-bottom:8px;">🎉</div>
-              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Purchased!</div>
-              <div style="color:var(--text-secondary);">Your team is now locked for the contest!</div>
+              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Submitted!</div>
+              <div style="color:var(--text-secondary);">Good luck in the contest!</div>
             </div>
           `;
           const firstSection = document.querySelector('.section');
           firstSection.insertBefore(successBanner, firstSection.firstChild);
           
-          // Auto-remove after 3 seconds
+          // Rest of your existing code...
+          const response = await fetch(`/user-profile?userId=${userId}`);
+          const profile = await response.json();
+          selectedTeam = profile.team.map(id => 
+            allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+          );
+          userBudget = profile.budget || 100.0;
+          freeTransfers = profile.freeTransfers || 1;
+          wildcardUsed = profile.wildcardUsed || false;
+          wildcardGameweek = profile.wildcardGameweek;
+          updateBudgetDisplay();
+          updateWildcardDisplay();
+          renderTeamGrid();
+          calculateTeamStats();
+          document.querySelectorAll('.slot').forEach(slot => {
+            slot.style.opacity = '0.7';
+          });
+          submitTeamBtn.style.display = 'none';
+          document.getElementById('formationSelectorContainer').style.display = 'none';
+          
+          // Auto-hide success banner after 3 seconds
           setTimeout(() => {
             if (successBanner.parentNode) {
               successBanner.parentNode.removeChild(successBanner);
             }
           }, 3000);
           
-          // Close confirmation modal
-          document.getElementById('confirmationModal').style.display = 'none';
-          document.getElementById('confirmationModal').classList.remove('slide-in-up');
-          
-          // Show "Team Locked" banner
-          const lockedBanner = document.createElement('div');
-          lockedBanner.innerHTML = `
-            <div class="submission-banner">
-              <div class="banner-title">✅ Team Locked!</div>
-              <div class="banner-text">Your team is locked for this contest.</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(lockedBanner, firstSection.firstChild);
-          
           // Start live scoring updates
           updateLiveScores();
         }
       } catch (e) {
-        alert("Failed to purchase team: " + (e.message || ""));
+        alert("Failed to submit team: " + (e.message || ""));
       }
     });
 
-    // CANCEL BUY TEAM
-    document.getElementById('cancelBuyBtn').addEventListener('click', () => {
-      document.getElementById('confirmationModal').style.display = 'none';
-      document.getElementById('confirmationModal').classList.remove('slide-in-up');
-    });
-
-    // CLOSE CONFIRMATION MODAL
-    document.getElementById('closeConfirmation').addEventListener('click', () => {
-      document.getElementById('confirmationModal').style.display = 'none';
-      document.getElementById('confirmationModal').classList.remove('slide-in-up');
-    });
-
-    function checkBuyTeamButton() {
+    function checkSubmitButton() {
       const isComplete = !selectedTeam.some(p => p === null);
-      const isOverBudget = calculateTeamValue() > 75;
-      const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
+      const isOverBudget = calculateTeamValue() > 100;
       
-      buyTeamBtn.disabled = !isComplete || isOverBudget || hasTeamLimitExceeded;
+      submitTeamBtn.disabled = !isComplete || isOverBudget;
       
       if (isOverBudget) {
-        buyTeamBtn.title = "Team budget exceeds £75m";
-      } else if (hasTeamLimitExceeded) {
-        buyTeamBtn.title = "Exceeds 2-player limit for a team";
+        submitTeamBtn.title = "Team budget exceeds £100m";
       } else {
-        buyTeamBtn.title = "";
+        submitTeamBtn.title = "";
       }
     }
 
@@ -2153,145 +1918,14 @@
       }
     });
 
-    // TRIPLE CAPTAIN ACTIVATION
-    document.getElementById('activateTripleCaptainBtn').addEventListener('click', async () => {
-      try {
-        // Check if there's a captain
-        if (!captainId) {
-          alert("Please select a captain first by adding one to your team");
-          return;
-        }
-        
-        const response = await fetch('/activate-triple-captain', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            userId,
-            captainId
-          })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          tripleCaptainUsed = true;
-          tripleCaptainGameweek = 1; // In a real app, this would be current gameweek
-          updateTripleCaptainDisplay();
-          
-          // Show success message
-          const successBanner = document.createElement('div');
-          successBanner.innerHTML = `
-            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
-              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Triple Captain Activated!</div>
-              <div style="color:var(--text-secondary); margin-top:6px;">Captain points will be tripled this gameweek</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
-          // Auto-remove after 3 seconds
-          setTimeout(() => {
-            if (successBanner.parentNode) {
-              successBanner.parentNode.removeChild(successBanner);
-            }
-          }, 3000);
-          
-          // Update UI
-          document.getElementById('tripleCaptainStatus').className = 'triple-captain-active';
-          document.getElementById('tripleCaptainStatus').innerText = 'Activated!';
-        }
-      } catch (e) {
-        alert("Failed to activate Triple Captain: " + (e.message || ""));
-      }
-    });
-
-    // WILD BENCH ACTIVATION
-    document.getElementById('activateWildBenchBtn').addEventListener('click', async () => {
-      try {
-        // Check if there's a Wild Bench player
-        if (!wildBenchPlayer) {
-          alert("Please select a Wild Bench player first by adding one to your team");
-          return;
-        }
-        
-        const response = await fetch('/activate-wild-bench', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            userId,
-            wildBenchPlayerId: wildBenchPlayer.id
-          })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-          wildBenchUsed = true;
-          wildBenchGameweek = 1; // In a real app, this would be current gameweek
-          updateWildBenchDisplay();
-          
-          // Show success message
-          const successBanner = document.createElement('div');
-          successBanner.innerHTML = `
-            <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
-              <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Wild Bench Activated!</div>
-              <div style="color:var(--text-secondary); margin-top:6px;">12th player will score this gameweek</div>
-            </div>
-          `;
-          const firstSection = document.querySelector('.section');
-          firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
-          // Auto-remove after 3 seconds
-          setTimeout(() => {
-            if (successBanner.parentNode) {
-              successBanner.parentNode.removeChild(successBanner);
-            }
-          }, 3000);
-          
-          // Update UI
-          document.getElementById('wildBenchStatus').className = 'wild-bench-active';
-          document.getElementById('wildBenchStatus').innerText = 'Activated!';
-        }
-      } catch (e) {
-        alert("Failed to activate Wild Bench: " + (e.message || ""));
-      }
-    });
-
     // Initial setup
     document.addEventListener('DOMContentLoaded', () => {
       // Auto-update live scores every 5 minutes
       setInterval(() => {
-        updateLiveScores();
-      }, 300000);
-      
-      // Set up captain selection
-      document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('slot')) {
-          const index = e.target.dataset.index;
-          const player = selectedTeam[index];
-          
-          if (player && player.id) {
-            captainId = player.id;
-            renderTeamGrid();
-            
-            // Show captain confirmation
-            const confirmation = document.createElement('div');
-            confirmation.innerHTML = `
-              <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin:16px 0;">
-                <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Captain Selected</div>
-                <div style="color:var(--text-secondary); margin-top:6px;">${player.web_name} is now your captain</div>
-              </div>
-            `;
-            const firstSection = document.querySelector('.section');
-            firstSection.insertBefore(confirmation, firstSection.firstChild);
-            
-            // Auto-remove after 3 seconds
-            setTimeout(() => {
-              if (confirmation.parentNode) {
-                confirmation.parentNode.removeChild(confirmation);
-              }
-            }, 3000);
-          }
+        if (submitTeamBtn.style.display === 'none') {
+          updateLiveScores();
         }
-      });
+      }, 300000);
     });
   </script>
 </body>
