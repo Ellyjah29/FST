@@ -447,212 +447,8 @@
     .stat-avg-ppg { color: var(--warning); }
     .stat-budget { color: var(--accent); }
 
-    /* SUBMISSION BANNER */
-    .submission-banner {
-      text-align: center;
-      padding: 16px;
-      background: rgba(78, 205, 196, 0.12);
-      border-radius: 14px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(78, 205, 196, 0.3);
-    }
-
-    .banner-title {
-      font-weight: 700;
-      color: var(--accent);
-      font-size: 17px;
-      margin: 0 0 8px;
-    }
-
-    .banner-text {
-      color: var(--text-secondary);
-      font-size: 14px;
-      margin: 0;
-    }
-
-    /* LOADING INDICATOR */
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top-color: var(--text);
-      animation: spin 1s ease-in-out infinite;
-      margin-right: 8px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* EMPTY STATE */
-    .empty-state {
-      text-align: center;
-      padding: 30px 20px;
-      color: var(--text-tertiary);
-    }
-
-    .empty-state i {
-      font-size: 48px;
-      margin-bottom: 16px;
-      color: var(--primary);
-    }
-
-    /* PROGRESS BAR */
-    .progress-container {
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 3px;
-      margin: 12px 0;
-      overflow: hidden;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background: var(--primary);
-      width: 0%;
-      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
-    }
-
-    /* ANIMATIONS */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes slideInUp {
-      from {
-        transform: translateY(100%);
-      }
-      to {
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes confetti {
-      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
-    }
-
-    .fade-in-up {
-      animation: fadeInUp 0.4s ease-out forwards;
-    }
-
-    .slide-in-up {
-      animation: slideInUp 0.3s ease-out forwards;
-    }
-
-    .pulse {
-      animation: pulse 0.6s ease-in-out;
-    }
-
-    .confetti-piece {
-      position: absolute;
-      width: 10px;
-      height: 10px;
-      background: #00c3ff;
-      opacity: 0;
-    }
-
-    /* SKELETON LOADING */
-    .skeleton {
-      background: linear-gradient(90deg, #1a2a3a 25%, #25384d 50%, #1a2a3a 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: 12px;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    /* STAGGERED ANIMATIONS */
-    .team-stat-card:nth-child(1) { animation-delay: 0.1s; }
-    .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
-    .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
-    .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
-
-    /* LIVE SCORING BADGE */
-    .live-badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      width: 20px;
-      height: 20px;
-      background: var(--success);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 600;
-      color: #000;
-    }
-
-    .live-indicator {
-      position: absolute;
-      bottom: 4px;
-      right: 4px;
-      width: 8px;
-      height: 8px;
-      background: var(--success);
-      border-radius: 50%;
-      box-shadow: 0 0 6px var(--success);
-    }
-
-    .live-update {
-      color: var(--success);
-      font-weight: 600;
-      animation: pulse 0.8s ease-in-out infinite;
-    }
-
-    /* BUDGET TRACKER */
-    .budget-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      background: rgba(26, 42, 58, 0.7);
-      border-radius: 12px;
-      margin: 16px 0;
-    }
-
-    .budget-label {
-      font-weight: 600;
-      color: var(--text-tertiary);
-    }
-
-    .budget-value {
-      font-weight: 700;
-      font-size: 16px;
-      color: var(--success);
-    }
-
-    .budget-warning {
-      color: var(--warning);
-    }
-
-    .budget-critical {
-      color: var(--error);
-      font-weight: 700;
-    }
-
-    /* TRANSFER SYSTEM */
-    .transfer-section {
+    /* BUY TEAM BUTTON */
+    .buy-team-container {
       margin-top: 20px;
       padding: 16px;
       background: rgba(255, 255, 255, 0.05);
@@ -660,17 +456,18 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .transfer-title {
+    .buy-team-title {
       font-weight: 600;
       margin-bottom: 12px;
       color: var(--text);
     }
 
-    .transfer-btn {
+    .buy-team-btn {
       width: 100%;
       padding: 12px;
       margin: 8px 0;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--accent);
+      color: #000;
       border: none;
       border-radius: 12px;
       font-size: 14px;
@@ -679,36 +476,115 @@
       transition: var(--transition);
     }
 
-    .transfer-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
+    .buy-team-btn:hover {
+      background: var(--accent-dark);
     }
 
-    .transfer-btn.disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .transfer-info {
+    .buy-team-info {
       font-size: 13px;
       color: var(--text-tertiary);
       margin-top: 8px;
     }
 
-    .transfer-penalty {
-      color: var(--error);
-      font-weight: 600;
+    /* CONFIRMATION MODAL */
+    .confirmation-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      display: none;
+      flex-direction: column;
+      z-index: 3000;
+      animation: fadeIn 0.2s ease;
     }
 
-    .free-transfers {
-      color: var(--success);
+    .confirmation-header {
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .confirmation-title {
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 8px;
+      color: var(--primary);
     }
 
-    .transfer-cooldown {
-      color: var(--text-tertiary);
-      font-size: 12px;
-      margin-top: 4px;
+    .close-confirmation {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .close-confirmation:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .confirmation-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .confirmation-message {
+      font-size: 18px;
+      margin: 20px 0;
+      color: var(--text);
+    }
+
+    .confirmation-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .confirm-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--success);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .cancel-btn {
+      flex: 1;
+      padding: 12px;
+      background: var(--error);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .confirm-btn:hover {
+      background: var(--success-dark);
+    }
+
+    .cancel-btn:hover {
+      background: #e03131;
     }
 
     /* WILD BENCH SYSTEM */
@@ -880,135 +756,6 @@
       text-align: center;
       font-size: 12px;
     }
-
-    /* READ-ONLY MODE */
-    .slot.read-only {
-      opacity: 0.7;
-      pointer-events: none;
-      cursor: default;
-    }
-
-    .slot.read-only:hover {
-      border-color: var(--text-tertiary);
-      transform: none;
-      box-shadow: none;
-    }
-
-    .slot.read-only.filled {
-      border-style: solid;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .read-only .captain-badge {
-      opacity: 0.7;
-    }
-
-    .read-only .live-badge {
-      opacity: 0.7;
-    }
-
-    .read-only .live-indicator {
-      opacity: 0.7;
-    }
-
-    /* POWER-UP BUTTONS IN READ-ONLY MODE */
-    .power-up-btn {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      background: rgba(255, 255, 255, 0.08);
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-
-    .power-up-btn:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-
-    .power-up-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .power-up-btn.active {
-      background: var(--accent);
-      color: #000;
-      box-shadow: 0 4px 8px rgba(78, 205, 196, 0.3);
-    }
-
-    .power-up-btn.active:hover {
-      background: var(--accent-dark);
-    }
-
-    .power-up-status {
-      font-size: 13px;
-      color: var(--text-tertiary);
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-    }
-
-    .power-up-status i {
-      color: var(--success);
-      margin-right: 8px;
-    }
-
-    .power-up-warning {
-      color: var(--warning);
-      font-weight: 600;
-    }
-
-    /* PLAYER STATS MODAL IN READ-ONLY MODE */
-    .stats-modal-read-only {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-      cursor: pointer;
-      transition: var(--transition);
-      border: 1px solid transparent;
-    }
-
-    .stats-modal-read-only:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 195, 255, 0.3);
-    }
-
-    .stats-modal-read-only .player-name {
-      font-weight: 600;
-      font-size: 16px;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-
-    .stats-modal-read-only .player-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .stats-modal-read-only .price-tag { color: var(--accent); font-weight: 600; }
-    .stats-modal-read-only .points-tag { color: var(--success); font-weight: 600; }
-
-    .stats-modal-read-only .player-photo {
-      width: 60px;
-      height: 75px;
-      object-fit: cover;
-      border-radius: 10px;
-      background: #000;
-    }
-
-    .stats-modal-read-only .player-info {
-      flex: 1;
-    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -1090,9 +837,16 @@
           <span id="teamProgressText">0/11 players selected</span>
         </div>
 
-        <button id="submitTeam" class="btn-secondary">
-          <i class="fas fa-lock"></i> Lock In Team & Join Contest
-        </button>
+        <!-- BUY TEAM BUTTON -->
+        <div class="buy-team-container">
+          <div class="buy-team-title">🛒 Buy This Team</div>
+          <button id="buyTeamBtn" class="buy-team-btn">
+            <i class="fas fa-shopping-cart"></i> Buy Team & Join Contest
+          </button>
+          <div class="buy-team-info">
+            <i class="fas fa-info-circle"></i> You'll be asked to confirm before finalizing your purchase
+          </div>
+        </div>
       </div>
 
       <!-- TEAM STATS SECTION -->
@@ -1263,6 +1017,32 @@
     </div>
   </div>
 
+  <!-- CONFIRMATION MODAL -->
+  <div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-header">
+      <div class="confirmation-title">⚠️ Confirm Purchase</div>
+      <button class="close-confirmation" id="closeConfirmation">&times;</button>
+    </div>
+    <div class="confirmation-content">
+      <div class="confirmation-message">
+        Are you sure you want to buy this team?
+      </div>
+      <div style="font-size: 14px; color: var(--text-tertiary); margin: 20px 0;">
+        This will lock your team and enter you into the contest.
+        <br><br>
+        <strong>Once confirmed, you won't be able to make changes.</strong>
+      </div>
+      <div class="confirmation-buttons">
+        <button id="confirmBuyBtn" class="confirm-btn">
+          <i class="fas fa-check"></i> Yes, Buy Team
+        </button>
+        <button id="cancelBuyBtn" class="cancel-btn">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
@@ -1277,7 +1057,7 @@
     const joinView = document.getElementById('joinView');
     const teamView = document.getElementById('teamView');
     const joinContestBtn = document.getElementById('joinContest');
-    const submitTeamBtn = document.getElementById('submitTeam');
+    const buyTeamBtn = document.getElementById('buyTeamBtn');
     const playerModal = document.getElementById('playerModal');
     const closeModal = document.getElementById('closeModal');
     const playerList = document.getElementById('playerList');
@@ -1314,7 +1094,6 @@
     let wildBenchUsed = false;
     let wildBenchGameweek = null;
     let teamCounts = {}; // Track how many players from each team
-    let isLocked = false; // Track if team is locked
 
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
 
@@ -1360,58 +1139,7 @@
         if (profile.managerName && profile.joined) {
           topUserName.innerText = profile.managerName;
           
-          // If team is LOCKED (submitted), show read-only view
-          if (profile.locked) {
-            joinView.style.display = 'none';
-            teamView.style.display = 'block';
-            isLocked = true;
-            loadPlayers().then(() => {
-              selectedTeam = profile.team.map(id => 
-                allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
-              );
-              wildBenchPlayer = profile.wildBenchPlayer;
-              userBudget = profile.budget || 75.0;
-              freeTransfers = profile.freeTransfers || 1;
-              wildcardUsed = profile.wildcardUsed || false;
-              wildcardGameweek = profile.wildcardGameweek;
-              tripleCaptainUsed = profile.tripleCaptainUsed || false;
-              tripleCaptainGameweek = profile.tripleCaptainGameweek;
-              captainId = profile.captainId;
-              wildBenchUsed = profile.wildBenchUsed || false;
-              wildBenchGameweek = profile.wildBenchGameweek;
-              calculateTeamCounts();
-              updateBudgetDisplay();
-              updateWildcardDisplay();
-              updateTripleCaptainDisplay();
-              updateWildBenchDisplay();
-              renderTeamGrid();
-              calculateTeamStats(); // Show team stats
-              // Only reduce opacity (don't disable pointer events)
-              document.querySelectorAll('.slot').forEach(slot => {
-                slot.classList.add('read-only');
-                slot.style.opacity = '0.7';
-              });
-              submitTeamBtn.style.display = 'none';
-              document.getElementById('formationSelectorContainer').style.display = 'none';
-              
-              // Show "Already Submitted" banner
-              const banner = document.createElement('div');
-              banner.innerHTML = `
-                <div class="submission-banner">
-                  <div class="banner-title">✅ Team Submitted!</div>
-                  <div class="banner-text">Your team is locked for this contest.</div>
-                </div>
-              `;
-              const firstSection = document.querySelector('.section');
-              firstSection.insertBefore(banner, firstSection.firstChild);
-              
-              // Load live scores
-              updateLiveScores();
-            });
-            return;
-          }
-          
-          // If joined but not submitted, show team builder
+          // Show team builder with saved team
           joinView.style.display = 'none';
           teamView.style.display = 'block';
           loadPlayers();
@@ -1667,7 +1395,7 @@
           const player = selectedTeam[slotIndex];
           const isCaptain = captainId === player?.id;
           html += `
-            <div class="slot ${slot.type} ${player ? 'filled' : ''} ${isLocked ? 'read-only' : ''}" 
+            <div class="slot ${slot.type} ${player ? 'filled' : ''}" 
                  data-index="${slotIndex}" 
                  data-type="${slot.type}">
               ${player ? 
@@ -1690,7 +1418,7 @@
         const wildBenchPlayer = allPlayers.find(p => p.id === wildBenchPlayer);
         html += `
           <div class="line" style="margin-top: 16px;">
-            <div class="wild-bench-slot ${wildBenchPlayer ? 'filled' : ''} ${isLocked ? 'read-only' : ''}" data-type="wild-bench">
+            <div class="wild-bench-slot ${wildBenchPlayer ? 'filled' : ''}" data-type="wild-bench">
               ${wildBenchPlayer ? 
                 `<img src="${wildBenchPlayer.photo_url}" style="width:50px;height:62px;object-fit:cover;border-radius:8px;">
                  <div class="wild-bench-badge">12</div>
@@ -1713,14 +1441,14 @@
           const index = slot.dataset.index;
           const player = selectedTeam[index];
           
-          // If team is submitted and player exists, show stats
-          if (player && player.id && isLocked) {
+          // Always allow viewing player stats
+          if (player && player.id) {
             showPlayerStats(player);
             return;
           }
           
           // For non-submitted teams, allow selection on empty slots
-          if (!isLocked && !player) {
+          if (!player) {
             const type = slot.dataset.type;
             openPlayerModal(type, index);
             
@@ -1745,7 +1473,7 @@
 
       // Check team limits
       checkTeamLimits();
-      checkSubmitButton();
+      checkBuyTeamButton();
       calculateTeamStats(); // Update team stats
       
       // Update progress bar
@@ -1754,10 +1482,10 @@
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
       
-      // Hide formation for submitted teams
+      // Hide formation for submitted teams (not applicable in this model)
       const formationContainer = document.getElementById('formationSelectorContainer');
       if (formationContainer) {
-        formationContainer.style.display = isLocked ? 'none' : 'block';
+        formationContainer.style.display = 'block';
       }
       
       // Update budget
@@ -2065,56 +1793,40 @@
       
       // Transfer section HTML
       let transferSection = '';
-      if (isLocked) {
-        transferSection = `
-          <div class="transfer-section">
-            <div class="transfer-title">📊 Player Stats</div>
-            <div class="stat-row">
-              <span>Form:</span>
-              <span>${player.form}</span>
-            </div>
-            <div class="stat-row">
-              <span>Pts/Game:</span>
-              <span>${player.points_per_game}</span>
-            </div>
-            <div class="stat-row">
-              <span>Selected By:</span>
-              <span>${player.selected_by_percent}%</span>
-            </div>
-            <div class="stat-row">
-              <span>Minutes:</span>
-              <span>${player.minutes}</span>
-            </div>
-            <div class="stat-row">
-              <span>Goals:</span>
-              <span>${player.goals_scored}</span>
-            </div>
-            <div class="stat-row">
-              <span>Assists:</span>
-              <span>${player.assists}</span>
-            </div>
-            <div class="stat-row">
-              <span>Bonus:</span>
-              <span>${player.bonus}</span>
-            </div>
-            ${positionStats}
+      transferSection = `
+        <div class="transfer-section">
+          <div class="transfer-title">📊 Player Stats</div>
+          <div class="stat-row">
+            <span>Form:</span>
+            <span>${player.form}</span>
           </div>
-        `;
-      } else {
-        transferSection = `
-          <div class="transfer-section">
-            <div class="transfer-title">🔄 Transfer Options</div>
-            <button id="transferOutBtn" class="transfer-btn">
-              <i class="fas fa-exchange-alt"></i> Replace this player
-            </button>
-            <div class="transfer-info">
-              ${freeTransfers > 0 ? 
-                `You have ${freeTransfers} free transfer${freeTransfers > 1 ? 's' : ''} left.` : 
-                `No free transfers left. -4 points penalty for extra transfers.`}
-            </div>
+          <div class="stat-row">
+            <span>Pts/Game:</span>
+            <span>${player.points_per_game}</span>
           </div>
-        `;
-      }
+          <div class="stat-row">
+            <span>Selected By:</span>
+            <span>${player.selected_by_percent}%</span>
+          </div>
+          <div class="stat-row">
+            <span>Minutes:</span>
+            <span>${player.minutes}</span>
+          </div>
+          <div class="stat-row">
+            <span>Goals:</span>
+            <span>${player.goals_scored}</span>
+          </div>
+          <div class="stat-row">
+            <span>Assists:</span>
+            <span>${player.assists}</span>
+          </div>
+          <div class="stat-row">
+            <span>Bonus:</span>
+            <span>${player.bonus}</span>
+          </div>
+          ${positionStats}
+        </div>
+      `;
 
       statsContent.innerHTML = `
         <div style="text-align:center; margin-bottom:20px;">
@@ -2167,22 +1879,6 @@
       
       document.getElementById('statsModal').style.display = 'flex';
       document.getElementById('statsModal').classList.add('slide-in-up');
-      
-      // Add transfer button event listener
-      const transferBtn = document.getElementById('transferOutBtn');
-      if (transferBtn) {
-        transferBtn.addEventListener('click', () => {
-          currentTransferPlayer = player;
-          document.getElementById('statsModal').style.display = 'none';
-          
-          // FIX: Map element_type to positionType string
-          const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
-          const positionType = positionMap[player.element_type] || 'fwd';
-          
-          // Open player selection for the same position
-          openPlayerModal(positionType, selectedTeam.indexOf(player));
-        });
-      }
     }
 
     function calculateTeamStats() {
@@ -2272,9 +1968,7 @@
 
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
-      if (isLocked) {
-        updateLiveScores();
-      }
+      updateLiveScores();
     }, 300000); // 5 minutes
 
     // Manual update button
@@ -2304,95 +1998,115 @@
       });
     });
 
-    submitTeamBtn.addEventListener('click', async () => {
+    // BUY TEAM CONFIRMATION
+    buyTeamBtn.addEventListener('click', () => {
+      // First check if team is complete
       if (selectedTeam.some(p => p === null)) {
         alert("Please fill all 11 slots");
         return;
       }
 
-      const teamIds = selectedTeam.map(p => p.id);
+      // Check if team budget is within limit
+      const teamValue = calculateTeamValue();
+      if (teamValue > 75) {
+        alert(`Team budget exceeded! Total: £${teamValue.toFixed(1)}m (max £75m)`);
+        return;
+      }
+
+      // Check if team has more than 2 players from any team
+      const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
+      if (hasTeamLimitExceeded) {
+        alert("Cannot have more than 2 players from any single team");
+        return;
+      }
+
+      // Show confirmation modal
+      document.getElementById('confirmationModal').style.display = 'flex';
+      document.getElementById('confirmationModal').classList.add('slide-in-up');
+    });
+
+    // CONFIRM BUY TEAM
+    document.getElementById('confirmBuyBtn').addEventListener('click', async () => {
       try {
+        const teamIds = selectedTeam.map(p => p.id);
         const response = await fetch('/save-team', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, team: teamIds })
         });
         const data = await response.json();
+        
         if (data.success) {
           // Create confetti celebration
           createConfetti();
           
-          // Show success message with animation
+          // Show success message
           const successBanner = document.createElement('div');
           successBanner.innerHTML = `
             <div style="text-align:center; padding:20px; background:rgba(74, 222, 128, 0.15); border-radius:16px; margin:16px 0; animation: fadeInUp 0.5s ease-out;">
               <div style="font-size:24px; margin-bottom:8px;">🎉</div>
-              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Submitted!</div>
-              <div style="color:var(--text-secondary);">Good luck in the contest!</div>
+              <div style="font-weight:700; color:var(--success); font-size:18px; margin-bottom:6px;">Team Purchased!</div>
+              <div style="color:var(--text-secondary);">Your team is now locked for the contest!</div>
             </div>
           `;
           const firstSection = document.querySelector('.section');
           firstSection.insertBefore(successBanner, firstSection.firstChild);
           
-          // Rest of your existing code...
-          const response = await fetch(`/user-profile?userId=${userId}`);
-          const profile = await response.json();
-          selectedTeam = profile.team.map(id => 
-            allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
-          );
-          wildBenchPlayer = profile.wildBenchPlayer;
-          userBudget = profile.budget || 75.0;
-          freeTransfers = profile.freeTransfers || 1;
-          wildcardUsed = profile.wildcardUsed || false;
-          wildcardGameweek = profile.wildcardGameweek;
-          tripleCaptainUsed = profile.tripleCaptainUsed || false;
-          tripleCaptainGameweek = profile.tripleCaptainGameweek;
-          captainId = profile.captainId;
-          wildBenchUsed = profile.wildBenchUsed || false;
-          wildBenchGameweek = profile.wildBenchGameweek;
-          calculateTeamCounts();
-          updateBudgetDisplay();
-          updateWildcardDisplay();
-          updateTripleCaptainDisplay();
-          updateWildBenchDisplay();
-          isLocked = true;
-          renderTeamGrid();
-          calculateTeamStats();
-          document.querySelectorAll('.slot').forEach(slot => {
-            slot.classList.add('read-only');
-            slot.style.opacity = '0.7';
-          });
-          submitTeamBtn.style.display = 'none';
-          document.getElementById('formationSelectorContainer').style.display = 'none';
-          
-          // Auto-hide success banner after 3 seconds
+          // Auto-remove after 3 seconds
           setTimeout(() => {
             if (successBanner.parentNode) {
               successBanner.parentNode.removeChild(successBanner);
             }
           }, 3000);
           
+          // Close confirmation modal
+          document.getElementById('confirmationModal').style.display = 'none';
+          document.getElementById('confirmationModal').classList.remove('slide-in-up');
+          
+          // Show "Team Locked" banner
+          const lockedBanner = document.createElement('div');
+          lockedBanner.innerHTML = `
+            <div class="submission-banner">
+              <div class="banner-title">✅ Team Locked!</div>
+              <div class="banner-text">Your team is locked for this contest.</div>
+            </div>
+          `;
+          const firstSection = document.querySelector('.section');
+          firstSection.insertBefore(lockedBanner, firstSection.firstChild);
+          
           // Start live scoring updates
           updateLiveScores();
         }
       } catch (e) {
-        alert("Failed to submit team: " + (e.message || ""));
+        alert("Failed to purchase team: " + (e.message || ""));
       }
     });
 
-    function checkSubmitButton() {
+    // CANCEL BUY TEAM
+    document.getElementById('cancelBuyBtn').addEventListener('click', () => {
+      document.getElementById('confirmationModal').style.display = 'none';
+      document.getElementById('confirmationModal').classList.remove('slide-in-up');
+    });
+
+    // CLOSE CONFIRMATION MODAL
+    document.getElementById('closeConfirmation').addEventListener('click', () => {
+      document.getElementById('confirmationModal').style.display = 'none';
+      document.getElementById('confirmationModal').classList.remove('slide-in-up');
+    });
+
+    function checkBuyTeamButton() {
       const isComplete = !selectedTeam.some(p => p === null);
-      const isOverBudget = calculateTeamValue() > 75; // Budget is 75€
+      const isOverBudget = calculateTeamValue() > 75;
       const hasTeamLimitExceeded = Object.values(teamCounts).some(count => count > 2);
       
-      submitTeamBtn.disabled = !isComplete || isOverBudget || hasTeamLimitExceeded;
+      buyTeamBtn.disabled = !isComplete || isOverBudget || hasTeamLimitExceeded;
       
       if (isOverBudget) {
-        submitTeamBtn.title = "Team budget exceeds £75m";
+        buyTeamBtn.title = "Team budget exceeds £75m";
       } else if (hasTeamLimitExceeded) {
-        submitTeamBtn.title = "Exceeds 2-player limit for a team";
+        buyTeamBtn.title = "Exceeds 2-player limit for a team";
       } else {
-        submitTeamBtn.title = "";
+        buyTeamBtn.title = "";
       }
     }
 
@@ -2545,14 +2259,12 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Auto-update live scores every 5 minutes
       setInterval(() => {
-        if (isLocked) {
-          updateLiveScores();
-        }
+        updateLiveScores();
       }, 300000);
       
       // Set up captain selection
       document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('slot') && isLocked) {
+        if (e.target.classList.contains('slot')) {
           const index = e.target.dataset.index;
           const player = selectedTeam[index];
           
