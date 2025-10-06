@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - NO CHANGES NEEDED
+// User Schema - UPDATED WITH PROPER DEFAULTS AND VALIDATION
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -40,7 +40,12 @@ const userSchema = new mongoose.Schema({
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
   budget: { type: Number, default: 100.0 }, // Budget tracking
-  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
+  freeTransfers: { 
+    type: Number, 
+    default: 1,
+    min: 0, // Ensure free transfers can't go below 0
+    max: 1  // For regular transfers (wildcard will handle unlimited)
+  }, // Free transfers per gameweek
   lastTransferGameweek: { type: Number, default: 1 }, // Track when last transfer happened
   
   // WILDCARD SYSTEM
@@ -232,7 +237,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player - FIXED FREE TRANSFERS PERSISTENCE
+// Transfer Player - FINAL FIXED VERSION
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -310,8 +315,16 @@ app.post('/transfer-player', async (req, res) => {
     // Only decrement free transfers if we're not applying a penalty
     if (user.freeTransfers > 0) {
       user.freeTransfers -= 1;
-      // CRITICAL FIX: Explicitly mark freeTransfers as modified
-      user.markModified('freeTransfers');
+      
+      // Ensure free transfers doesn't go below 0
+      if (user.freeTransfers < 0) {
+        user.freeTransfers = 0;
+      }
+    }
+    
+    // CRITICAL FIX: Validate freeTransfers before saving
+    if (user.freeTransfers < 0) {
+      user.freeTransfers = 0;
     }
     
     user.lastUpdated = new Date();
