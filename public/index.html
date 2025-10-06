@@ -32,12 +32,10 @@
       --goal-area: #bbdefb;
       --center-circle: #ffffff;
     }
-
     * {
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
-
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
@@ -51,7 +49,6 @@
       flex-direction: column;
       overflow-x: hidden;
     }
-
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -64,13 +61,11 @@
       z-index: 1000;
       backdrop-filter: blur(10px);
     }
-
     .user-info {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-
     .user-avatar {
       width: 40px;
       height: 40px;
@@ -79,7 +74,6 @@
       border: 2px solid var(--primary);
       box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
     }
-
     .user-name {
       font-weight: 600;
       font-size: 16px;
@@ -87,7 +81,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .app-title {
       color: var(--primary);
       font-weight: 700;
@@ -95,14 +88,12 @@
       letter-spacing: -0.3px;
       text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
-
     .main-content {
       flex: 1;
       overflow-y: auto;
       padding: 16px;
       position: relative;
     }
-
     /* FOOTBALL PITCH BACKGROUND */
     .pitch-background {
       position: absolute;
@@ -115,7 +106,6 @@
       z-index: -1;
       pointer-events: none;
     }
-
     /* PITCH MARKINGS */
     .pitch-markings {
       position: absolute;
@@ -126,27 +116,23 @@
       pointer-events: none;
       z-index: -1;
     }
-
     .pitch-line {
       position: absolute;
       background: rgba(255, 255, 255, 0.3);
       z-index: -1;
     }
-
     .center-line {
       width: 100%;
       height: 2px;
       top: 50%;
       left: 0;
     }
-
     .half-way-line {
       width: 2px;
       height: 100%;
       top: 0;
       left: 50%;
     }
-
     .center-circle {
       width: 200px;
       height: 200px;
@@ -156,7 +142,6 @@
       left: 50%;
       transform: translate(-50%, -50%);
     }
-
     .penalty-box {
       width: 160px;
       height: 40px;
@@ -164,7 +149,6 @@
       left: 50%;
       transform: translateX(-50%);
     }
-
     .goal-area {
       width: 60px;
       height: 20px;
@@ -173,7 +157,6 @@
       transform: translateX(-50%);
       background: rgba(187, 222, 251, 0.2);
     }
-
     .section {
       background: rgba(26, 42, 58, 0.8);
       border-radius: var(--radius);
@@ -185,7 +168,6 @@
       backdrop-filter: blur(10px);
       animation: fadeInUp 0.5s ease;
     }
-
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -196,7 +178,6 @@
         transform: translateY(0);
       }
     }
-
     .section-title {
       font-weight: 700;
       font-size: 18px;
@@ -207,11 +188,9 @@
       gap: 8px;
       text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
-
     .input-group {
       margin-bottom: 16px;
     }
-
     .input-label {
       display: block;
       margin-bottom: 8px;
@@ -219,7 +198,6 @@
       color: var(--text);
       font-size: 14px;
     }
-
     input {
       width: 100%;
       padding: 14px;
@@ -232,17 +210,14 @@
       transition: var(--transition);
       box-shadow: 0 2px 5px rgba(0, 195, 255, 0.1);
     }
-
     input:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.3), 0 2px 5px rgba(0, 195, 255, 0.2);
     }
-
     input::placeholder {
       color: var(--text-tertiary);
     }
-
     button {
       width: 100%;
       padding: 16px;
@@ -257,7 +232,6 @@
       letter-spacing: 0.3px;
       box-shadow: 0 4px 12px rgba(0, 195, 255, 0.1);
     }
-
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: #000;
@@ -265,7 +239,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .btn-primary:before {
       content: '';
       position: absolute;
@@ -276,16 +249,13 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
       transition: 0.5s;
     }
-
     .btn-primary:hover:before {
       left: 100%;
     }
-
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(0, 195, 255, 0.4);
     }
-
     .btn-secondary {
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       color: #000;
@@ -293,7 +263,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .btn-secondary:before {
       content: '';
       position: absolute;
@@ -304,16 +273,13 @@
       background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.2), transparent);
       transition: 0.5s;
     }
-
     .btn-secondary:hover:before {
       left: 100%;
     }
-
     .btn-secondary:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(78, 205, 196, 0.4);
     }
-
     .btn-outline {
       background: transparent;
       color: var(--text);
@@ -321,7 +287,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .btn-outline:before {
       content: '';
       position: absolute;
@@ -332,22 +297,18 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .btn-outline:hover:before {
       left: 100%;
     }
-
     .btn-outline:hover:not(:disabled) {
       background: rgba(255, 255, 255, 0.05);
     }
-
     button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
     }
-
     /* FORMATION GRID */
     .formation-selector {
       display: flex;
@@ -356,7 +317,6 @@
       flex-wrap: wrap;
       justify-content: center;
     }
-
     .formation-btn {
       padding: 10px 16px;
       background: rgba(255, 255, 255, 0.08);
@@ -370,7 +330,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .formation-btn:before {
       content: '';
       position: absolute;
@@ -381,15 +340,12 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .formation-btn:hover:before {
       left: 100%;
     }
-
     .formation-btn:hover {
       background: rgba(255, 255, 255, 0.12);
     }
-
     .formation-btn.active {
       background: var(--primary);
       color: #000;
@@ -397,7 +353,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .formation-btn.active:before {
       content: '';
       position: absolute;
@@ -408,11 +363,9 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
       transition: 0.5s;
     }
-
     .formation-btn.active:hover:before {
       left: 100%;
     }
-
     .team-grid {
       display: flex;
       flex-direction: column;
@@ -422,13 +375,11 @@
       justify-content: center;
       position: relative;
     }
-
     .line {
       display: flex;
       justify-content: center;
       gap: 16px;
     }
-
     .slot {
       width: 64px;
       height: 80px;
@@ -444,31 +395,26 @@
       animation: fadeIn 0.3s ease;
       box-shadow: 0 2px 5px rgba(0, 195, 255, 0.1);
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.8); }
       to { opacity: 1; transform: scale(1); }
     }
-
     .slot:hover {
       border-color: var(--text-secondary);
       transform: scale(1.05);
       box-shadow: 0 4px 10px rgba(0, 195, 255, 0.2);
     }
-
     .slot.filled {
       border-style: solid;
       transform: scale(1.03);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       animation: pulse 0.8s ease-in-out infinite;
     }
-
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
-
     .slot-label {
       font-size: 11px;
       font-weight: 600;
@@ -477,7 +423,6 @@
       letter-spacing: 0.5px;
       color: var(--text-tertiary);
     }
-
     .player-modal {
       position: fixed;
       top: 0;
@@ -491,12 +436,10 @@
       animation: fadeIn 0.2s ease;
       backdrop-filter: blur(10px);
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-
     .modal-header {
       padding: 18px 20px;
       display: flex;
@@ -506,14 +449,12 @@
       border-bottom: 1px solid var(--border);
       position: relative;
     }
-
     .modal-title {
       font-size: 20px;
       font-weight: 700;
       color: var(--primary);
       text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
-
     .close-modal {
       background: none;
       border: none;
@@ -529,18 +470,15 @@
       transition: var(--transition);
       position: relative;
     }
-
     .close-modal:hover {
       background: rgba(255, 255, 255, 0.1);
       transform: rotate(90deg);
     }
-
     .modal-content {
       flex: 1;
       overflow-y: auto;
       padding: 20px;
     }
-
     .player-card {
       background: rgba(255, 255, 255, 0.06);
       border-radius: 14px;
@@ -555,7 +493,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .player-card:before {
       content: '';
       position: absolute;
@@ -566,18 +503,15 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .player-card:hover:before {
       left: 100%;
     }
-
     .player-card:hover {
       background: rgba(255, 255, 255, 0.1);
       border-color: var(--primary);
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0, 195, 255, 0.3);
     }
-
     .player-photo {
       width: 60px;
       height: 75px;
@@ -587,11 +521,9 @@
       border: 2px solid var(--primary);
       box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
     }
-
     .player-info {
       flex: 1;
     }
-
     .player-name {
       font-weight: 600;
       font-size: 16px;
@@ -599,17 +531,14 @@
       color: var(--text);
       text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
     }
-
     .player-meta {
       display: flex;
       justify-content: space-between;
       font-size: 13px;
       color: var(--text-secondary);
     }
-
     .price-tag { color: var(--accent); font-weight: 600; }
     .points-tag { color: var(--success); font-weight: 600; }
-
     #status {
       text-align: center;
       margin: 16px 0;
@@ -617,7 +546,6 @@
       color: var(--text-secondary);
       min-height: 24px;
     }
-
     .retry-btn {
       background: var(--primary);
       color: #000;
@@ -633,7 +561,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .retry-btn:before {
       content: '';
       position: absolute;
@@ -644,15 +571,12 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
       transition: 0.5s;
     }
-
     .retry-btn:hover:before {
       left: 100%;
     }
-
     .retry-btn:hover {
       background: var(--primary-dark);
     }
-
     /* TEAM STATS */
     .team-stats-grid {
       display: grid;
@@ -660,7 +584,6 @@
       gap: 16px;
       margin-top: 12px;
     }
-
     .team-stat-card {
       background: rgba(255, 255, 255, 0.05);
       border-radius: 14px;
@@ -673,7 +596,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .team-stat-card:before {
       content: '';
       position: absolute;
@@ -684,29 +606,24 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .team-stat-card:hover:before {
       left: 100%;
     }
-
     .team-stat-label {
       font-size: 13px;
       color: var(--text-tertiary);
       margin-bottom: 6px;
       font-weight: 500;
     }
-
     .team-stat-value {
       font-weight: 700;
       font-size: 18px;
     }
-
     .stat-total-points { color: var(--success); }
     .stat-team-value { color: var(--accent); }
     .stat-avg-form { color: var(--primary); }
     .stat-avg-ppg { color: var(--warning); }
     .stat-budget { color: var(--accent); }
-
     /* SUBMISSION BANNER */
     .submission-banner {
       text-align: center;
@@ -718,7 +635,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .submission-banner:before {
       content: '';
       position: absolute;
@@ -729,24 +645,20 @@
       background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.2), transparent);
       transition: 0.5s;
     }
-
     .submission-banner:hover:before {
       left: 100%;
     }
-
     .banner-title {
       font-weight: 700;
       color: var(--accent);
       font-size: 17px;
       margin: 0 0 8px;
     }
-
     .banner-text {
       color: var(--text-secondary);
       font-size: 14px;
       margin: 0;
     }
-
     /* LOADING INDICATOR */
     .loading {
       display: inline-block;
@@ -758,24 +670,20 @@
       animation: spin 1s ease-in-out infinite;
       margin-right: 8px;
     }
-
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-
     /* EMPTY STATE */
     .empty-state {
       text-align: center;
       padding: 30px 20px;
       color: var(--text-tertiary);
     }
-
     .empty-state i {
       font-size: 48px;
       margin-bottom: 16px;
       color: var(--primary);
     }
-
     /* PROGRESS BAR */
     .progress-container {
       height: 6px;
@@ -784,7 +692,6 @@
       margin: 12px 0;
       overflow: hidden;
     }
-
     .progress-bar {
       height: 100%;
       background: var(--primary);
@@ -792,7 +699,6 @@
       transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
       box-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
-
     /* ANIMATIONS */
     @keyframes fadeInUp {
       from {
@@ -804,7 +710,6 @@
         transform: translateY(0);
       }
     }
-
     @keyframes slideInUp {
       from {
         transform: translateY(100%);
@@ -813,30 +718,24 @@
         transform: translateY(0);
       }
     }
-
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
-
     @keyframes confetti {
       0% { transform: translateY(0) rotate(0deg); opacity: 1; }
       100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
     }
-
     .fade-in-up {
       animation: fadeInUp 0.4s ease-out forwards;
     }
-
     .slide-in-up {
       animation: slideInUp 0.3s ease-out forwards;
     }
-
     .pulse {
       animation: pulse 0.6s ease-in-out;
     }
-
     .confetti-piece {
       position: absolute;
       width: 10px;
@@ -844,7 +743,6 @@
       background: #00c3ff;
       opacity: 0;
     }
-
     /* SKELETON LOADING */
     .skeleton {
       background: linear-gradient(90deg, #1a2a3a 25%, #25384d 50%, #1a2a3a 75%);
@@ -852,18 +750,15 @@
       animation: loading 1.5s infinite;
       border-radius: 12px;
     }
-
     @keyframes loading {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-
     /* STAGGERED ANIMATIONS */
     .team-stat-card:nth-child(1) { animation-delay: 0.1s; }
     .team-stat-card:nth-child(2) { animation-delay: 0.2s; }
     .team-stat-card:nth-child(3) { animation-delay: 0.3s; }
     .team-stat-card:nth-child(4) { animation-delay: 0.4s; }
-
     /* LIVE SCORING BADGE */
     .live-badge {
       position: absolute;
@@ -881,7 +776,6 @@
       color: #000;
       box-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
-
     .live-indicator {
       position: absolute;
       bottom: 4px;
@@ -892,13 +786,11 @@
       border-radius: 50%;
       box-shadow: 0 0 6px var(--success);
     }
-
     .live-update {
       color: var(--success);
       font-weight: 600;
       animation: pulse 0.8s ease-in-out infinite;
     }
-
     /* BUDGET TRACKER */
     .budget-container {
       display: flex;
@@ -911,7 +803,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .budget-container:before {
       content: '';
       position: absolute;
@@ -922,32 +813,26 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .budget-container:hover:before {
       left: 100%;
     }
-
     .budget-label {
       font-weight: 600;
       color: var(--text-tertiary);
     }
-
     .budget-value {
       font-weight: 700;
       font-size: 16px;
       color: var(--success);
       text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
-
     .budget-warning {
       color: var(--warning);
     }
-
     .budget-critical {
       color: var(--error);
       font-weight: 700;
     }
-
     /* TRANSFER SYSTEM */
     .transfer-section {
       margin-top: 20px;
@@ -958,7 +843,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .transfer-section:before {
       content: '';
       position: absolute;
@@ -969,17 +853,14 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .transfer-section:hover:before {
       left: 100%;
     }
-
     .transfer-title {
       font-weight: 600;
       margin-bottom: 12px;
       color: var(--text);
     }
-
     .transfer-btn {
       width: 100%;
       padding: 12px;
@@ -994,7 +875,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .transfer-btn:before {
       content: '';
       position: absolute;
@@ -1005,43 +885,35 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .transfer-btn:hover:before {
       left: 100%;
     }
-
     .transfer-btn:hover {
       background: rgba(255, 255, 255, 0.12);
     }
-
     .transfer-btn.disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-
     .transfer-info {
       font-size: 13px;
       color: var(--text-tertiary);
       margin-top: 8px;
     }
-
     .transfer-penalty {
       color: var(--error);
       font-weight: 600;
     }
-
     .free-transfers {
       color: var(--success);
       font-weight: 700;
       margin-bottom: 8px;
     }
-
     .transfer-cooldown {
       color: var(--text-tertiary);
       font-size: 12px;
       margin-top: 4px;
     }
-
     /* WILDCARD SYSTEM */
     .wildcard-container {
       margin-top: 20px;
@@ -1052,7 +924,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .wildcard-container:before {
       content: '';
       position: absolute;
@@ -1063,11 +934,9 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .wildcard-container:hover:before {
       left: 100%;
     }
-
     .wildcard-title {
       font-weight: 600;
       margin-bottom: 12px;
@@ -1076,7 +945,6 @@
       align-items: center;
       gap: 8px;
     }
-
     .wildcard-icon {
       background: var(--accent);
       color: #000;
@@ -1090,17 +958,14 @@
       margin-right: 8px;
       box-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
-
     .wildcard-active {
       color: var(--success);
       font-weight: 700;
       text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
-
     .wildcard-inactive {
       color: var(--text-tertiary);
     }
-
     .wildcard-btn {
       width: 100%;
       padding: 12px;
@@ -1115,7 +980,6 @@
       position: relative;
       overflow: hidden;
     }
-
     .wildcard-btn:before {
       content: '';
       position: absolute;
@@ -1126,20 +990,16 @@
       background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
       transition: 0.5s;
     }
-
     .wildcard-btn:hover:before {
       left: 100%;
     }
-
     .wildcard-btn:hover {
       background: rgba(255, 255, 255, 0.12);
     }
-
     .wildcard-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-
     .wildcard-usage {
       font-size: 13px;
       color: var(--text-tertiary);
@@ -1147,17 +1007,14 @@
       display: flex;
       align-items: center;
     }
-
     .wildcard-usage i {
       color: var(--success);
       margin-right: 8px;
     }
-
     .wildcard-warning {
       color: var(--warning);
       font-weight: 600;
     }
-
     /* PARTICLE EFFECTS */
     .particle {
       position: absolute;
@@ -1168,7 +1025,6 @@
       pointer-events: none;
       z-index: 9999;
     }
-
     /* FOOTBALL ICONS */
     .football-icon {
       width: 20px;
@@ -1178,61 +1034,50 @@
       background-repeat: no-repeat;
       filter: drop-shadow(0 0 3px rgba(0, 195, 255, 0.5));
     }
-
     /* GLOWING BORDER */
     .glow-border {
       border: 2px solid var(--primary);
       box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
       animation: glow 2s ease-in-out infinite alternate;
     }
-
     @keyframes glow {
       from { box-shadow: 0 0 5px rgba(0, 195, 255, 0.3); }
       to { box-shadow: 0 0 20px rgba(0, 195, 255, 0.7); }
     }
-
     /* TRANSFER ANIMATION */
     @keyframes transfer {
       0% { transform: scale(0.8); opacity: 0; }
       50% { transform: scale(1.2); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
-
     .transfer-animation {
       animation: transfer 0.5s ease;
     }
-
     /* WILDCARD ACTIVATION ANIMATION */
     .wildcard-activation {
       animation: wildcardGlow 1s ease-in-out infinite;
     }
-
     @keyframes wildcardGlow {
       0% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
       50% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.8); }
       100% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
     }
-
     /* RESPONSIVE DESIGN */
     @media (max-width: 768px) {
       .section {
         padding: 16px;
       }
-      
       .team-grid {
         margin: 16px 0;
       }
-      
       .slot {
         width: 56px;
         height: 70px;
       }
-      
       .player-photo {
         width: 50px;
         height: 65px;
       }
-      
       .formation-selector {
         flex-direction: column;
         gap: 8px;
@@ -1252,7 +1097,6 @@
       <div class="user-name" id="topUserName">FST Manager</div>
     </div>
   </div>
-
   <!-- FOOTBALL PITCH BACKGROUND -->
   <div class="pitch-background"></div>
   <div class="pitch-markings">
@@ -1264,7 +1108,6 @@
     <div class="pitch-line goal-area" style="top: 10px;"></div>
     <div class="pitch-line goal-area" style="bottom: 10px;"></div>
   </div>
-
   <div class="main-content">
     <!-- JOIN VIEW -->
     <div id="joinView" class="view">
@@ -1272,7 +1115,6 @@
         <h2 class="section-title">
           <i class="fas fa-trophy"></i> Join Free Contest
         </h2>
-        
         <div class="input-group">
           <label class="input-label">Manager Name</label>
           <input type="text" 
@@ -1280,11 +1122,9 @@
                  placeholder="Choose your fantasy manager name"
                  maxlength="20">
         </div>
-
         <button id="joinContest" class="btn-primary">
           <i class="fas fa-play-circle"></i> Start Building Your Team
         </button>
-        
         <div style="text-align: center; padding: 12px; background: rgba(78, 205, 196, 0.1); border-radius: 12px; margin-top: 16px;">
           <div style="color: var(--accent); font-weight: 600; font-size: 14px;">
             🎁 Entry is <strong>FREE</strong> this week!
@@ -1295,20 +1135,17 @@
         </div>
       </div>
     </div>
-
     <!-- TEAM VIEW -->
     <div id="teamView" class="view" style="display:none;">
       <div class="section">
         <h2 class="section-title">
           <i class="fas fa-users"></i> Build Your Dream Team
         </h2>
-        
         <!-- BUDGET TRACKER -->
         <div class="budget-container">
           <div class="budget-label">Budget Remaining:</div>
           <div id="budgetRemaining" class="budget-value">£100.0m</div>
         </div>
-        
         <!-- FORMATION CONTAINER -->
         <div id="formationSelectorContainer" class="input-group">
           <label class="input-label">Choose Formation</label>
@@ -1319,23 +1156,19 @@
             <button class="formation-btn" data-formation="5-3-2">5-3-2</button>
           </div>
         </div>
-
         <div class="team-grid" id="teamGrid">
           <!-- Populated by JS -->
         </div>
-
         <div class="progress-container">
           <div class="progress-bar" id="teamProgress"></div>
         </div>
         <div style="text-align: center; color: var(--text-tertiary); font-size: 13px; margin-bottom: 16px;">
           <span id="teamProgressText">0/11 players selected</span>
         </div>
-
         <button id="submitTeam" class="btn-secondary" disabled>
           <i class="fas fa-lock"></i> Lock In Team & Join Contest
         </button>
       </div>
-
       <!-- TEAM STATS SECTION -->
       <div id="teamStats" class="section" style="display:none;">
         <h3 class="section-title">💰 Your Team Budget</h3>
@@ -1357,7 +1190,6 @@
             <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
           </div>
         </div>
-
         <!-- WILDCARD SYSTEM -->
         <div class="wildcard-container">
           <div class="wildcard-title">
@@ -1375,7 +1207,6 @@
             <span id="wildcardUsage">1 per season</span>
           </div>
         </div>
-        
         <!-- LIVE SCORING BUTTON -->
         <div style="margin-top: 20px; text-align: center;">
           <button id="updatePointsBtn" class="btn-outline" style="padding: 12px 24px; font-size: 14px;">
@@ -1388,14 +1219,12 @@
       </div>
     </div>
   </div>
-
   <!-- PLAYER MODAL -->
   <div class="player-modal" id="playerModal">
     <div class="modal-header">
       <div class="modal-title">Select <span id="modalPosition">Player</span></div>
       <button class="close-modal" id="closeModal">&times;</button>
     </div>
-    
     <!-- SEARCH & FILTERS -->
     <div style="padding: 0 20px 15px;">
       <div class="input-group">
@@ -1405,7 +1234,6 @@
                placeholder="Search by name or team..."
                style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 14px;">
       </div>
-      
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
         <div class="input-group">
           <label class="input-label">Price Range (£m)</label>
@@ -1426,7 +1254,6 @@
                    style="padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: rgba(26, 42, 58, 0.7); color: white; font-size: 13px;">
           </div>
         </div>
-        
         <div class="input-group">
           <label class="input-label">Points Range</label>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
@@ -1443,15 +1270,12 @@
           </div>
         </div>
       </div>
-      
       <button id="resetFilters" class="btn-outline" style="margin-top: 16px;">
         🔄 Reset Filters
       </button>
     </div>
-    
     <div class="modal-content" id="playerList"></div>
   </div>
-
   <!-- PLAYER STATS MODAL -->
   <div class="player-modal" id="statsModal" style="display:none;">
     <div class="modal-header">
@@ -1462,16 +1286,13 @@
       <!-- Stats will be populated here -->
     </div>
   </div>
-
   <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
     tg.ready();
-
     const initData = tg.initDataUnsafe;
     const telegramUser = initData?.user;
     const userId = telegramUser ? telegramUser.id.toString() : 'guest_' + Date.now();
-
     const topUserAvatar = document.getElementById('topUserAvatar');
     const topUserName = document.getElementById('topUserName');
     const joinView = document.getElementById('joinView');
@@ -1483,33 +1304,28 @@
     const playerList = document.getElementById('playerList');
     const teamGrid = document.getElementById('teamGrid');
     const managerNameInput = document.getElementById('managerNameInput');
-
     if (telegramUser) {
       topUserName.innerText = telegramUser.first_name || "FST Manager";
       if (telegramUser.photo_url) {
         topUserAvatar.src = telegramUser.photo_url;
       }
     }
-
     const formations = {
       "4-3-3": [1, 4, 3, 3],
       "3-5-2": [1, 3, 5, 2],
       "4-4-2": [1, 4, 4, 2],
       "5-3-2": [1, 5, 3, 2]
     };
-
     let currentFormation = "4-3-3";
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
     let liveScores = {};
     let userBudget = 100.0;
-    let freeTransfers = 1;
+    let freeTransfers = 1; // This will be updated from server
     let currentTransferPlayer = null; // Track which player we're transferring out
     let wildcardUsed = false;
     let wildcardGameweek = null;
-
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
-
     // CONFETTI FUNCTION
     function createConfetti() {
       const confettiContainer = document.createElement('div');
@@ -1521,10 +1337,8 @@
       confettiContainer.style.pointerEvents = 'none';
       confettiContainer.style.zIndex = '3000';
       document.body.appendChild(confettiContainer);
-
       const colors = ['#00c3ff', '#4ecdc4', '#4ade80', '#fbbf24', '#f87171'];
       const pieces = 150;
-
       for (let i = 0; i < pieces; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti-piece';
@@ -1536,13 +1350,11 @@
         piece.style.animationDelay = Math.random() * 2 + 's';
         confettiContainer.appendChild(piece);
       }
-
       // Remove after animation
       setTimeout(() => {
         document.body.removeChild(confettiContainer);
       }, 5000);
     }
-
     // Create particle effects
     function createParticles(x, y) {
       for (let i = 0; i < 10; i++) {
@@ -1551,15 +1363,12 @@
         particle.style.left = `${x}px`;
         particle.style.top = `${y}px`;
         document.body.appendChild(particle);
-        
         // Animate particle
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 50 + 20;
         const duration = Math.random() * 1000 + 500;
-        
         const endX = x + Math.cos(angle) * distance;
         const endY = y + Math.sin(angle) * distance;
-        
         particle.animate([
           { left: `${x}px`, top: `${y}px`, opacity: 1 },
           { left: `${endX}px`, top: `${endY}px`, opacity: 0 }
@@ -1567,7 +1376,6 @@
           duration: duration,
           easing: 'ease-out'
         });
-        
         // Remove particle after animation
         setTimeout(() => {
           if (particle.parentNode) {
@@ -1576,16 +1384,13 @@
         }, duration);
       }
     }
-
     // Check existing user on load
     async function checkExistingUser() {
       try {
         const response = await fetch(`/user-profile?userId=${userId}`);
         const profile = await response.json();
-        
         if (profile.managerName && profile.joined) {
           topUserName.innerText = profile.managerName;
-          
           // If team is LOCKED (submitted), show read-only view
           if (profile.locked) {
             joinView.style.display = 'none';
@@ -1595,7 +1400,7 @@
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
               userBudget = profile.budget || 100.0;
-              freeTransfers = profile.freeTransfers || 1;
+              freeTransfers = profile.freeTransfers || 1; // CRITICAL FIX: Get from server
               wildcardUsed = profile.wildcardUsed || false;
               wildcardGameweek = profile.wildcardGameweek;
               updateBudgetDisplay();
@@ -1608,7 +1413,6 @@
               });
               submitTeamBtn.style.display = 'none';
               document.getElementById('formationSelectorContainer').style.display = 'none';
-              
               // Show "Already Submitted" banner
               const banner = document.createElement('div');
               banner.innerHTML = `
@@ -1619,13 +1423,11 @@
               `;
               const firstSection = document.querySelector('.section');
               firstSection.insertBefore(banner, firstSection.firstChild);
-              
               // Load live scores
               updateLiveScores();
             });
             return;
           }
-          
           // If joined but not submitted, show team builder
           joinView.style.display = 'none';
           teamView.style.display = 'block';
@@ -1636,7 +1438,7 @@
             );
           }
           userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1;
+          freeTransfers = profile.freeTransfers || 1; // CRITICAL FIX: Get from server
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
           updateBudgetDisplay();
@@ -1648,20 +1450,16 @@
       } catch (e) {
         // Continue to join view
       }
-      
       managerNameInput.value = telegramUser?.first_name || "FST Manager";
     }
-
     // Initialize
     checkExistingUser();
-
     joinContestBtn.addEventListener('click', async () => {
       const managerName = managerNameInput.value.trim() || "FST Manager";
       if (managerName.length < 2) {
         alert("Manager name must be at least 2 characters");
         return;
       }
-
       try {
         const response = await fetch('/connect-wallet', {
           method: 'POST',
@@ -1676,7 +1474,7 @@
           loadPlayers();
           renderTeamGrid();
           userBudget = data.budget || 100.0;
-          freeTransfers = data.freeTransfers || 1;
+          freeTransfers = data.freeTransfers || 1; // CRITICAL FIX: Get from server
           wildcardUsed = false;
           wildcardGameweek = null;
           updateBudgetDisplay();
@@ -1688,7 +1486,6 @@
         alert("Error: " + (e.message || "Failed to join contest"));
       }
     });
-
     async function loadPlayers() {
       const statusDiv = document.getElementById('status') || document.createElement('div');
       if (!document.getElementById('status')) {
@@ -1696,7 +1493,6 @@
         firstSection.insertBefore(statusDiv, firstSection.firstChild);
         statusDiv.id = 'status';
       }
-
       // Show skeleton loading
       teamGrid.innerHTML = `
         <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:16px;">
@@ -1705,7 +1501,6 @@
           `).join('')}
         </div>
       `;
-
       try {
         const response = await fetch('/players');
         if (!response.ok) {
@@ -1727,12 +1522,10 @@
         document.getElementById('retryBtn').addEventListener('click', loadPlayers);
       }
     }
-
     function updateBudgetDisplay() {
       const budgetContainer = document.getElementById('budgetRemaining');
       const budgetStats = document.getElementById('budgetStats');
       if (!budgetContainer || !budgetStats) return;
-      
       // Format budget with color based on value
       let budgetClass = 'budget-value';
       if (userBudget < 10) {
@@ -1740,12 +1533,10 @@
       } else if (userBudget < 20) {
         budgetClass = 'budget-warning';
       }
-      
       budgetContainer.className = budgetClass;
       budgetContainer.innerText = `£${userBudget.toFixed(1)}m`;
       budgetStats.className = budgetClass;
       budgetStats.innerText = `£${userBudget.toFixed(1)}m`;
-      
       // Update free transfers display
       const transfersElement = document.getElementById('freeTransfers');
       if (transfersElement) {
@@ -1758,12 +1549,10 @@
         }
       }
     }
-
     function updateWildcardDisplay() {
       const wildcardStatus = document.getElementById('wildcardStatus');
       const wildcardUsage = document.getElementById('wildcardUsage');
       const activateBtn = document.getElementById('activateWildcardBtn');
-      
       if (wildcardUsed) {
         wildcardStatus.className = 'wildcard-active';
         wildcardStatus.innerText = 'Activated!';
@@ -1778,27 +1567,22 @@
         activateBtn.title = "Activate for unlimited transfers this gameweek";
       }
     }
-
     function calculateTeamValue() {
       return selectedTeam
         .filter(p => p !== null)
         .reduce((sum, p) => sum + (parseFloat(p.now_cost) || 0), 0);
     }
-
     function calculateRemainingBudget() {
       const teamValue = calculateTeamValue();
       return (100.0 - teamValue).toFixed(1);
     }
-
     function renderTeamGrid() {
       const [gk, def, mid, fwd] = formations[currentFormation];
       const slots = [];
-      
       for (let i = 0; i < gk; i++) slots.push({ type: 'gk', label: 'GK' });
       for (let i = 0; i < def; i++) slots.push({ type: 'def', label: 'DEF' });
       for (let i = 0; i < mid; i++) slots.push({ type: 'mid', label: 'MID' });
       for (let i = 0; i < fwd; i++) slots.push({ type: 'fwd', label: 'FWD' });
-
       let html = '';
       const lines = [
         slots.slice(-fwd),
@@ -1806,7 +1590,6 @@
         slots.slice(-(fwd+mid+def), -(fwd+mid)),
         slots.slice(0, gk)
       ];
-
       lines.forEach(line => {
         if (line.length === 0) return;
         html += `<div class="line">`;
@@ -1829,26 +1612,21 @@
         });
         html += `</div>`;
       });
-
       teamGrid.innerHTML = html;
-
       // Click handler for player stats
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
           const player = selectedTeam[index];
-          
           // If team is submitted and player exists, show stats
           if (player && player.id && submitTeamBtn.style.display === 'none') {
             showPlayerStats(player);
             return;
           }
-          
           // For non-submitted teams, allow selection on empty slots
           if (submitTeamBtn.style.display !== 'none' && !player) {
             const type = slot.dataset.type;
             openPlayerModal(type, index);
-            
             // Add selection animation
             slot.style.transform = 'scale(0.95)';
             setTimeout(() => {
@@ -1857,52 +1635,42 @@
           }
         });
       });
-
       checkSubmitButton();
       calculateTeamStats(); // Update team stats
-      
       // Update progress bar
       const filledCount = selectedTeam.filter(p => p !== null).length;
       const progressPercent = (filledCount / 11) * 100;
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
-      
       // Hide formation for submitted teams
       const isSubmitted = submitTeamBtn.style.display === 'none';
       const formationContainer = document.getElementById('formationSelectorContainer');
       if (formationContainer) {
         formationContainer.style.display = isSubmitted ? 'none' : 'block';
       }
-      
       // Update budget
       userBudget = 100.0 - calculateTeamValue();
       updateBudgetDisplay();
     }
-
     function openPlayerModal(positionType, slotIndex) {
       const positionMap = { gk: 1, def: 2, mid: 3, fwd: 4 };
       const fplType = positionMap[positionType];
       const positionName = { gk: 'Goalkeeper', def: 'Defender', mid: 'Midfielder', fwd: 'Forward' }[positionType];
-
       document.getElementById('modalPosition').innerText = positionName;
-
       const selectedIds = new Set(
         selectedTeam
           .filter(p => p !== null)
           .map(p => p.id)
       );
-
       let availablePlayers = allPlayers
         .filter(p => p.element_type === fplType)
         .filter(p => !selectedIds.has(p.id));
-
       const originalPlayers = [...availablePlayers];
       renderPlayerList(availablePlayers, slotIndex);
       setupFilters(originalPlayers, slotIndex);
       playerModal.style.display = 'flex';
       playerModal.classList.add('slide-in-up');
     }
-
     function setupFilters(originalPlayers, slotIndex) {
       const searchInput = document.getElementById('playerSearch');
       const minPriceInput = document.getElementById('minPrice');
@@ -1910,7 +1678,6 @@
       const minPointsInput = document.getElementById('minPoints');
       const maxPointsInput = document.getElementById('maxPoints');
       const resetBtn = document.getElementById('resetFilters');
-
       const applyFilters = () => {
         let filtered = [...originalPlayers];
         const searchTerm = searchInput.value.toLowerCase();
@@ -1938,13 +1705,11 @@
         }
         renderPlayerList(filtered, slotIndex);
       };
-
       searchInput.addEventListener('input', applyFilters);
       minPriceInput.addEventListener('input', applyFilters);
       maxPriceInput.addEventListener('input', applyFilters);
       minPointsInput.addEventListener('input', applyFilters);
       maxPointsInput.addEventListener('input', applyFilters);
-      
       resetBtn.addEventListener('click', () => {
         searchInput.value = '';
         minPriceInput.value = '';
@@ -1954,14 +1719,12 @@
         renderPlayerList(originalPlayers, slotIndex);
       });
     }
-
     function renderPlayerList(players, slotIndex) {
       let html = '';
       players.forEach(player => {
         // Check if adding this player would exceed budget
         const wouldExceedBudget = userBudget < parseFloat(player.now_cost);
         const playerClass = wouldExceedBudget ? 'player-card budget-exceed' : 'player-card';
-        
         html += `
           <div class="${playerClass}" data-id="${player.id}">
             <img src="${player.photo_url}" class="player-photo" onerror="this.src='https://via.placeholder.com/60x75?text=❓'">
@@ -1976,22 +1739,17 @@
           </div>
         `;
       });
-
       if (players.length === 0) {
         html = '<div class="empty-state"><i class="fas fa-search"></i><p>No players match your filters</p></div>';
       }
-
       playerList.innerHTML = html;
-
       document.querySelectorAll('.player-card').forEach(card => {
         card.addEventListener('click', async () => {
           const playerId = parseInt(card.dataset.id);
           const player = allPlayers.find(p => p.id === playerId);
-          
           // If this is a transfer (replacing a player)
           if (currentTransferPlayer) {
             const oldPlayerId = currentTransferPlayer.id;
-            
             try {
               const response = await fetch('/transfer-player', {
                 method: 'POST',
@@ -2003,15 +1761,13 @@
                 })
               });
               const data = await response.json();
-              
               if (data.success) {
                 // Update UI
                 const oldPlayerIndex = selectedTeam.indexOf(parseInt(oldPlayerId));
                 selectedTeam[oldPlayerIndex] = playerId;
                 userBudget = data.budget;
-                freeTransfers = data.freeTransfers;
+                freeTransfers = data.freeTransfers; // CRITICAL FIX: Update from server
                 const wildcardActive = data.wildcardActive;
-                
                 // Show success message
                 const successBanner = document.createElement('div');
                 successBanner.innerHTML = `
@@ -2023,18 +1779,15 @@
                 `;
                 const firstSection = document.querySelector('.section');
                 firstSection.insertBefore(successBanner, firstSection.firstChild);
-                
                 // Auto-remove after 3 seconds
                 setTimeout(() => {
                   if (successBanner.parentNode) {
                     successBanner.parentNode.removeChild(successBanner);
                   }
                 }, 3000);
-                
                 // Update UI
                 renderTeamGrid();
                 calculateTeamStats();
-                
                 // Reset transfer state
                 currentTransferPlayer = null;
                 document.getElementById('statsModal').style.display = 'none';
@@ -2044,36 +1797,30 @@
             } catch (e) {
               alert("Failed to transfer player: " + (e.message || ""));
             }
-            
             // Close the modal after transfer
             playerModal.style.display = 'none';
             return;
           }
-          
           // If this is a regular selection (not a transfer)
           for (let i = 0; i < selectedTeam.length; i++) {
             if (selectedTeam[i] && selectedTeam[i].id === playerId) {
               selectedTeam[i] = null;
             }
           }
-          
           // Check if adding this player would exceed budget
           const playerCost = parseFloat(player.now_cost);
           if (userBudget < playerCost) {
             alert(`Cannot add this player! Budget exceeded by £${(playerCost - userBudget).toFixed(1)}m`);
             return;
           }
-          
           selectedTeam[slotIndex] = player;
           renderTeamGrid();
           playerModal.style.display = 'none';
         });
       });
     }
-
     function showPlayerStats(player) {
       const statsContent = document.getElementById('statsContent');
-      
       // Position-specific stats
       let positionStats = '';
       if (player.element_type === 1 || player.element_type === 2) { // GK/DEF
@@ -2084,7 +1831,6 @@
           </div>
         `;
       }
-      
       // Transfer section HTML
       let transferSection = '';
       if (submitTeamBtn.style.display === 'none') {
@@ -2102,7 +1848,6 @@
           </div>
         `;
       }
-
       statsContent.innerHTML = `
         <div style="text-align:center; margin-bottom:20px;">
           <img src="${player.photo_url}" style="width:80px; height:100px; border-radius:10px; object-fit:cover;">
@@ -2110,7 +1855,6 @@
           <div style="color:var(--text-tertiary);">${player.team_name} • ${player.position}</div>
           <div style="color:var(--success); font-weight:700; font-size:18px; margin-top:5px;">${player.total_points} pts</div>
         </div>
-        
         <div class="stat-grid">
           <div class="stat-row">
             <span>Form:</span>
@@ -2142,60 +1886,48 @@
           </div>
           ${positionStats}
         </div>
-        
         ${transferSection}
-        
         <div style="margin-top:20px; padding-top:15px; border-top:1px solid var(--border);">
           <div style="color:var(--text-tertiary); font-size:13px;">
             * Stats updated after each gameweek
           </div>
         </div>
       `;
-      
       document.getElementById('statsModal').style.display = 'flex';
       document.getElementById('statsModal').classList.add('slide-in-up');
-      
       // Add transfer button event listener
       const transferBtn = document.getElementById('transferOutBtn');
       if (transferBtn) {
         transferBtn.addEventListener('click', () => {
           currentTransferPlayer = player;
           document.getElementById('statsModal').style.display = 'none';
-          
           // FIX: Map element_type to positionType string
           const positionMap = { 1: 'gk', 2: 'def', 3: 'mid', 4: 'fwd' };
           const positionType = positionMap[player.element_type] || 'fwd';
-          
           // Open player selection for the same position
           openPlayerModal(positionType, selectedTeam.indexOf(player));
         });
       }
     }
-
     function calculateTeamStats() {
       if (selectedTeam.some(p => p === null)) {
         document.getElementById('teamStats').style.display = 'none';
         return;
       }
-      
       const validPlayers = selectedTeam.filter(p => p !== null);
       const seasonTotal = validPlayers.reduce((sum, p) => sum + (p.total_points || 0), 0);
       const avgForm = validPlayers.reduce((sum, p) => sum + parseFloat(p.form || 0), 0) / validPlayers.length;
       const avgPPG = validPlayers.reduce((sum, p) => sum + parseFloat(p.points_per_game || 0), 0) / validPlayers.length;
-      
       // Add fade-in animation to stats cards
       const statsContainer = document.getElementById('teamStats');
       statsContainer.style.display = 'block';
-      
       // Animate stat values
       animateValue('seasonTotal', 0, seasonTotal, 1000);
       animateValue('avgForm', 0, avgForm, 800, (val) => val.toFixed(1));
       animateValue('avgPPG', 0, avgPPG, 800, (val) => val.toFixed(1));
-      
       // Update budget stats
       updateBudgetDisplay();
     }
-
     function animateValue(id, start, end, duration, formatter = (val) => Math.round(val)) {
       const element = document.getElementById(id);
       const range = end - start;
@@ -2212,11 +1944,9 @@
         }
       }, stepTime);
     }
-
     // UPDATE LIVE SCORES
     async function updateLiveScores() {
       if (selectedTeam.every(p => p === null)) return;
-      
       try {
         const response = await fetch('/update-points', {
           method: 'POST',
@@ -2224,27 +1954,22 @@
           body: JSON.stringify({ userId })
         });
         const data = await response.json();
-        
         if (data.success) {
           // Update liveScores object
           data.playerStats.forEach(stat => {
             liveScores[stat.player_id] = stat;
           });
-          
           // Update UI
           renderTeamGrid();
           calculateTeamStats();
-          
           // Update last updated time
           const lastUpdated = document.getElementById('lastUpdated');
           lastUpdated.innerText = `Last updated: ${new Date().toLocaleTimeString()}`;
-          
           // Show live update indicator
           const updateBtn = document.getElementById('updatePointsBtn');
           updateBtn.innerHTML = `<i class="fas fa-check"></i> Live Scores Updated!`;
           updateBtn.style.backgroundColor = 'rgba(74, 222, 128, 0.1)';
           updateBtn.style.color = '#000';
-          
           // Reset button after 3 seconds
           setTimeout(() => {
             updateBtn.innerHTML = `<i class="fas fa-sync-alt"></i> Update Live Scores`;
@@ -2256,31 +1981,26 @@
         console.error('Failed to update scores:', e.message);
       }
     }
-
     // Auto-update every 5 minutes (for demo)
     setInterval(() => {
       if (submitTeamBtn.style.display === 'none') {
         updateLiveScores();
       }
     }, 300000); // 5 minutes
-
     // Manual update button
     document.getElementById('updatePointsBtn').addEventListener('click', updateLiveScores);
-
     closeModal.addEventListener('click', () => {
       playerModal.classList.remove('slide-in-up');
       setTimeout(() => {
         playerModal.style.display = 'none';
       }, 300);
     });
-
     document.getElementById('closeStatsModal').addEventListener('click', () => {
       document.getElementById('statsModal').classList.remove('slide-in-up');
       setTimeout(() => {
         document.getElementById('statsModal').style.display = 'none';
       }, 300);
     });
-
     document.querySelectorAll('.formation-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.formation-btn').forEach(b => b.classList.remove('active'));
@@ -2290,13 +2010,11 @@
         renderTeamGrid();
       });
     });
-
     submitTeamBtn.addEventListener('click', async () => {
       if (selectedTeam.some(p => p === null)) {
         alert("Please fill all 11 slots");
         return;
       }
-
       const teamIds = selectedTeam.map(p => p.id);
       try {
         const response = await fetch('/save-team', {
@@ -2308,7 +2026,6 @@
         if (data.success) {
           // Create confetti celebration
           createConfetti();
-          
           // Show success message with animation
           const successBanner = document.createElement('div');
           successBanner.innerHTML = `
@@ -2320,7 +2037,6 @@
           `;
           const firstSection = document.querySelector('.section');
           firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
           // Rest of your existing code...
           const response = await fetch(`/user-profile?userId=${userId}`);
           const profile = await response.json();
@@ -2328,7 +2044,7 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1;
+          freeTransfers = profile.freeTransfers || 1; // CRITICAL FIX: Get from server
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
           updateBudgetDisplay();
@@ -2340,14 +2056,12 @@
           });
           submitTeamBtn.style.display = 'none';
           document.getElementById('formationSelectorContainer').style.display = 'none';
-          
           // Auto-hide success banner after 3 seconds
           setTimeout(() => {
             if (successBanner.parentNode) {
               successBanner.parentNode.removeChild(successBanner);
             }
           }, 3000);
-          
           // Start live scoring updates
           updateLiveScores();
         }
@@ -2355,20 +2069,16 @@
         alert("Failed to submit team: " + (e.message || ""));
       }
     });
-
     function checkSubmitButton() {
       const isComplete = !selectedTeam.some(p => p === null);
       const isOverBudget = calculateTeamValue() > 100;
-      
       submitTeamBtn.disabled = !isComplete || isOverBudget;
-      
       if (isOverBudget) {
         submitTeamBtn.title = "Team budget exceeds £100m";
       } else {
         submitTeamBtn.title = "";
       }
     }
-
     // WILDCARD ACTIVATION
     document.getElementById('activateWildcardBtn').addEventListener('click', async () => {
       try {
@@ -2378,12 +2088,10 @@
           body: JSON.stringify({ userId })
         });
         const data = await response.json();
-        
         if (data.success) {
           wildcardUsed = true;
           wildcardGameweek = 1; // In a real app, this would be current gameweek
           updateWildcardDisplay();
-          
           // Show success message
           const successBanner = document.createElement('div');
           successBanner.innerHTML = `
@@ -2394,19 +2102,16 @@
           `;
           const firstSection = document.querySelector('.section');
           firstSection.insertBefore(successBanner, firstSection.firstChild);
-          
           // Auto-remove after 3 seconds
           setTimeout(() => {
             if (successBanner.parentNode) {
               successBanner.parentNode.removeChild(successBanner);
             }
           }, 3000);
-          
           // Update UI
           freeTransfers = 1; // Set to 1 to show wildcard is active
           document.getElementById('freeTransfers').className = 'free-transfers';
           document.getElementById('freeTransfers').innerText = 'Unlimited';
-          
           // Add particle effect
           const btnRect = document.getElementById('activateWildcardBtn').getBoundingClientRect();
           createParticles(btnRect.left + btnRect.width/2, btnRect.top + btnRect.height/2);
@@ -2415,7 +2120,6 @@
         alert("Failed to activate wildcard: " + (e.message || ""));
       }
     });
-
     // Initial setup
     document.addEventListener('DOMContentLoaded', () => {
       // Auto-update live scores every 5 minutes
