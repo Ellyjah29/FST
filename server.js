@@ -1,4 +1,4 @@
-// server.js — FINAL: FREE TRANSFERS & WILDCARD SYSTEM
+// server.js — FINAL: FREE TRANSFERS NOW DATABASE CONSISTENT
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - UPDATED WITH PROPER FREE TRANSFER HANDLING
+// User Schema - NO CHANGES NEEDED
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -41,7 +41,7 @@ const userSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now },
   budget: { type: Number, default: 100.0 }, // Budget tracking
   freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
-  lastTransferGameweek: { type: Number, default: 1 },
+  lastTransferGameweek: { type: Number, default: 1 }, // Track when last transfer happened
   
   // WILDCARD SYSTEM
   wildcardUsed: { type: Boolean, default: false },
@@ -232,7 +232,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player - FIXED FREE TRANSFERS STORAGE
+// Transfer Player - FIXED FREE TRANSFERS PERSISTENCE
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -310,29 +310,19 @@ app.post('/transfer-player', async (req, res) => {
     // Only decrement free transfers if we're not applying a penalty
     if (user.freeTransfers > 0) {
       user.freeTransfers -= 1;
+      // CRITICAL FIX: Explicitly mark freeTransfers as modified
+      user.markModified('freeTransfers');
     }
     
-    // CRITICAL FIX: Use findOneAndUpdate with $set to ensure proper update
-    const updatedUser = await User.findOneAndUpdate(
-      { telegramId: userId },
-      { 
-        $set: {
-          team: user.team,
-          budget: user.budget,
-          freeTransfers: user.freeTransfers,
-          points: user.points,
-          lastUpdated: new Date()
-        }
-      },
-      { new: true }
-    );
+    user.lastUpdated = new Date();
+    await user.save();
 
     res.json({
       success: true,
       message: penaltyPoints > 0 ? '✅ Player transferred! (Penalty: -4 points)' : '✅ Player transferred!',
-      budget: updatedUser.budget,
-      freeTransfers: updatedUser.freeTransfers,
-      points: updatedUser.points
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      points: user.points
     });
   } catch (error) {
     console.error('Transfer error:', error.message);
@@ -393,17 +383,10 @@ app.post('/update-points', async (req, res) => {
     }
 
     // Update user points
-    const updatedUser = await User.findOneAndUpdate(
-      { telegramId: userId },
-      { 
-        $set: {
-          points: totalPoints,
-          totalPoints: totalPoints,
-          lastUpdated: new Date()
-        }
-      },
-      { new: true }
-    );
+    user.points = totalPoints;
+    user.totalPoints = totalPoints;
+    user.lastUpdated = new Date();
+    await user.save();
 
     res.json({
       success: true,
@@ -491,17 +474,9 @@ app.post('/activate-wildcard', async (req, res) => {
     if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
 
     // Activate wildcard for current gameweek
-    const updatedUser = await User.findOneAndUpdate(
-      { telegramId: userId },
-      { 
-        $set: {
-          wildcardUsed: true,
-          wildcardGameweek: user.currentGameweek,
-          lastUpdated: new Date()
-        }
-      },
-      { new: true }
-    );
+    user.wildcardUsed = true;
+    user.wildcardGameweek = user.currentGameweek;
+    await user.save();
 
     res.json({
       success: true,
