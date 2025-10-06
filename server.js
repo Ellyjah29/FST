@@ -312,18 +312,27 @@ app.post('/transfer-player', async (req, res) => {
       user.freeTransfers -= 1;
     }
     
-    // CRITICAL FIX: Explicitly mark freeTransfers as modified
-    user.markModified('freeTransfers');
-    
-    user.lastUpdated = new Date();
-    await user.save();
+    // CRITICAL FIX: Use findOneAndUpdate with $set to ensure proper update
+    const updatedUser = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
+        $set: {
+          team: user.team,
+          budget: user.budget,
+          freeTransfers: user.freeTransfers,
+          points: user.points,
+          lastUpdated: new Date()
+        }
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
       message: penaltyPoints > 0 ? '✅ Player transferred! (Penalty: -4 points)' : '✅ Player transferred!',
-      budget: user.budget,
-      freeTransfers: user.freeTransfers,
-      points: user.points
+      budget: updatedUser.budget,
+      freeTransfers: updatedUser.freeTransfers,
+      points: updatedUser.points
     });
   } catch (error) {
     console.error('Transfer error:', error.message);
@@ -384,10 +393,17 @@ app.post('/update-points', async (req, res) => {
     }
 
     // Update user points
-    user.points = totalPoints;
-    user.totalPoints = totalPoints;
-    user.lastUpdated = new Date();
-    await user.save();
+    const updatedUser = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
+        $set: {
+          points: totalPoints,
+          totalPoints: totalPoints,
+          lastUpdated: new Date()
+        }
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
@@ -475,9 +491,17 @@ app.post('/activate-wildcard', async (req, res) => {
     if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
 
     // Activate wildcard for current gameweek
-    user.wildcardUsed = true;
-    user.wildcardGameweek = user.currentGameweek;
-    await user.save();
+    const updatedUser = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
+        $set: {
+          wildcardUsed: true,
+          wildcardGameweek: user.currentGameweek,
+          lastUpdated: new Date()
+        }
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
