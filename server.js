@@ -1,4 +1,4 @@
-// server.js — FINAL: WILDCARD SYSTEM INTEGRATED
+// server.js — FINAL: FREE TRANSFERS & WILDCARD SYSTEM
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - UPDATED WITH WILDCARD FIELDS
+// User Schema - UPDATED WITH PROPER FREE TRANSFER HANDLING
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -44,8 +44,8 @@ const userSchema = new mongoose.Schema({
   lastTransferGameweek: { type: Number, default: 1 },
   
   // WILDCARD SYSTEM
-  wildcardUsed: { type: Boolean, default: false }, // Has user used wildcard this season?
-  wildcardGameweek: { type: Number, default: null }, // Which gameweek was wildcard used?
+  wildcardUsed: { type: Boolean, default: false },
+  wildcardGameweek: { type: Number, default: null },
   
   createdAt: { type: Date, default: Date.now }
 });
@@ -82,7 +82,7 @@ app.post('/connect-wallet', async (req, res) => {
         budget: 100.0,
         freeTransfers: 1,
         lastTransferGameweek: 1,
-        wildcardUsed: false, // Initialize wildcard as unused
+        wildcardUsed: false,
         wildcardGameweek: null
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
@@ -232,7 +232,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player - UPDATED WITH WILDCARD LOGIC
+// Transfer Player - FIXED FREE TRANSFERS STORAGE
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -296,36 +296,22 @@ app.post('/transfer-player', async (req, res) => {
       user.lastTransferGameweek = user.currentGameweek;
     }
 
-    // WILDCARD CHECK
-    const isWildcardActive = user.wildcardUsed && user.wildcardGameweek === user.currentGameweek;
-    
     let penaltyPoints = 0;
-    let transferMade = true;
-    
-    // Only apply free transfer logic if wildcard is NOT active
-    if (!isWildcardActive) {
-      if (user.freeTransfers < 1) {
-        // -4 points penalty for extra transfers
-        penaltyPoints = 4;
-        user.points = Math.max(0, user.points - 4);
-      }
-    } else {
-      // Wildcard is active - unlimited transfers
-      // No penalty, no free transfer deduction needed
-      user.freeTransfers = 1; // Keep free transfers at 1 to show active wildcard
+    if (user.freeTransfers < 1) {
+      // -4 points penalty for extra transfers
+      penaltyPoints = 4;
+      user.points = Math.max(0, user.points - 4);
     }
 
     // Perform transfer
     user.team[oldPlayerIndex] = parseInt(newPlayerId);
     user.budget = newBudget;
     
-    // Only decrement free transfers if wildcard is NOT active
-    if (!isWildcardActive) {
-      if (user.freeTransfers > 0) {
-        user.freeTransfers -= 1;
-      }
+    // Only decrement free transfers if we're not applying a penalty
+    if (user.freeTransfers > 0) {
+      user.freeTransfers -= 1;
     }
-
+    
     // CRITICAL FIX: Explicitly mark freeTransfers as modified
     user.markModified('freeTransfers');
     
@@ -334,46 +320,14 @@ app.post('/transfer-player', async (req, res) => {
 
     res.json({
       success: true,
-      message: penaltyPoints > 0 ? 
-        '✅ Player transferred! (Penalty: -4 points)' : 
-        isWildcardActive ? 
-          '✅ Player transferred! (Wildcard active)' : 
-          '✅ Player transferred!',
+      message: penaltyPoints > 0 ? '✅ Player transferred! (Penalty: -4 points)' : '✅ Player transferred!',
       budget: user.budget,
       freeTransfers: user.freeTransfers,
-      points: user.points,
-      wildcardActive: isWildcardActive
+      points: user.points
     });
   } catch (error) {
     console.error('Transfer error:', error.message);
     res.status(500).json({ error: 'Failed to transfer player' });
-  }
-});
-
-// ACTIVATE WILDCARD - NEW ENDPOINT
-app.post('/activate-wildcard', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId) return res.status(400).json({ error: 'User ID required' });
-
-    const user = await User.findOne({ telegramId: userId });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (user.wildcardUsed) return res.status(400).json({ error: 'Wildcard already used' });
-    if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
-
-    // Activate wildcard for current gameweek
-    user.wildcardUsed = true;
-    user.wildcardGameweek = user.currentGameweek;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: '✅ Wildcard activated! Unlimited transfers for this gameweek',
-      wildcardActive: true
-    });
-  } catch (error) {
-    console.error('Wildcard error:', error.message);
-    res.status(500).json({ error: 'Failed to activate wildcard' });
   }
 });
 
@@ -446,7 +400,7 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Get User Profile - UPDATED WITH WILDCARD DATA
+// Get User Profile
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -506,6 +460,33 @@ app.get('/prize-pool', async (req, res) => {
   } catch (error) {
     console.error('Prize error:', error.message);
     res.status(500).json({ error: 'Failed to calculate prize pool' });
+  }
+});
+
+// Activate Wildcard
+app.post('/activate-wildcard', async (req, res) => {
+  try {
+    const { userId } = req.body;
+    if (!userId) return res.status(400).json({ error: 'User ID required' });
+
+    const user = await User.findOne({ telegramId: userId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (user.wildcardUsed) return res.status(400).json({ error: 'Wildcard already used' });
+    if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
+
+    // Activate wildcard for current gameweek
+    user.wildcardUsed = true;
+    user.wildcardGameweek = user.currentGameweek;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: '✅ Wildcard activated! Unlimited transfers for this gameweek',
+      wildcardActive: true
+    });
+  } catch (error) {
+    console.error('Wildcard error:', error.message);
+    res.status(500).json({ error: 'Failed to activate wildcard' });
   }
 });
 
