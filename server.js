@@ -1,4 +1,4 @@
-// server.js — FINAL: FREE TRANSFERS & PENALTY POINTS FIXED
+// server.js — FINAL: SIMPLE & WORKING
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - UPDATED WITH PROPER DEFAULTS AND VALIDATION
+// User Schema - SIMPLIFIED
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -40,19 +40,7 @@ const userSchema = new mongoose.Schema({
   currentGameweek: { type: Number, default: 1 },
   lastUpdated: { type: Date, default: Date.now },
   budget: { type: Number, default: 100.0 }, // Budget tracking
-  
-  // Free transfers with proper validation
-  freeTransfers: {
-    type: Number,
-    default: 1,
-    min: 0,
-    max: 1,
-    set: function(value) {
-      // Ensure value is an integer
-      return Math.floor(value);
-    }
-  },
-  
+  freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
   lastTransferGameweek: { type: Number, default: 1 }, // Track when last transfer happened
   
   // WILDCARD SYSTEM
@@ -244,7 +232,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player - FINAL FIXED VERSION
+// Transfer Player - SIMPLIFIED VERSION
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -308,23 +296,13 @@ app.post('/transfer-player', async (req, res) => {
       user.lastTransferGameweek = user.currentGameweek;
     }
 
-    // Check if wildcard is active
-    const isWildcardActive = user.wildcardUsed && user.wildcardGameweek === user.currentGameweek;
-    
-    let penaltyPoints = 0;
-    
-    // Only apply penalty if wildcard is NOT active and free transfers are 0
-    if (user.freeTransfers < 1 && !isWildcardActive) {
-      // -4 points penalty for extra transfers
-      penaltyPoints = 4;
-      user.points = Math.max(0, user.points - 4);
-    }
-
     // Perform transfer
     user.team[oldPlayerIndex] = parseInt(newPlayerId);
     user.budget = newBudget;
     
-    // Only decrement free transfers if wildcard is NOT active
+    // Only decrement free transfers if we're not using wildcard
+    const isWildcardActive = user.wildcardUsed && user.wildcardGameweek === user.currentGameweek;
+    
     if (!isWildcardActive) {
       if (user.freeTransfers > 0) {
         user.freeTransfers -= 1;
@@ -336,23 +314,15 @@ app.post('/transfer-player', async (req, res) => {
       }
     } else {
       // Wildcard is active - unlimited transfers
-      // No penalty, no free transfer deduction needed
-      user.freeTransfers = 1; // Keep free transfers at 1 to show active wildcard
+      user.freeTransfers = 1; // Keep showing 1 to indicate wildcard is active
     }
-    
-    // Ensure freeTransfers is never negative
-    user.freeTransfers = Math.max(0, user.freeTransfers);
     
     user.lastUpdated = new Date();
     await user.save();
 
     res.json({
       success: true,
-      message: penaltyPoints > 0 ? 
-        '✅ Player transferred! (Penalty: -4 points)' : 
-        isWildcardActive ? 
-          '✅ Player transferred! (Wildcard active)' : 
-          '✅ Player transferred!',
+      message: isWildcardActive ? '✅ Player transferred! (Wildcard active)' : '✅ Player transferred!',
       budget: user.budget,
       freeTransfers: user.freeTransfers,
       points: user.points,
