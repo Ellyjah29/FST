@@ -1320,12 +1320,25 @@
     let selectedTeam = Array(11).fill(null);
     let allPlayers = [];
     let liveScores = {};
-    let userBudget = 100.0;
-    let freeTransfers = 1; // This will be updated from server
+    let userBudget = null; // Initialize as null
+    let freeTransfers = null; // Initialize as null
     let currentTransferPlayer = null; // Track which player we're transferring out
-    let wildcardUsed = false;
+    let wildcardUsed = null;
     let wildcardGameweek = null;
+    let isProfileLoaded = false; // Track if profile is loaded
     managerNameInput.value = telegramUser?.first_name || "FST Manager";
+    
+    // Add loading state to prevent showing incorrect values
+    const loadingState = document.createElement('div');
+    loadingState.id = 'loadingState';
+    loadingState.style = 'text-align: center; padding: 20px; display: none;';
+    loadingState.innerHTML = `
+      <div class="loading"></div>
+      <div style="margin-top: 10px; color: var(--text-secondary);">Loading your profile...</div>
+    `;
+    const firstSection = document.querySelector('.section');
+    firstSection.insertBefore(loadingState, firstSection.firstChild);
+    
     // CONFETTI FUNCTION
     function createConfetti() {
       const confettiContainer = document.createElement('div');
@@ -1386,11 +1399,25 @@
     }
     // Check existing user on load
     async function checkExistingUser() {
+      // Show loading state immediately
+      loadingState.style.display = 'block';
+      
       try {
         const response = await fetch(`/user-profile?userId=${userId}`);
         const profile = await response.json();
+        
         if (profile.managerName && profile.joined) {
           topUserName.innerText = profile.managerName;
+          
+          // Initialize from server data
+          userBudget = profile.budget || 100.0;
+          freeTransfers = profile.freeTransfers || 1;
+          wildcardUsed = profile.wildcardUsed || false;
+          wildcardGameweek = profile.wildcardGameweek;
+          
+          // Mark profile as loaded
+          isProfileLoaded = true;
+          
           // If team is LOCKED (submitted), show read-only view
           if (profile.locked) {
             joinView.style.display = 'none';
@@ -1399,10 +1426,6 @@
               selectedTeam = profile.team.map(id => 
                 allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
               );
-              userBudget = profile.budget || 100.0;
-              freeTransfers = profile.freeTransfers || 1; // CRITICAL FIX: Get from server
-              wildcardUsed = profile.wildcardUsed || false;
-              wildcardGameweek = profile.wildcardGameweek;
               updateBudgetDisplay();
               updateWildcardDisplay();
               renderTeamGrid();
@@ -1426,31 +1449,33 @@
               // Load live scores
               updateLiveScores();
             });
-            return;
+          } else {
+            // If joined but not submitted, show team builder
+            joinView.style.display = 'none';
+            teamView.style.display = 'block';
+            loadPlayers();
+            if (profile.team && profile.team.length > 0) {
+              selectedTeam = profile.team.map(id => 
+                allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
+              );
+            }
+            updateBudgetDisplay();
+            updateWildcardDisplay();
+            renderTeamGrid();
+            calculateTeamStats(); // Show team stats
           }
-          // If joined but not submitted, show team builder
-          joinView.style.display = 'none';
-          teamView.style.display = 'block';
-          loadPlayers();
-          if (profile.team && profile.team.length > 0) {
-            selectedTeam = profile.team.map(id => 
-              allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
-            );
-          }
-          userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1; // CRITICAL FIX: Get from server
-          wildcardUsed = profile.wildcardUsed || false;
-          wildcardGameweek = profile.wildcardGameweek;
-          updateBudgetDisplay();
-          updateWildcardDisplay();
-          renderTeamGrid();
-          calculateTeamStats(); // Show team stats
-          return;
         }
       } catch (e) {
-        // Continue to join view
+        console.error("Profile load error:", e);
+      } finally {
+        // Always hide loading state
+        loadingState.style.display = 'none';
+        
+        // If profile wasn't loaded, show join view
+        if (!isProfileLoaded) {
+          joinView.style.display = 'block';
+        }
       }
-      managerNameInput.value = telegramUser?.first_name || "FST Manager";
     }
     // Initialize
     checkExistingUser();
@@ -1474,7 +1499,7 @@
           loadPlayers();
           renderTeamGrid();
           userBudget = data.budget || 100.0;
-          freeTransfers = data.freeTransfers || 1; // CRITICAL FIX: Get from server
+          freeTransfers = data.freeTransfers || 1;
           wildcardUsed = false;
           wildcardGameweek = null;
           updateBudgetDisplay();
@@ -1577,12 +1602,17 @@
       return (100.0 - teamValue).toFixed(1);
     }
     function renderTeamGrid() {
+      // Don't render if profile not loaded yet
+      if (!isProfileLoaded) return;
+      
       const [gk, def, mid, fwd] = formations[currentFormation];
       const slots = [];
+      
       for (let i = 0; i < gk; i++) slots.push({ type: 'gk', label: 'GK' });
       for (let i = 0; i < def; i++) slots.push({ type: 'def', label: 'DEF' });
       for (let i = 0; i < mid; i++) slots.push({ type: 'mid', label: 'MID' });
       for (let i = 0; i < fwd; i++) slots.push({ type: 'fwd', label: 'FWD' });
+      
       let html = '';
       const lines = [
         slots.slice(-fwd),
@@ -1590,6 +1620,7 @@
         slots.slice(-(fwd+mid+def), -(fwd+mid)),
         slots.slice(0, gk)
       ];
+      
       lines.forEach(line => {
         if (line.length === 0) return;
         html += `<div class="line">`;
@@ -1612,21 +1643,26 @@
         });
         html += `</div>`;
       });
+      
       teamGrid.innerHTML = html;
+      
       // Click handler for player stats
       document.querySelectorAll('.slot').forEach(slot => {
         slot.addEventListener('click', () => {
           const index = slot.dataset.index;
           const player = selectedTeam[index];
+          
           // If team is submitted and player exists, show stats
           if (player && player.id && submitTeamBtn.style.display === 'none') {
             showPlayerStats(player);
             return;
           }
+          
           // For non-submitted teams, allow selection on empty slots
           if (submitTeamBtn.style.display !== 'none' && !player) {
             const type = slot.dataset.type;
             openPlayerModal(type, index);
+            
             // Add selection animation
             slot.style.transform = 'scale(0.95)';
             setTimeout(() => {
@@ -1635,19 +1671,23 @@
           }
         });
       });
+      
       checkSubmitButton();
       calculateTeamStats(); // Update team stats
+      
       // Update progress bar
       const filledCount = selectedTeam.filter(p => p !== null).length;
       const progressPercent = (filledCount / 11) * 100;
       document.getElementById('teamProgress').style.width = `${progressPercent}%`;
       document.getElementById('teamProgressText').innerText = `${filledCount}/11 players selected`;
+      
       // Hide formation for submitted teams
       const isSubmitted = submitTeamBtn.style.display === 'none';
       const formationContainer = document.getElementById('formationSelectorContainer');
       if (formationContainer) {
         formationContainer.style.display = isSubmitted ? 'none' : 'block';
       }
+      
       // Update budget
       userBudget = 100.0 - calculateTeamValue();
       updateBudgetDisplay();
@@ -1766,7 +1806,7 @@
                 const oldPlayerIndex = selectedTeam.indexOf(parseInt(oldPlayerId));
                 selectedTeam[oldPlayerIndex] = playerId;
                 userBudget = data.budget;
-                freeTransfers = data.freeTransfers; // CRITICAL FIX: Update from server
+                freeTransfers = data.freeTransfers;
                 const wildcardActive = data.wildcardActive;
                 // Show success message
                 const successBanner = document.createElement('div');
@@ -2044,7 +2084,7 @@
             allPlayers.find(p => p.id === id) || { id, web_name: "Unknown", photo_url: "https://via.placeholder.com/60x75?text=❓" }
           );
           userBudget = profile.budget || 100.0;
-          freeTransfers = profile.freeTransfers || 1; // CRITICAL FIX: Get from server
+          freeTransfers = profile.freeTransfers || 1;
           wildcardUsed = profile.wildcardUsed || false;
           wildcardGameweek = profile.wildcardGameweek;
           updateBudgetDisplay();
