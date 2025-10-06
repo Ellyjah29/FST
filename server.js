@@ -1,4 +1,4 @@
-// server.js — FINAL: WILDCARD SYSTEM INTEGRATED
+// server.js — FINAL: FIXED FREE TRANSFERS PERSISTENCE
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -20,7 +20,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// User Schema - UPDATED WITH WILDCARD FIELDS
+// User Schema - NO CHANGES NEEDED
 const userSchema = new mongoose.Schema({
   telegramId: { type: String, required: true, unique: true },
   managerName: { 
@@ -41,11 +41,11 @@ const userSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now },
   budget: { type: Number, default: 100.0 }, // Budget tracking
   freeTransfers: { type: Number, default: 1 }, // Free transfers per gameweek
-  lastTransferGameweek: { type: Number, default: 1 },
+  lastTransferGameweek: { type: Number, default: 1 }, // Track when last transfer happened
   
   // WILDCARD SYSTEM
-  wildcardUsed: { type: Boolean, default: false }, // Has user used wildcard this season?
-  wildcardGameweek: { type: Number, default: null }, // Which gameweek was wildcard used?
+  wildcardUsed: { type: Boolean, default: false },
+  wildcardGameweek: { type: Number, default: null },
   
   createdAt: { type: Date, default: Date.now }
 });
@@ -82,7 +82,7 @@ app.post('/connect-wallet', async (req, res) => {
         budget: 100.0,
         freeTransfers: 1,
         lastTransferGameweek: 1,
-        wildcardUsed: false, // Initialize wildcard as unused
+        wildcardUsed: false,
         wildcardGameweek: null
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }
@@ -232,7 +232,7 @@ app.post('/save-team', async (req, res) => {
   }
 });
 
-// Transfer Player - UPDATED WITH WILDCARD LOGIC
+// Transfer Player - FIXED WITH PROPER MONGODB UPDATE
 app.post('/transfer-player', async (req, res) => {
   try {
     const { userId, oldPlayerId, newPlayerId } = req.body;
@@ -300,7 +300,6 @@ app.post('/transfer-player', async (req, res) => {
     const isWildcardActive = user.wildcardUsed && user.wildcardGameweek === user.currentGameweek;
     
     let penaltyPoints = 0;
-    let transferMade = true;
     
     // Only apply free transfer logic if wildcard is NOT active
     if (!isWildcardActive) {
@@ -325,23 +324,28 @@ app.post('/transfer-player', async (req, res) => {
         user.freeTransfers -= 1;
       }
     }
-
-    // CRITICAL FIX: Explicitly mark freeTransfers as modified
-    user.markModified('freeTransfers');
     
-    user.lastUpdated = new Date();
-    await user.save();
+    // CRITICAL FIX: Use findOneAndUpdate with $set to ensure proper update
+    const updatedUser = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
+        $set: {
+          team: user.team,
+          budget: user.budget,
+          points: user.points,
+          freeTransfers: user.freeTransfers,
+          lastUpdated: new Date()
+        }
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
-      message: penaltyPoints > 0 ? 
-        '✅ Player transferred! (Penalty: -4 points)' : 
-        isWildcardActive ? 
-          '✅ Player transferred! (Wildcard active)' : 
-          '✅ Player transferred!',
-      budget: user.budget,
-      freeTransfers: user.freeTransfers,
-      points: user.points,
+      message: penaltyPoints > 0 ? '✅ Player transferred! (Penalty: -4 points)' : '✅ Player transferred!',
+      budget: updatedUser.budget,
+      freeTransfers: updatedUser.freeTransfers,
+      points: updatedUser.points,
       wildcardActive: isWildcardActive
     });
   } catch (error) {
@@ -362,9 +366,17 @@ app.post('/activate-wildcard', async (req, res) => {
     if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
 
     // Activate wildcard for current gameweek
-    user.wildcardUsed = true;
-    user.wildcardGameweek = user.currentGameweek;
-    await user.save();
+    const updatedUser = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
+        $set: {
+          wildcardUsed: true,
+          wildcardGameweek: user.currentGameweek,
+          lastUpdated: new Date()
+        }
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
@@ -430,10 +442,17 @@ app.post('/update-points', async (req, res) => {
     }
 
     // Update user points
-    user.points = totalPoints;
-    user.totalPoints = totalPoints;
-    user.lastUpdated = new Date();
-    await user.save();
+    const updatedUser = await User.findOneAndUpdate(
+      { telegramId: userId },
+      { 
+        $set: {
+          points: totalPoints,
+          totalPoints: totalPoints,
+          lastUpdated: new Date()
+        }
+      },
+      { new: true }
+    );
 
     res.json({
       success: true,
