@@ -26,6 +26,11 @@
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       --radius: 16px;
       --transition: all 0.2s ease;
+      --pitch-green: #2e7d32;
+      --pitch-light: #4caf50;
+      --pitch-dark: #1b5e20;
+      --goal-area: #bbdefb;
+      --center-circle: #ffffff;
     }
 
     * {
@@ -44,6 +49,7 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     .top-bar {
@@ -56,6 +62,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
+      backdrop-filter: blur(10px);
     }
 
     .user-info {
@@ -70,6 +77,7 @@
       border-radius: 50%;
       object-fit: cover;
       border: 2px solid var(--primary);
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
     }
 
     .user-name {
@@ -85,21 +93,108 @@
       font-weight: 700;
       font-size: 20px;
       letter-spacing: -0.3px;
+      text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
 
     .main-content {
       flex: 1;
       overflow-y: auto;
       padding: 16px;
+      position: relative;
+    }
+
+    /* FOOTBALL PITCH BACKGROUND */
+    .pitch-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--pitch-dark) 0%, var(--pitch-green) 50%, var(--pitch-light) 100%);
+      opacity: 0.15;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* PITCH MARKINGS */
+    .pitch-markings {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .pitch-line {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.3);
+      z-index: -1;
+    }
+
+    .center-line {
+      width: 100%;
+      height: 2px;
+      top: 50%;
+      left: 0;
+    }
+
+    .half-way-line {
+      width: 2px;
+      height: 100%;
+      top: 0;
+      left: 50%;
+    }
+
+    .center-circle {
+      width: 200px;
+      height: 200px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .penalty-box {
+      width: 160px;
+      height: 40px;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .goal-area {
+      width: 60px;
+      height: 20px;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(187, 222, 251, 0.2);
     }
 
     .section {
-      background: var(--surface);
+      background: rgba(26, 42, 58, 0.8);
       border-radius: var(--radius);
       padding: 20px;
       margin-bottom: 20px;
       box-shadow: var(--shadow);
       border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .section-title {
@@ -110,6 +205,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
 
     .input-group {
@@ -134,12 +230,13 @@
       font-size: 15px;
       font-family: inherit;
       transition: var(--transition);
+      box-shadow: 0 2px 5px rgba(0, 195, 255, 0.1);
     }
 
     input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.3);
+      box-shadow: 0 0 0 2px rgba(0, 195, 255, 0.3), 0 2px 5px rgba(0, 195, 255, 0.2);
     }
 
     input::placeholder {
@@ -158,12 +255,30 @@
       transition: var(--transition);
       font-family: inherit;
       letter-spacing: 0.3px;
+      box-shadow: 0 4px 12px rgba(0, 195, 255, 0.1);
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: #000;
       box-shadow: 0 4px 12px rgba(0, 195, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn-primary:hover:before {
+      left: 100%;
     }
 
     .btn-primary:hover:not(:disabled) {
@@ -175,6 +290,23 @@
       background: linear-gradient(135deg, var(--accent), var(--accent-dark));
       color: #000;
       box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-secondary:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn-secondary:hover:before {
+      left: 100%;
     }
 
     .btn-secondary:hover:not(:disabled) {
@@ -186,6 +318,23 @@
       background: transparent;
       color: var(--text);
       border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-outline:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .btn-outline:hover:before {
+      left: 100%;
     }
 
     .btn-outline:hover:not(:disabled) {
@@ -205,6 +354,7 @@
       gap: 10px;
       margin: 16px 0;
       flex-wrap: wrap;
+      justify-content: center;
     }
 
     .formation-btn {
@@ -217,6 +367,23 @@
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .formation-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .formation-btn:hover:before {
+      left: 100%;
     }
 
     .formation-btn:hover {
@@ -227,6 +394,23 @@
       background: var(--primary);
       color: #000;
       box-shadow: 0 4px 8px rgba(0, 195, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .formation-btn.active:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .formation-btn.active:hover:before {
+      left: 100%;
     }
 
     .team-grid {
@@ -236,6 +420,7 @@
       margin: 20px 0;
       min-height: 300px;
       justify-content: center;
+      position: relative;
     }
 
     .line {
@@ -256,16 +441,32 @@
       cursor: pointer;
       transition: var(--transition);
       position: relative;
+      animation: fadeIn 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 195, 255, 0.1);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .slot:hover {
       border-color: var(--text-secondary);
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0, 195, 255, 0.2);
     }
 
     .slot.filled {
       border-style: solid;
       transform: scale(1.03);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      animation: pulse 0.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     .slot-label {
@@ -288,6 +489,7 @@
       flex-direction: column;
       z-index: 2000;
       animation: fadeIn 0.2s ease;
+      backdrop-filter: blur(10px);
     }
 
     @keyframes fadeIn {
@@ -302,12 +504,14 @@
       align-items: center;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
+      position: relative;
     }
 
     .modal-title {
       font-size: 20px;
       font-weight: 700;
       color: var(--primary);
+      text-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
 
     .close-modal {
@@ -323,10 +527,12 @@
       align-items: center;
       justify-content: center;
       transition: var(--transition);
+      position: relative;
     }
 
     .close-modal:hover {
       background: rgba(255, 255, 255, 0.1);
+      transform: rotate(90deg);
     }
 
     .modal-content {
@@ -346,6 +552,23 @@
       cursor: pointer;
       transition: var(--transition);
       border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .player-card:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .player-card:hover:before {
+      left: 100%;
     }
 
     .player-card:hover {
@@ -361,6 +584,8 @@
       object-fit: cover;
       border-radius: 10px;
       background: #000;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
     }
 
     .player-info {
@@ -372,6 +597,7 @@
       font-size: 16px;
       margin-bottom: 4px;
       color: var(--text);
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
     }
 
     .player-meta {
@@ -404,6 +630,23 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .retry-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .retry-btn:hover:before {
+      left: 100%;
     }
 
     .retry-btn:hover {
@@ -427,6 +670,23 @@
       opacity: 0;
       transform: translateY(20px);
       animation: fadeInUp 0.4s ease-out forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .team-stat-card:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .team-stat-card:hover:before {
+      left: 100%;
     }
 
     .team-stat-label {
@@ -455,6 +715,23 @@
       border-radius: 14px;
       margin-bottom: 20px;
       border: 1px solid rgba(78, 205, 196, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submission-banner:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .submission-banner:hover:before {
+      left: 100%;
     }
 
     .banner-title {
@@ -513,6 +790,7 @@
       background: var(--primary);
       width: 0%;
       transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+      box-shadow: 0 0 5px rgba(0, 195, 255, 0.5);
     }
 
     /* ANIMATIONS */
@@ -601,6 +879,7 @@
       font-size: 10px;
       font-weight: 600;
       color: #000;
+      box-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
 
     .live-indicator {
@@ -629,6 +908,23 @@
       background: rgba(26, 42, 58, 0.7);
       border-radius: 12px;
       margin: 16px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .budget-container:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .budget-container:hover:before {
+      left: 100%;
     }
 
     .budget-label {
@@ -640,6 +936,7 @@
       font-weight: 700;
       font-size: 16px;
       color: var(--success);
+      text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
 
     .budget-warning {
@@ -658,6 +955,23 @@
       background: rgba(255, 255, 255, 0.05);
       border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .transfer-section:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .transfer-section:hover:before {
+      left: 100%;
     }
 
     .transfer-title {
@@ -677,6 +991,23 @@
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .transfer-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .transfer-btn:hover:before {
+      left: 100%;
     }
 
     .transfer-btn:hover {
@@ -718,6 +1049,23 @@
       background: rgba(255, 255, 255, 0.05);
       border-radius: 14px;
       border: 1px solid rgba(255, 255, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wildcard-container:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .wildcard-container:hover:before {
+      left: 100%;
     }
 
     .wildcard-title {
@@ -740,11 +1088,13 @@
       justify-content: center;
       font-size: 12px;
       margin-right: 8px;
+      box-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
 
     .wildcard-active {
       color: var(--success);
       font-weight: 700;
+      text-shadow: 0 0 5px rgba(74, 222, 128, 0.5);
     }
 
     .wildcard-inactive {
@@ -762,6 +1112,23 @@
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wildcard-btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: 0.5s;
+    }
+
+    .wildcard-btn:hover:before {
+      left: 100%;
     }
 
     .wildcard-btn:hover {
@@ -790,6 +1157,87 @@
       color: var(--warning);
       font-weight: 600;
     }
+
+    /* PARTICLE EFFECTS */
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* FOOTBALL ICONS */
+    .football-icon {
+      width: 20px;
+      height: 20px;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxMCIgY3k9IjEwIiByPSIxMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMTAgMGMtMy4zIDAtNi4zIDEuNy04LjMgNC4zTDEwIDEwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xMCAxMEMxMy4zIDEwIDE2LjMgOC4zIDE4LjMgNS43TDEwIDEwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik01LjcgMTAuNUM1LjcgOS4zIDYuMyA4LjEgNy4zIDcuM0wxMCAxMC41IiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xMi4zIDEwLjVDMTIuMyAxMS43IDExLjcgMTIuOSAxMC43IDEzLjdMMTAgMTAuNSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=');
+      background-size: contain;
+      background-repeat: no-repeat;
+      filter: drop-shadow(0 0 3px rgba(0, 195, 255, 0.5));
+    }
+
+    /* GLOWING BORDER */
+    .glow-border {
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 10px rgba(0, 195, 255, 0.5);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 5px rgba(0, 195, 255, 0.3); }
+      to { box-shadow: 0 0 20px rgba(0, 195, 255, 0.7); }
+    }
+
+    /* TRANSFER ANIMATION */
+    @keyframes transfer {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .transfer-animation {
+      animation: transfer 0.5s ease;
+    }
+
+    /* WILDCARD ACTIVATION ANIMATION */
+    .wildcard-activation {
+      animation: wildcardGlow 1s ease-in-out infinite;
+    }
+
+    @keyframes wildcardGlow {
+      0% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.8); }
+      100% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.5); }
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 768px) {
+      .section {
+        padding: 16px;
+      }
+      
+      .team-grid {
+        margin: 16px 0;
+      }
+      
+      .slot {
+        width: 56px;
+        height: 70px;
+      }
+      
+      .player-photo {
+        width: 50px;
+        height: 65px;
+      }
+      
+      .formation-selector {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -803,6 +1251,18 @@
            onerror="this.src='https://via.placeholder.com/40x40?text=👤'">
       <div class="user-name" id="topUserName">FST Manager</div>
     </div>
+  </div>
+
+  <!-- FOOTBALL PITCH BACKGROUND -->
+  <div class="pitch-background"></div>
+  <div class="pitch-markings">
+    <div class="pitch-line center-line"></div>
+    <div class="pitch-line half-way-line"></div>
+    <div class="pitch-line center-circle"></div>
+    <div class="pitch-line penalty-box" style="top: 20px;"></div>
+    <div class="pitch-line penalty-box" style="bottom: 20px;"></div>
+    <div class="pitch-line goal-area" style="top: 10px;"></div>
+    <div class="pitch-line goal-area" style="bottom: 10px;"></div>
   </div>
 
   <div class="main-content">
@@ -897,7 +1357,7 @@
             <div id="avgForm" class="team-stat-value stat-avg-form">0.0</div>
           </div>
         </div>
-        
+
         <!-- WILDCARD SYSTEM -->
         <div class="wildcard-container">
           <div class="wildcard-title">
@@ -1083,6 +1543,40 @@
       }, 5000);
     }
 
+    // Create particle effects
+    function createParticles(x, y) {
+      for (let i = 0; i < 10; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+        document.body.appendChild(particle);
+        
+        // Animate particle
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 50 + 20;
+        const duration = Math.random() * 1000 + 500;
+        
+        const endX = x + Math.cos(angle) * distance;
+        const endY = y + Math.sin(angle) * distance;
+        
+        particle.animate([
+          { left: `${x}px`, top: `${y}px`, opacity: 1 },
+          { left: `${endX}px`, top: `${endY}px`, opacity: 0 }
+        ], {
+          duration: duration,
+          easing: 'ease-out'
+        });
+        
+        // Remove particle after animation
+        setTimeout(() => {
+          if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+          }
+        }, duration);
+      }
+    }
+
     // Check existing user on load
     async function checkExistingUser() {
       try {
@@ -1260,7 +1754,7 @@
           transfersElement.innerText = `${freeTransfers} left`;
         } else {
           transfersElement.className = 'transfer-penalty';
-          transfersElement.innerText = '0 (No penalty)';
+          transfersElement.innerText = '0 (Penalty: -4 points)';
         }
       }
     }
@@ -1515,7 +2009,8 @@
                 const oldPlayerIndex = selectedTeam.indexOf(parseInt(oldPlayerId));
                 selectedTeam[oldPlayerIndex] = playerId;
                 userBudget = data.budget;
-                freeTransfers = data.freeTransfers; // This is now correct
+                freeTransfers = data.freeTransfers;
+                const wildcardActive = data.wildcardActive;
                 
                 // Show success message
                 const successBanner = document.createElement('div');
@@ -1523,7 +2018,7 @@
                   <div style="text-align:center; padding:15px; background:rgba(74, 222, 128, 0.15); border-radius:12px; margin-bottom:20px;">
                     <div style="font-weight:700; color:var(--success); font-size:16px;">✅ Player Transferred!</div>
                     <div style="color:var(--text-secondary); margin-top:6px;">Free transfers left: ${freeTransfers}</div>
-                    ${data.wildcardActive ? '<div class="wildcard-active">Wildcard active - unlimited transfers</div>' : ''}
+                    ${wildcardActive ? '<div class="wildcard-active">Wildcard active - unlimited transfers</div>' : ''}
                   </div>
                 `;
                 const firstSection = document.querySelector('.section');
@@ -1602,7 +2097,7 @@
             <div class="transfer-info">
               ${freeTransfers > 0 ? 
                 `You have ${freeTransfers} free transfer${freeTransfers > 1 ? 's' : ''} left.` : 
-                `No free transfers left. No penalty for extra transfers.`}
+                `No free transfers left. -4 points penalty for extra transfers.`}
             </div>
           </div>
         `;
@@ -1911,6 +2406,10 @@
           freeTransfers = 1; // Set to 1 to show wildcard is active
           document.getElementById('freeTransfers').className = 'free-transfers';
           document.getElementById('freeTransfers').innerText = 'Unlimited';
+          
+          // Add particle effect
+          const btnRect = document.getElementById('activateWildcardBtn').getBoundingClientRect();
+          createParticles(btnRect.left + btnRect.width/2, btnRect.top + btnRect.height/2);
         }
       } catch (e) {
         alert("Failed to activate wildcard: " + (e.message || ""));
