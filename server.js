@@ -294,6 +294,7 @@ app.post('/transfer-player', async (req, res) => {
       // Reset transfers at new gameweek
       user.freeTransfers = 1;
       user.lastTransferGameweek = user.currentGameweek;
+      user.markModified('freeTransfers'); // CRITICAL FIX: Mark as modified
     }
 
     // WILDCARD CHECK
@@ -312,6 +313,7 @@ app.post('/transfer-player', async (req, res) => {
       // Wildcard is active - unlimited transfers
       // No penalty, no free transfer deduction needed
       user.freeTransfers = 1; // Keep free transfers at 1 to show active wildcard
+      user.markModified('freeTransfers'); // CRITICAL FIX: Mark as modified
     }
 
     // Perform transfer
@@ -322,30 +324,24 @@ app.post('/transfer-player', async (req, res) => {
     if (!isWildcardActive) {
       if (user.freeTransfers > 0) {
         user.freeTransfers -= 1;
+        user.markModified('freeTransfers'); // CRITICAL FIX: Mark as modified
       }
     }
-    
-    // CRITICAL FIX: Use findOneAndUpdate with $set to ensure proper update
-    const updatedUser = await User.findOneAndUpdate(
-      { telegramId: userId },
-      { 
-        $set: {
-          team: user.team,
-          budget: user.budget,
-          points: user.points,
-          freeTransfers: user.freeTransfers,
-          lastUpdated: new Date()
-        }
-      },
-      { new: true }
-    );
+
+    // Save the user with proper modification tracking
+    user.lastUpdated = new Date();
+    await user.save();
 
     res.json({
       success: true,
-      message: penaltyPoints > 0 ? '✅ Player transferred! (Penalty: -4 points)' : '✅ Player transferred!',
-      budget: updatedUser.budget,
-      freeTransfers: updatedUser.freeTransfers,
-      points: updatedUser.points,
+      message: penaltyPoints > 0 ? 
+        '✅ Player transferred! (Penalty: -4 points)' : 
+        isWildcardActive ? 
+          '✅ Player transferred! (Wildcard active)' : 
+          '✅ Player transferred!',
+      budget: user.budget,
+      freeTransfers: user.freeTransfers,
+      points: user.points,
       wildcardActive: isWildcardActive
     });
   } catch (error) {
@@ -354,7 +350,7 @@ app.post('/transfer-player', async (req, res) => {
   }
 });
 
-// ACTIVATE WILDCARD - NEW ENDPOINT
+// Activate Wildcard - NEW ENDPOINT
 app.post('/activate-wildcard', async (req, res) => {
   try {
     const { userId } = req.body;
@@ -366,17 +362,12 @@ app.post('/activate-wildcard', async (req, res) => {
     if (user.locked === false) return res.status(400).json({ error: 'Team must be submitted to use wildcard' });
 
     // Activate wildcard for current gameweek
-    const updatedUser = await User.findOneAndUpdate(
-      { telegramId: userId },
-      { 
-        $set: {
-          wildcardUsed: true,
-          wildcardGameweek: user.currentGameweek,
-          lastUpdated: new Date()
-        }
-      },
-      { new: true }
-    );
+    user.wildcardUsed = true;
+    user.wildcardGameweek = user.currentGameweek;
+    user.freeTransfers = 1; // Reset free transfers when activating wildcard
+    user.markModified('freeTransfers'); // CRITICAL FIX: Mark as modified
+    
+    await user.save();
 
     res.json({
       success: true,
@@ -397,6 +388,7 @@ app.post('/update-points', async (req, res) => {
 
     const user = await User.findOne({ telegramId: userId });
     if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user.locked) return res.status(400).json({ error: 'Team not submitted' });
 
     if (!user.team || user.team.length !== 11) {
       return res.status(400).json({ error: 'Team not complete' });
@@ -411,7 +403,6 @@ app.post('/update-points', async (req, res) => {
         const response = await axios.get(`https://fantasy.premierleague.com/api/element-summary/${playerId}/`, {
           timeout: 5000
         });
-        
         const data = response.data;
         const latestGW = data.history.sort((a, b) => b.round - a.round)[0];
         
@@ -442,17 +433,10 @@ app.post('/update-points', async (req, res) => {
     }
 
     // Update user points
-    const updatedUser = await User.findOneAndUpdate(
-      { telegramId: userId },
-      { 
-        $set: {
-          points: totalPoints,
-          totalPoints: totalPoints,
-          lastUpdated: new Date()
-        }
-      },
-      { new: true }
-    );
+    user.points = totalPoints;
+    user.totalPoints = totalPoints;
+    user.lastUpdated = new Date();
+    await user.save();
 
     res.json({
       success: true,
@@ -465,7 +449,7 @@ app.post('/update-points', async (req, res) => {
   }
 });
 
-// Get User Profile - UPDATED WITH WILDCARD DATA
+// Get User Profile - FIXED TO RETURN CORRECT FREE TRANSFERS
 app.get('/user-profile', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -473,6 +457,14 @@ app.get('/user-profile', async (req, res) => {
 
     const user = await User.findOne({ telegramId: userId });
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Log for debugging
+    console.log('User profile requested:', {
+      userId,
+      freeTransfers: user.freeTransfers,
+      budget: user.budget,
+      wildcardUsed: user.wildcardUsed
+    });
 
     res.json({
       managerName: user.managerName,
